@@ -31,12 +31,19 @@ void UGA_ManaPlayerRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 	}
 
 	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
-
 	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
-	if (PlayerCharacter && PlayerCharacter->GetRollingEffectClass() && AbilitySystemComponent)
+
+	if (PlayerCharacter && PlayerCharacter->GetRollingEffectClass() && PlayerCharacter->GetBlockMovementEffectClass() && AbilitySystemComponent)
 	{
-		FVector Direction = PlayerCharacter->GetActorForwardVector();
-		float Strength = 800.f; // Adjust as needed
+		FVector Direction = PlayerCharacter->GetLastMovementInputVector().GetSafeNormal();;
+
+		if (Direction.Length() == 0)
+		{
+			Direction = PlayerCharacter->GetActorForwardVector().GetSafeNormal();
+
+		}
+			
+		float Strength = 500.f; // Adjust as needed
 		float Duration = 0.5f; // Duration in seconds
 		bool bIsAdditive = false;
 		bool bDisableDestinationReachedInterrupt = false;
@@ -50,9 +57,12 @@ void UGA_ManaPlayerRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 		if (RootMotionTask)
 		{
 			RootMotionTask->ReadyForActivation();
+			//Now add a delegate to the root motion task that grants the player the "IsFree" tag again so they can move around a bit before the animation is over.
+
 		}
 		
 		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetRollingEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetBlockMovementEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 	}
 
 	// Play the montage and bind delegates
@@ -76,6 +86,7 @@ void UGA_ManaPlayerRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 	}
 }
 
+
 void UGA_ManaPlayerRoll::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
@@ -85,6 +96,13 @@ void UGA_ManaPlayerRoll::EndAbility(const FGameplayAbilitySpecHandle Handle, con
 		FGameplayTagContainer RollingTags;
 		RollingTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling")));
 		ActorInfo->AbilitySystemComponent->RemoveActiveEffectsWithGrantedTags(RollingTags);
+
+		APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
+
+		if (PlayerCharacter)
+		{
+			ActorInfo->AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ActorInfo->AbilitySystemComponent->MakeEffectContext());
+		}
 	}
 }
 

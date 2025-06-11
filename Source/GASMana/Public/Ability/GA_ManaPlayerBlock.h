@@ -17,7 +17,7 @@ class GASMANA_API UGA_ManaPlayerBlock : public UGameplayAbility
 
 	UGA_ManaPlayerBlock();
 
-	/** Airborne Effect Class */
+	/** Block Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Block", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> BlockEffectClass;
 

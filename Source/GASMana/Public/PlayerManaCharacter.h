@@ -71,6 +71,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer RollTagContainer;
 
+	/** Roll Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer AttackTagContainer;
+
 	/** Grounded Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> GroundedEffectClass;
@@ -87,6 +91,18 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> RollingEffectClass;
 
+	/** Rolling Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> AttackingEffectClass;
+
+	/** Free to Move Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> FreeEffectClass;
+
+	/** Block Movement Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> BlockMovementEffectClass;
+
 	/** Rolling Montage To Play */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Roll", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* RollMontage;
@@ -94,6 +110,14 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter
 	/** Roll MovementCurve */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Roll", meta = (AllowPrivateAccess = "true"))
 	UCurveFloat* DiveRollCurveFloat;
+
+	/** Atack Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* AttackMontage;
+
+	/** Atack Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AGASManaCharacter> BaseEnemy;
 
 	UFUNCTION()
 	void OnBlockingTagChanged(const FGameplayTag Tag, int32 NewCount);
@@ -135,6 +159,8 @@ public:
 
 	virtual void Blocking() override;
 
+	virtual void HandleMelee() override;
+
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
@@ -143,6 +169,10 @@ public:
 	/** Returns BlockingEffectClass **/
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetBlockingEffectClass() const { return BlockingEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetRollingEffectClass() const { return RollingEffectClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetAttackingEffectClass() const { return AttackingEffectClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetFreeEffectClass() const { return FreeEffectClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetBlockMovementEffectClass() const { return BlockMovementEffectClass; }
 	FORCEINLINE UAnimMontage* GetRollMontage() const { return RollMontage; }
+	FORCEINLINE UAnimMontage* GetAttackMontage() const { return AttackMontage; }
 	FORCEINLINE UCurveFloat* GetDiveRollCurveFloat() const { return DiveRollCurveFloat; }
 };

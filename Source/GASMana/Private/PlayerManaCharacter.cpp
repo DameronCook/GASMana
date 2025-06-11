@@ -12,6 +12,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Effect/GE_ManaPlayerGrounded.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "Actors/BaseManaEnemy.h"
 
 APlayerManaCharacter::APlayerManaCharacter()
 {
@@ -61,6 +64,7 @@ void APlayerManaCharacter::BeginPlay()
 	if (AbilitySystem && GroundedEffectClass)
 	{
 			AbilitySystem->ApplyGameplayEffectToSelf(GroundedEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
+			AbilitySystem->ApplyGameplayEffectToSelf(FreeEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
 	}
 
 	if (AbilitySystem)
@@ -140,6 +144,46 @@ void APlayerManaCharacter::FinishedBlocking()
 	}
 }
 
+void APlayerManaCharacter::HandleMelee()
+{
+	Super::HandleMelee();
+
+	if (GEngine && GetCharacterMovement()->IsFalling() == false) {
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "AttackSWING");
+	}
+
+	FVector Position = GetMesh()->GetSocketLocation(FName("hand_rSocket"));
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
+	UClass* Enemy = BaseEnemy;
+	TArray<AActor*> IgnoreActors;
+	IgnoreActors.Add(this);
+	TArray<AActor*> OutActors;
+
+	bool bHit = UKismetSystemLibrary::SphereOverlapActors(GetWorld(), Position, 40, ObjectTypes, Enemy, IgnoreActors, OutActors);
+
+	if (bHit)
+	{
+		for (AActor* HitActor : OutActors)
+		{
+			ABaseManaEnemy* HitManaCharacter = Cast<ABaseManaEnemy>(HitActor);
+			if (HitManaCharacter)
+			{
+				UAbilitySystemComponent* TargetAbilitySystemComponent = HitManaCharacter->GetAbilitySystemComponent();
+				if (TargetAbilitySystemComponent)
+				{
+					FGameplayTag EventTag = FGameplayTag::RequestGameplayTag(FName("Character.Damaged"));
+					FGameplayEventData EventData;
+					EventData.Instigator = this;
+					EventData.Target = HitManaCharacter;
+					UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, EventTag, EventData);
+					HitManaCharacter->ShowHealth();
+				}
+			}
+		}
+	}
+}
+
 void APlayerManaCharacter::OnBlockingTagChanged(const FGameplayTag Tag, int32 NewCount)
 {
     // Tag was removed if NewCount == 0
@@ -208,6 +252,13 @@ void APlayerManaCharacter::Jump()
 
 void APlayerManaCharacter::Move(const FInputActionValue& Value)
 {
+	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
+
+	if (!AbilitySystem || !AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree"))))
+	{
+		//This checks if the player is free to move before the player actually runs any moving functions, this way if we're rolling attacking etc it won't move as well.
+		return;
+	}
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
@@ -244,9 +295,7 @@ void APlayerManaCharacter::Look(const FInputActionValue& Value)
 
 void APlayerManaCharacter::Attack(const FInputActionValue& Value)
 {
-	if (GEngine && GetCharacterMovement()->IsFalling() == false) {
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Attack");
-	}
+	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackTagContainer, true);
 }
 
 void APlayerManaCharacter::Block(const FInputActionValue& Value)

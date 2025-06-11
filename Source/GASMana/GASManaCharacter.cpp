@@ -41,6 +41,12 @@ void AGASManaCharacter::FinishedBlocking()
 
 }
 
+void AGASManaCharacter::HandleMelee()
+{
+	//Empty for now. Whenever other actors inherit from this, they can override this function
+
+}
+
 void AGASManaCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);

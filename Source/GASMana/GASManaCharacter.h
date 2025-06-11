@@ -18,8 +18,6 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
-//DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
-
 UCLASS()
 class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface
 {
@@ -37,11 +35,25 @@ class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
 	class TSubclassOf<AManaEquipmentParent> LeftHandEquipment;
 
+	/* Hit React Montage*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
+	class UAnimMontage* HitReactMontage;
+
 	UPROPERTY()
 	class UManaAttributeSet* Attributes;
 
+
+	/** Damaged Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Damage", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> DamageEffectClass;
+
 public:
 	AGASManaCharacter();
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	virtual void HandleMelee();
+
+
 	//----------------------------------------------------------Ability System
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
@@ -63,7 +75,6 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Blocking")
 	virtual void FinishedBlocking();
-
 public:
 
 
@@ -82,5 +93,7 @@ public:
 	FORCEINLINE class UAbilitySystemComponent* GetAbilitySystemComponent() const { return AbilitySystemComponent; }
 	FORCEINLINE TSubclassOf<AManaEquipmentParent> GetRightHandEquipment() const { return RightHandEquipment; }
 	FORCEINLINE TSubclassOf<AManaEquipmentParent> GetLeftHandEquipment() const { return LeftHandEquipment; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetDamageEffectClass() const { return DamageEffectClass; }
+	FORCEINLINE UAnimMontage* GetHitReactMontage() const { return HitReactMontage; }
 };
 
