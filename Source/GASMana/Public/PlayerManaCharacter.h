@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "../GASManaCharacter.h"
 #include "../../GameplayTags/Classes/GameplayTagContainer.h"
+#include "I_ProgressBarInterface.h"
 #include "PlayerManaCharacter.generated.h"
 
 
@@ -19,9 +20,12 @@ struct FGameplayTagContainer;
  * 
  */
 UCLASS()
-class GASMANA_API APlayerManaCharacter : public AGASManaCharacter
+class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_ProgressBarInterface
 {
 	GENERATED_BODY()
+
+	//////////////////////////////////////////////////////////////////////////
+	// Components
 	
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -30,6 +34,17 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
+
+	/** Player HUD */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
+	UUserWidget* PlayerHUD;
+
+	/** Player HUD Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UUserWidget> PlayerHUDClass;
+
+	//////////////////////////////////////////////////////////////////////////
+	// Input
 
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -55,9 +70,16 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* BlockAction;
 
-	/** Attack Input Action */
+	/** Roll Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* RollAction;
+
+
+	/* Cached direction of input (always calculated) */
+	FVector CachedInputDirection;
+
+	//////////////////////////////////////////////////////////////////////////
+	// Abilities
 
 	/** Jump Tag Container */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
@@ -71,60 +93,99 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer RollTagContainer;
 
-	/** Roll Tag Container */
+	/** Attack Tag Container */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer AttackTagContainer;
 
-	/** Grounded Effect Class */
+	/** Wall Run Tag Container */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer WallRunTagContainer;
+
+	//////////////////////////////////////////////////////////////////////////
+	// Effect Classes
+
+	/** Grounded Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Movement", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> GroundedEffectClass;
 
 	/** Airborne Effect Class */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Movement", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> AirborneEffectClass;
 
 	/** Blocking Effect Class */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Block", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> BlockingEffectClass;
 
 	/** Rolling Effect Class */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Roll", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> RollingEffectClass;
 
 	/** Rolling Effect Class */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Attack", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> AttackingEffectClass;
 
 	/** Free to Move Effect Class */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Movement", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> FreeEffectClass;
 
 	/** Block Movement Effect Class */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Movement", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> BlockMovementEffectClass;
 
+	/** Wall Run Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Movement", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> WallRunEffectClass;
+
+	/** Normal Stamina Regen Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Stamina", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> StaminaRegenEffectClass;
+
+	/** Block Stamina Regen Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Stamina", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> StaminaRegenBlockEffectClass;
+
+	//////////////////////////////////////////////////////////////////////////
+	// Montages
+
 	/** Rolling Montage To Play */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Roll", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* RollMontage;
 
-	/** Roll MovementCurve */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Roll", meta = (AllowPrivateAccess = "true"))
-	UCurveFloat* DiveRollCurveFloat;
-
 	/** Atack Montage To Play */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AttackMontage;
 
-	/** Atack Montage To Play */
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// Curve Floats
+
+	/** Roll MovementCurve */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Curves", meta = (AllowPrivateAccess = "true"))
+	UCurveFloat* DiveRollCurveFloat;
+
+	//////////////////////////////////////////////////////////////////////////
+	// Object References (Liable to move)
+
+	/** Enemy Base */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AGASManaCharacter> BaseEnemy;
 
 	UFUNCTION()
 	void OnBlockingTagChanged(const FGameplayTag Tag, int32 NewCount);
 
+	//////////////////////////////////////////////////////////////////////////
+	// Wall Run
+	UFUNCTION()
+	void WallRunCheck();
+
+
+
 protected:
 
 	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaTime) override;
 
 	virtual void Landed(const FHitResult& Hit) override;
 
@@ -161,18 +222,32 @@ public:
 
 	virtual void HandleMelee() override;
 
+	void UpdateStaminaRegen();
+
+	//Interface overrides
+	///////////////////////////////////////
+	virtual float GetHealth_Implementation() const override;
+	virtual float GetHealthAsRatio_Implementation() const override;
+	virtual float GetStamina_Implementation() const override;
+	virtual float GetStaminaAsRatio_Implementation() const override;
+	virtual float GetMana_Implementation() const override;
+	virtual float GetManaAsRatio_Implementation() const override;
+
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-
 	/** Returns BlockingEffectClass **/
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetBlockingEffectClass() const { return BlockingEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetRollingEffectClass() const { return RollingEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetAttackingEffectClass() const { return AttackingEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetFreeEffectClass() const { return FreeEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetBlockMovementEffectClass() const { return BlockMovementEffectClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetStaminaRegenEffectClass() const { return StaminaRegenEffectClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetStaminaRegenBlockEffectClass() const { return StaminaRegenBlockEffectClass; }
 	FORCEINLINE UAnimMontage* GetRollMontage() const { return RollMontage; }
 	FORCEINLINE UAnimMontage* GetAttackMontage() const { return AttackMontage; }
 	FORCEINLINE UCurveFloat* GetDiveRollCurveFloat() const { return DiveRollCurveFloat; }
+	FORCEINLINE UInputAction* GetMoveAction() const { return MoveAction; }
+	FORCEINLINE FVector GetCachedInputDirection() const { return CachedInputDirection; }
 };

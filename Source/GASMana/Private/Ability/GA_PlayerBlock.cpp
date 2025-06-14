@@ -15,6 +15,7 @@ UGA_ManaPlayerBlock::UGA_ManaPlayerBlock()
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsBlocking")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking")));
 }
 
 
@@ -32,6 +33,7 @@ void UGA_ManaPlayerBlock::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
 	if (PlayerCharacter && PlayerCharacter->GetBlockingEffectClass() && AbilitySystemComponent)
 	{
+
 		
 		AbilitySystemComponent->ApplyGameplayEffectToSelf(
 			PlayerCharacter->GetBlockingEffectClass()->GetDefaultObject<UGameplayEffect>(),
@@ -41,6 +43,9 @@ void UGA_ManaPlayerBlock::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 
 		PlayerCharacter->Blocking();
 	}
+
+	//Update Stamina Regen
+	PlayerCharacter->UpdateStaminaRegen();
 
 	EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 }

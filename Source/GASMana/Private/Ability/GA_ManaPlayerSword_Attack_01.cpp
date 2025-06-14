@@ -8,6 +8,7 @@
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "ManaPlayerAnimInstance.h"
 #include "../../GASManaCharacter.h"
 
 UGA_ManaPlayerSword_Attack_01::UGA_ManaPlayerSword_Attack_01()
@@ -16,6 +17,8 @@ UGA_ManaPlayerSword_Attack_01::UGA_ManaPlayerSword_Attack_01()
 	FGameplayTagContainer Tags;
 	Tags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Action.Attack")));
 	SetAssetTags(Tags);
+
+	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking")));
 
 	//Blocked Tags
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling")));
@@ -36,37 +39,43 @@ void UGA_ManaPlayerSword_Attack_01::ActivateAbility(const FGameplayAbilitySpecHa
 	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
 	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
 
-	// Play the montage and bind delegates
-	if (PlayerCharacter->GetAttackMontage() && ActorInfo->AvatarActor.IsValid())
-	{
-
-		UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, PlayerCharacter->GetAttackMontage(), 1.0f, NAME_None, false, 0.0f);
-
-		if (MontageTask)
+	
+	if (PlayerCharacter) {
+		// Play the montage and bind delegates
+		if (PlayerCharacter->GetAttackMontage() && ActorInfo->AvatarActor.IsValid())
 		{
-			MontageTask->OnCompleted.AddDynamic(this, &UGA_ManaPlayerSword_Attack_01::OnMontageEnded);
-			MontageTask->OnInterrupted.AddDynamic(this, &UGA_ManaPlayerSword_Attack_01::OnMontageEnded);
-			MontageTask->OnCancelled.AddDynamic(this, &UGA_ManaPlayerSword_Attack_01::OnMontageEnded);
-			MontageTask->ReadyForActivation();
+			UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, PlayerCharacter->GetAttackMontage(), 1.0f, NAME_None, false, 0.0f);
+
+			if (MontageTask)
+			{
+				MontageTask->OnCompleted.AddDynamic(this, &UGA_ManaPlayerSword_Attack_01::OnMontageEnded);
+				MontageTask->OnInterrupted.AddDynamic(this, &UGA_ManaPlayerSword_Attack_01::OnMontageEnded);
+				MontageTask->OnCancelled.AddDynamic(this, &UGA_ManaPlayerSword_Attack_01::OnMontageEnded);
+				MontageTask->OnBlendOut.AddDynamic(this, &UGA_ManaPlayerSword_Attack_01::OnMontageEnded);
+				MontageTask->ReadyForActivation();
+			}
 		}
+		else
+		{
+			// If no montage, just end ability immediately
+			EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		}
+
+		FGameplayTag EventTag = FGameplayTag::RequestGameplayTag(FName("Character.Damaged"));
+
+		UAbilityTask_WaitGameplayEvent* WaitTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, EventTag, nullptr, true, true);
+
+		if (WaitTask)
+		{
+			WaitTask->EventReceived.AddDynamic(this, &UGA_ManaPlayerSword_Attack_01::OnGameplayEventReceived);
+			WaitTask->ReadyForActivation();
+		}
+
+		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetAttackingEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+
+		//Update Stamina Regen
+		PlayerCharacter->UpdateStaminaRegen();
 	}
-	else
-	{
-		// If no montage, just end ability immediately
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
-	}
-
-	FGameplayTag EventTag = FGameplayTag::RequestGameplayTag(FName("Character.Damaged"));
-
-	UAbilityTask_WaitGameplayEvent* WaitTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, EventTag, nullptr, true, true);
-
-	if (WaitTask)
-	{
-		WaitTask->EventReceived.AddDynamic(this, &UGA_ManaPlayerSword_Attack_01::OnGameplayEventReceived);
-		WaitTask->ReadyForActivation();
-	}
-
-	AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetAttackingEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 }
 
 void UGA_ManaPlayerSword_Attack_01::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
@@ -78,6 +87,30 @@ void UGA_ManaPlayerSword_Attack_01::EndAbility(const FGameplayAbilitySpecHandle 
 		FGameplayTagContainer AttackTags;
 		AttackTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking")));
 		ActorInfo->AbilitySystemComponent->RemoveActiveEffectsWithGrantedTags(AttackTags);
+
+		APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
+
+		if (PlayerCharacter)
+		{
+			//Update Gameplay Effects
+			if (!ActorInfo->AbilitySystemComponent->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling"))))
+			{
+				ActorInfo->AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ActorInfo->AbilitySystemComponent->MakeEffectContext());
+
+			}
+
+			//Update the anim instance
+			UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(PlayerCharacter->GetMesh()->GetAnimInstance());
+			if (AnimInstance)
+			{
+				AnimInstance->SetIsAttacking(false);
+				AnimInstance->Montage_Stop(0.1f, PlayerCharacter->GetAttackMontage());
+
+			}
+
+			//Update Stamina Regen
+			PlayerCharacter->UpdateStaminaRegen();
+		}
 	}
 }
 

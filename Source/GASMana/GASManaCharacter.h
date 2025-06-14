@@ -36,7 +36,7 @@ class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface
 	class TSubclassOf<AManaEquipmentParent> LeftHandEquipment;
 
 	/* Hit React Montage*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage, meta = (AllowPrivateAccess = "true"))
 	class UAnimMontage* HitReactMontage;
 
 	UPROPERTY()
@@ -52,18 +52,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void HandleMelee();
-
-
-	//----------------------------------------------------------Ability System
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-	int MaxHealth = 100;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-	int MaxMana = 100;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-	int MaxStamina = 100;
 
 protected:
 	/* Adds Equipment to socket*/

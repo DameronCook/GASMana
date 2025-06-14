@@ -19,8 +19,20 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Blocking")
 	bool bIsBlocking = false;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Atacking")
+	bool bIsAttacking = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Moving")
+	bool bIsRunning = false;
+
 public:
 	UFUNCTION(BlueprintCallable, Category = "Blocking")
 	void SetIsBlocking(bool bBlocking);
+	
+	UFUNCTION(BlueprintCallable, Category = "Blocking")
+	void SetIsAttacking(bool bAttacking);
+	
+	UFUNCTION(BlueprintCallable, Category = "Blocking")
+	void SetIsRunning(bool bRunning);
 	
 };

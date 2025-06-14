@@ -6,6 +6,10 @@
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_ApplyRootMotionConstantForce.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputActionValue.h"
+#include "GameFramework/PlayerController.h"
 
 UGA_ManaPlayerRoll::UGA_ManaPlayerRoll()
 {
@@ -35,13 +39,23 @@ void UGA_ManaPlayerRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 
 	if (PlayerCharacter && PlayerCharacter->GetRollingEffectClass() && PlayerCharacter->GetBlockMovementEffectClass() && AbilitySystemComponent)
 	{
-		FVector Direction = PlayerCharacter->GetLastMovementInputVector().GetSafeNormal();;
+		
+		//Cancel all abilities with the Player.IsAttacking tag
+		FGameplayTag AttackTag = FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking"));
+		FGameplayTagContainer AttackTags;
+		AttackTags.AddTag(AttackTag);
+		AbilitySystemComponent->CancelAbilities(&AttackTags, nullptr, this);
 
-		if (Direction.Length() == 0)
+		FVector Direction = PlayerCharacter->GetCachedInputDirection();
+		if (Direction.IsNearlyZero())
 		{
+			// If no input, roll on actor forward (maybe change this to camera forward...?)
 			Direction = PlayerCharacter->GetActorForwardVector().GetSafeNormal();
-
 		}
+
+		FRotator PlayerRotation = Direction.Rotation();
+
+		PlayerCharacter->SetActorRotation(PlayerRotation, ETeleportType::None);
 			
 		float Strength = 500.f; // Adjust as needed
 		float Duration = 0.5f; // Duration in seconds
@@ -56,6 +70,7 @@ void UGA_ManaPlayerRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 
 		if (RootMotionTask)
 		{
+			RootMotionTask->OnFinish.AddDynamic(this, &UGA_ManaPlayerRoll::OnMotionTaskEnded);
 			RootMotionTask->ReadyForActivation();
 			//Now add a delegate to the root motion task that grants the player the "IsFree" tag again so they can move around a bit before the animation is over.
 
@@ -84,6 +99,9 @@ void UGA_ManaPlayerRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 		// If no montage, just end ability immediately
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 	}
+
+	//Update Stamina Regen
+	PlayerCharacter->UpdateStaminaRegen();
 }
 
 
@@ -95,12 +113,14 @@ void UGA_ManaPlayerRoll::EndAbility(const FGameplayAbilitySpecHandle Handle, con
 	{
 		FGameplayTagContainer RollingTags;
 		RollingTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling")));
+		RollingTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking")));
 		ActorInfo->AbilitySystemComponent->RemoveActiveEffectsWithGrantedTags(RollingTags);
 
 		APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
 
 		if (PlayerCharacter)
 		{
+			PlayerCharacter->UpdateStaminaRegen();
 			ActorInfo->AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ActorInfo->AbilitySystemComponent->MakeEffectContext());
 		}
 	}
@@ -109,5 +129,11 @@ void UGA_ManaPlayerRoll::EndAbility(const FGameplayAbilitySpecHandle Handle, con
 void UGA_ManaPlayerRoll::OnMontageEnded()
 {
 	// End the ability (get the current context)
+	//EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+}
+
+void UGA_ManaPlayerRoll::OnMotionTaskEnded()
+{
+	//Allow the player to move again by applying the free efect class
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }

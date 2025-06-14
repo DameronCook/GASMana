@@ -13,6 +13,8 @@
 #include "InputActionValue.h"
 #include "Effect/GE_ManaPlayerGrounded.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "Blueprint/UserWidget.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Actors/BaseManaEnemy.h"
 
@@ -61,7 +63,7 @@ void APlayerManaCharacter::BeginPlay()
 
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
 
-	if (AbilitySystem && GroundedEffectClass)
+	if (AbilitySystem && GroundedEffectClass && FreeEffectClass)
 	{
 			AbilitySystem->ApplyGameplayEffectToSelf(GroundedEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
 			AbilitySystem->ApplyGameplayEffectToSelf(FreeEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
@@ -77,8 +79,34 @@ void APlayerManaCharacter::BeginPlay()
 
 	AddEquipment(FName("hand_rSocket"), GetRightHandEquipment());
 	AddEquipment(FName("hand_lSocket"), GetLeftHandEquipment());
+
+	if (PlayerHUDClass)
+	{
+		//Configure Player HUD
+		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		PlayerHUD = CreateWidget<UUserWidget>(PlayerController, PlayerHUDClass);
+		PlayerHUD->AddToViewport();
+	}
+
+	UpdateStaminaRegen();
 }
 
+void APlayerManaCharacter::Tick(float DeltaTime)
+{
+	//Nothing so far! Hooray! Now I'm gonna feel guilty when I DO have to fill this
+
+	Super::Tick(DeltaTime);
+
+	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
+
+	if (AbilitySystem && AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne"))))
+	{
+		WallRunCheck();
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Movement
 
 void APlayerManaCharacter::Landed(const FHitResult& Hit)
 {
@@ -124,6 +152,14 @@ void APlayerManaCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode,
 	//If needed, remove the airborne effect here. However, the landed function should be able to handle this
 }
 
+void APlayerManaCharacter::WallRunCheck()
+{
+
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Combat
+
 void APlayerManaCharacter::Blocking()
 {
 	Super::Blocking();
@@ -148,9 +184,9 @@ void APlayerManaCharacter::HandleMelee()
 {
 	Super::HandleMelee();
 
-	if (GEngine && GetCharacterMovement()->IsFalling() == false) {
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "AttackSWING");
-	}
+	//if (GEngine && GetCharacterMovement()->IsFalling() == false) {
+	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "AttackSWING");
+	//}
 
 	FVector Position = GetMesh()->GetSocketLocation(FName("hand_rSocket"));
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
@@ -184,6 +220,39 @@ void APlayerManaCharacter::HandleMelee()
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+//Implementation
+
+float APlayerManaCharacter::GetHealth_Implementation() const
+{
+	return GetAbilitySystemComponent()->GetNumericAttribute(UManaAttributeSet::GetHealthAttribute());
+}
+
+float APlayerManaCharacter::GetHealthAsRatio_Implementation() const
+{
+	return GetHealth_Implementation()/ GetAbilitySystemComponent()->GetNumericAttribute(UManaAttributeSet::GetMaxHealthAttribute());
+}
+
+float APlayerManaCharacter::GetStamina_Implementation() const
+{
+	return GetAbilitySystemComponent()->GetNumericAttribute(UManaAttributeSet::GetStaminaAttribute());
+}
+
+float APlayerManaCharacter::GetStaminaAsRatio_Implementation() const
+{
+	return GetStamina_Implementation()/GetAbilitySystemComponent()->GetNumericAttribute(UManaAttributeSet::GetMaxStaminaAttribute());
+}
+
+float APlayerManaCharacter::GetMana_Implementation() const
+{
+	return GetAbilitySystemComponent()->GetNumericAttribute(UManaAttributeSet::GetManaAttribute());;
+}
+
+float APlayerManaCharacter::GetManaAsRatio_Implementation() const
+{
+	return GetMana_Implementation()/ GetAbilitySystemComponent()->GetNumericAttribute(UManaAttributeSet::GetMaxManaAttribute());
+}
+
 void APlayerManaCharacter::OnBlockingTagChanged(const FGameplayTag Tag, int32 NewCount)
 {
     // Tag was removed if NewCount == 0
@@ -192,6 +261,7 @@ void APlayerManaCharacter::OnBlockingTagChanged(const FGameplayTag Tag, int32 Ne
         FinishedBlocking();
     }
 }
+
 
 //////////////////////////////////////////////////////////////////////////
 // Input
@@ -231,6 +301,8 @@ void APlayerManaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerManaCharacter::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Canceled, this, &APlayerManaCharacter::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &APlayerManaCharacter::Move);
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerManaCharacter::Look);
@@ -253,30 +325,60 @@ void APlayerManaCharacter::Jump()
 void APlayerManaCharacter::Move(const FInputActionValue& Value)
 {
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
-
-	if (!AbilitySystem || !AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree"))))
-	{
-		//This checks if the player is free to move before the player actually runs any moving functions, this way if we're rolling attacking etc it won't move as well.
-		return;
-	}
-	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
-
-	if (Controller != nullptr)
-	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	bool IsFree = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree")));
 	
-		// get right vector 
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	if (AbilitySystem)
+	{
+		// input is a Vector2D
+		FVector2D MovementVector = Value.Get<FVector2D>();
 
-		// add movement 
-		AddMovementInput(ForwardDirection, MovementVector.Y);
-		AddMovementInput(RightDirection, MovementVector.X);
+		// Add or remove the running tag based on input
+		FGameplayTag RunningTag = FGameplayTag::RequestGameplayTag(FName("Character.IsRunning"));
+		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+		if (!MovementVector.IsNearlyZero())
+		{
+			if (!AbilitySystem->HasMatchingGameplayTag(RunningTag))
+			{
+				AbilitySystem->AddLooseGameplayTag(RunningTag);
+			}
+			if (AnimInstance)
+			{
+				AnimInstance->SetIsRunning(true);
+			}
+		}
+		else
+		{
+			if (AbilitySystem->HasMatchingGameplayTag(RunningTag))
+			{
+				AbilitySystem->RemoveLooseGameplayTag(RunningTag);
+			}
+			if (AnimInstance)
+			{
+				AnimInstance->SetIsRunning(false);
+			}
+		}
+
+		if (Controller != nullptr)
+		{
+			// find out which way is forward
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+			// get forward vector
+			const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+			// get right vector 
+			const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+			CachedInputDirection = (ForwardDirection * MovementVector.Y + RightDirection * MovementVector.X).GetSafeNormal();
+
+			if (IsFree)
+			{
+				// add movement 
+				AddMovementInput(ForwardDirection, MovementVector.Y);
+				AddMovementInput(RightDirection, MovementVector.X);
+			}
+		}
 	}
 }
 
@@ -295,7 +397,11 @@ void APlayerManaCharacter::Look(const FInputActionValue& Value)
 
 void APlayerManaCharacter::Attack(const FInputActionValue& Value)
 {
-	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackTagContainer, true);
+	if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackTagContainer, true))
+	{
+		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+		AnimInstance->SetIsAttacking(true);
+	}
 }
 
 void APlayerManaCharacter::Block(const FInputActionValue& Value)
@@ -316,10 +422,47 @@ void APlayerManaCharacter::StopBlock(const FInputActionValue& Value)
 	FGameplayTagContainer Tag;
 	Tag.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsBlocking")));
 	GetAbilitySystemComponent()->RemoveActiveEffectsWithGrantedTags(Tag);
+
+	UpdateStaminaRegen();
 }
 
 void APlayerManaCharacter::Roll(const FInputActionValue& Value)
 {
 	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(RollTagContainer, true);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// Ability Regen
+void APlayerManaCharacter::UpdateStaminaRegen()
+{
+	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
+	if (!AbilitySystem|| !StaminaRegenBlockEffectClass || !StaminaRegenEffectClass)
+		return;
+
+	//Check these to see if the player should recharge stamina or not
+	bool bIsBlocking = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsBlocking")));
+	bool bIsAttacking = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking")));
+	bool bIsRolling = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling")));
+
+	// Remove both regen effects first
+	AbilitySystem->RemoveActiveGameplayEffectBySourceEffect(StaminaRegenEffectClass, AbilitySystem);
+	AbilitySystem->RemoveActiveGameplayEffectBySourceEffect(StaminaRegenBlockEffectClass, AbilitySystem);
+
+	if (bIsAttacking || bIsRolling)
+	{
+		return;
+	}
+
+	//bool bIsFree = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree")));
+
+	if (bIsBlocking)
+	{
+		AbilitySystem->ApplyGameplayEffectToSelf(StaminaRegenBlockEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
+	}
+	else
+	{
+		AbilitySystem->ApplyGameplayEffectToSelf(StaminaRegenEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
+	}
 }
 

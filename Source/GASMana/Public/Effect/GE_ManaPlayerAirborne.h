@@ -15,4 +15,6 @@ class GASMANA_API UGE_ManaPlayerAirborne : public UGameplayEffect
 	GENERATED_BODY()
 	
 	UGE_ManaPlayerAirborne();
+
+
 };

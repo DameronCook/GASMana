@@ -22,5 +22,4 @@ class GASMANA_API UGA_ManaPlayerBlock : public UGameplayAbility
 	TSubclassOf<UGameplayEffect> BlockEffectClass;
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
-
 };

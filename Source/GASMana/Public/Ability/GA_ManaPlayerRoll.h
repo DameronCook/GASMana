@@ -22,4 +22,7 @@ class GASMANA_API UGA_ManaPlayerRoll : public UGameplayAbility
 
 	UFUNCTION()
 	void OnMontageEnded();
+
+	UFUNCTION()
+	void OnMotionTaskEnded();
 };
