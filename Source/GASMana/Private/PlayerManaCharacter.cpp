@@ -93,15 +93,21 @@ void APlayerManaCharacter::BeginPlay()
 
 void APlayerManaCharacter::Tick(float DeltaTime)
 {
-	//Nothing so far! Hooray! Now I'm gonna feel guilty when I DO have to fill this
-
 	Super::Tick(DeltaTime);
 
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
 
-	if (AbilitySystem && AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne"))))
+	if (AbilitySystem && AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne"))) && !AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning"))))
 	{
-		WallRunCheck();
+		if (WallRunCheck())
+		{
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, "Can Wall Run!");
+			}
+
+			AbilitySystem->TryActivateAbilitiesByTag(WallRunTagContainer, true);
+		}
 	}
 }
 
@@ -152,9 +158,94 @@ void APlayerManaCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode,
 	//If needed, remove the airborne effect here. However, the landed function should be able to handle this
 }
 
-void APlayerManaCharacter::WallRunCheck()
+bool APlayerManaCharacter::WallRunCheck()
 {
+	FHitResult OutHit;
 
+	// Capsule parameters
+	const FVector CapsuleLocation = GetActorLocation();
+	const float CapsuleRadius = 40.0f;
+	const float CapsuleHalfHeight = 40.0f;
+	const FQuat CapsuleRotation = FQuat::Identity;
+
+	//Trace Parameters
+	bool bTraceComplex = false;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+
+	// Draw the debug capsule
+	//DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation, FColor::Red, false, 0.f);
+
+	bool bHit = GetWorld()->SweepSingleByChannel(OutHit, CapsuleLocation, CapsuleLocation, CapsuleRotation,ECollisionChannel::ECC_Visibility, FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight), QueryParams);
+
+	if (bHit)
+	{
+		//DrawDebugPoint(GetWorld(), OutHit.ImpactPoint, 20, FColor::Green, false, 1.0f);
+		if (CanWallRunOnSurface(OutHit.ImpactNormal))
+		{
+			//Initialize variables based on side of wall here
+			if (IsWallRunningAlongRightSide(OutHit.ImpactNormal))
+			{
+				WallRunSide = EWallRunSide::Right;
+				WallRunDirection = SetWallRunDirection(FVector(0, 0, 1), OutHit.ImpactNormal);
+				if (GEngine)
+				{
+					GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, "Wall Run along Right!");
+				}
+				PlayableWallRunMontage = WallRunRightMontage;
+			}
+			else
+			{
+				WallRunSide = EWallRunSide::Left;
+				WallRunDirection = SetWallRunDirection(FVector(0, 0, -1), OutHit.ImpactNormal);
+				if (GEngine)
+				{
+					GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, "Wall Run along Left!");
+				}
+				PlayableWallRunMontage = WallRunLeftMontage;
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+bool APlayerManaCharacter::CanWallRunOnSurface(FVector ImpactNormal)
+{
+	//Calculate if the wall we're on is angled down like an overhang 
+	if (ImpactNormal.Z < -.09)
+	{
+		return false;
+	}
+
+	//Calculate Surface Angle  of the impact point
+	FVector XYVector = FVector(ImpactNormal.X, ImpactNormal.Y, 0);				//Gives us the XY Plane of the surface normal. Basically it gives us the horizontal plane of the point
+	XYVector.Normalize();														//Enures it's a unit vector		
+	double FloorAngle = acos(XYVector.Dot(ImpactNormal));						//Gives the angle in radians between the two vectors. So the Dot product returns how different the two planes are. 
+	FMath::RadiansToDegrees(FloorAngle);										//Convert to degrees for later implementation
+	
+	//Calculate Angle walkable by the floor
+	double WalkableFloorAngle = GetCharacterMovement()->GetWalkableFloorAngle();
+
+	return FloorAngle < WalkableFloorAngle;
+}
+
+bool APlayerManaCharacter::IsWallRunningAlongRightSide(FVector ImpactNormal)
+{
+	FVector ActorRight = GetActorRightVector();
+	double RightVectorDot = ImpactNormal.Dot(ActorRight);
+
+	if (RightVectorDot < 0)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+FVector APlayerManaCharacter::SetWallRunDirection(FVector SideMultiplier, FVector ImpactNormal)
+{
+	return FVector::CrossProduct(ImpactNormal, SideMultiplier);
 }
 
 //////////////////////////////////////////////////////////////////////////

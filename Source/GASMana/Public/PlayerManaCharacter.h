@@ -19,6 +19,13 @@ struct FGameplayTagContainer;
 /**
  * 
  */
+UENUM(BlueprintType)
+enum class EWallRunSide : uint8
+{
+	Left  UMETA(DisplayName = "Left"),
+	Right UMETA(DisplayName = "Right")
+};
+
 UCLASS()
 class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_ProgressBarInterface
 {
@@ -155,6 +162,18 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AttackMontage;
 
+	/** Wall Run Right Montage */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* WallRunLeftMontage;
+
+	/** Wall Run left Montage*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* WallRunRightMontage;
+
+	/** Wall Run Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* PlayableWallRunMontage;
+
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -176,10 +195,26 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 
 	//////////////////////////////////////////////////////////////////////////
 	// Wall Run
+
+	/** Wall Run Side */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Curves", meta = (AllowPrivateAccess = "true"))
+	EWallRunSide WallRunSide;
+
+	/** Wall Run Side */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Curves", meta = (AllowPrivateAccess = "true"))
+	FVector WallRunDirection;
+
 	UFUNCTION()
-	void WallRunCheck();
+	bool WallRunCheck();
 
+	UFUNCTION()
+	bool CanWallRunOnSurface(FVector ImpactNormal);
 
+	UFUNCTION()
+	bool IsWallRunningAlongRightSide(FVector ImpactNormal);
+
+	UFUNCTION()
+	FVector SetWallRunDirection(FVector SideMultiplier, FVector ImpactNormal);
 
 protected:
 
@@ -243,10 +278,12 @@ public:
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetAttackingEffectClass() const { return AttackingEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetFreeEffectClass() const { return FreeEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetBlockMovementEffectClass() const { return BlockMovementEffectClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetWallRunEffectClass() const { return WallRunEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetStaminaRegenEffectClass() const { return StaminaRegenEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetStaminaRegenBlockEffectClass() const { return StaminaRegenBlockEffectClass; }
 	FORCEINLINE UAnimMontage* GetRollMontage() const { return RollMontage; }
 	FORCEINLINE UAnimMontage* GetAttackMontage() const { return AttackMontage; }
+	FORCEINLINE UAnimMontage* GetWallRunMontage() const { return PlayableWallRunMontage; }
 	FORCEINLINE UCurveFloat* GetDiveRollCurveFloat() const { return DiveRollCurveFloat; }
 	FORCEINLINE UInputAction* GetMoveAction() const { return MoveAction; }
 	FORCEINLINE FVector GetCachedInputDirection() const { return CachedInputDirection; }
