@@ -101,13 +101,19 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 	{
 		if (WallRunCheck())
 		{
-			if (GEngine)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, "Can Wall Run!");
-			}
-
 			AbilitySystem->TryActivateAbilitiesByTag(WallRunTagContainer, true);
 		}
+	}
+
+	if (ActiveWallRunAbility)
+	{
+		UpdateWallRunVertical(DeltaTime);
+
+		FVector NewWallRunHorizontalDirection = UpdateWallRunHorizontal();
+		GetCharacterMovement()->Velocity.X = NewWallRunHorizontalDirection.X * WallRunStrength;
+		GetCharacterMovement()->Velocity.Y = NewWallRunHorizontalDirection.Y * WallRunStrength;
+
+		SetActorRotation(FMath::RInterpTo(GetActorRotation(), NewWallRunHorizontalDirection.Rotation(), DeltaTime, 5.0f)); //SetActorRotation(NewWallRunDirection.Rotation());
 	}
 }
 
@@ -128,6 +134,7 @@ void APlayerManaCharacter::Landed(const FHitResult& Hit)
 	//Remove the grounded effect by tag
 	FGameplayTagContainer AirborneTags;
 	AirborneTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne")));
+	AirborneTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
 	AbilitySystem->RemoveActiveEffectsWithGrantedTags(AirborneTags);
 
 	//if (GEngine) {
@@ -158,6 +165,9 @@ void APlayerManaCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode,
 	//If needed, remove the airborne effect here. However, the landed function should be able to handle this
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Wall Run functions... move to actor component???
+
 bool APlayerManaCharacter::WallRunCheck()
 {
 	FHitResult OutHit;
@@ -187,7 +197,8 @@ bool APlayerManaCharacter::WallRunCheck()
 			if (IsWallRunningAlongRightSide(OutHit.ImpactNormal))
 			{
 				WallRunSide = EWallRunSide::Right;
-				WallRunDirection = SetWallRunDirection(FVector(0, 0, 1), OutHit.ImpactNormal);
+				WallRunDir = FVector(0, 0, -1);
+				WallRunDirection = SetWallRunDirection(WallRunDir, OutHit.ImpactNormal);
 				if (GEngine)
 				{
 					GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, "Wall Run along Right!");
@@ -197,13 +208,20 @@ bool APlayerManaCharacter::WallRunCheck()
 			else
 			{
 				WallRunSide = EWallRunSide::Left;
-				WallRunDirection = SetWallRunDirection(FVector(0, 0, -1), OutHit.ImpactNormal);
+				WallRunDir = FVector(0, 0, 1);
+				WallRunDirection = SetWallRunDirection(WallRunDir, OutHit.ImpactNormal);
 				if (GEngine)
 				{
 					GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, "Wall Run along Left!");
 				}
 				PlayableWallRunMontage = WallRunLeftMontage;
 			}
+
+			//Set the variables that need to be reset to start the vertical motion
+			WallRunElapsedTime = 0.0f;
+			WallRunStartZ = GetActorLocation().Z;
+
+			//Start the wall run
 			return true;
 		}
 	}
@@ -246,6 +264,59 @@ bool APlayerManaCharacter::IsWallRunningAlongRightSide(FVector ImpactNormal)
 FVector APlayerManaCharacter::SetWallRunDirection(FVector SideMultiplier, FVector ImpactNormal)
 {
 	return FVector::CrossProduct(ImpactNormal, SideMultiplier);
+}
+
+FVector APlayerManaCharacter::UpdateWallRunHorizontal()
+{
+	FHitResult OutHit;
+
+	// Capsule parameters
+	const FVector LineStartLocation = GetActorLocation();
+	const float LineTraceLength = 200.0f;
+	const FVector LineEndLocation = (FVector::CrossProduct(WallRunDirection, WallRunDir) * LineTraceLength) + LineStartLocation;
+
+	//Trace Parameters
+	bool bTraceComplex = false;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+
+	//DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
+	bool bHit = GetWorld()->LineTraceSingleByChannel(OutHit, LineStartLocation, LineEndLocation, ECollisionChannel::ECC_Visibility, QueryParams);
+
+	if (bHit)
+	{
+		WallRunDirection = SetWallRunDirection(WallRunDir, OutHit.ImpactNormal);
+		return WallRunDirection.GetSafeNormal();
+	}
+	else
+	{
+		if (ActiveWallRunAbility)
+		{
+			ActiveWallRunAbility->OnWallRunFinished();
+		}
+		GetCharacterMovement()->Velocity.Set(WallRunDirection.X * 800, WallRunDirection.Z * 800, 0.0f);
+		return FVector();
+	}
+}
+
+void APlayerManaCharacter::UpdateWallRunVertical(float DeltaTime)
+{
+	WallRunElapsedTime += DeltaTime;
+	float Time = WallRunElapsedTime / WallRunDuration;
+	if (Time >= 1.0f)
+	{
+		if (ActiveWallRunAbility)
+		{
+			ActiveWallRunAbility->OnWallRunFinished();
+			return;
+		}
+	}
+
+	float SineOffset = WallRunAmplitude * FMath::Sin(2 * PI * WallRunFreq * Time);
+
+	FVector CurrentLocation = GetActorLocation();
+	CurrentLocation.Z = WallRunStartZ + SineOffset;
+	SetActorLocation(CurrentLocation, true);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -556,4 +627,3 @@ void APlayerManaCharacter::UpdateStaminaRegen()
 		AbilitySystem->ApplyGameplayEffectToSelf(StaminaRegenEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
 	}
 }
-

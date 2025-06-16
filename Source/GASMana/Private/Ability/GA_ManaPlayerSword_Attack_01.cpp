@@ -93,11 +93,13 @@ void UGA_ManaPlayerSword_Attack_01::EndAbility(const FGameplayAbilitySpecHandle 
 		if (PlayerCharacter)
 		{
 			//Update Gameplay Effects
+			/*
 			if (!ActorInfo->AbilitySystemComponent->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling"))))
 			{
 				ActorInfo->AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ActorInfo->AbilitySystemComponent->MakeEffectContext());
 
 			}
+			*/
 
 			//Update the anim instance
 			UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(PlayerCharacter->GetMesh()->GetAnimInstance());
