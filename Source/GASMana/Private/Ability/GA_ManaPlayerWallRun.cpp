@@ -5,8 +5,6 @@
 #include "../../Public/PlayerManaCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
-#include "Abilities/Tasks/AbilityTask_ApplyRootMotionConstantForce.h"
-#include "AbilityTasks/ApplyRootMotionDynamicForce.h"
 
 UGA_ManaPlayerWallRun::UGA_ManaPlayerWallRun()
 {
@@ -22,6 +20,25 @@ UGA_ManaPlayerWallRun::UGA_ManaPlayerWallRun()
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
 }
 
+bool UGA_ManaPlayerWallRun::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const
+{
+	if (!Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
+	{
+		return false;
+	}
+
+	if (const UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get())
+	{
+		float CurrentMana = AbilitySystemComponent->GetNumericAttribute(UManaAttributeSet::GetManaAttribute());
+		if (CurrentMana <= 0.0f)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+
 void UGA_ManaPlayerWallRun::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
@@ -32,7 +49,7 @@ void UGA_ManaPlayerWallRun::ActivateAbility(const FGameplayAbilitySpecHandle Han
 	if (PlayerCharacter && AbilitySystemComponent && CharacterMovement)
 	{
 		PlayerCharacter->SetWallRunAbility(this);
-		PlayerCharacter->GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(PlayerCharacter->GetWallRunDrainEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+		ManaDrainEffectHandle = PlayerCharacter->GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(PlayerCharacter->GetWallRunDrainEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 		/*
 		if (GEngine)
 		{
@@ -98,7 +115,6 @@ void UGA_ManaPlayerWallRun::EndAbility(const FGameplayAbilitySpecHandle Handle, 
 
 			if (UAbilitySystemComponent* AbilitySystem = PlayerCharacter->GetAbilitySystemComponent())
 			{
-				FActiveGameplayEffectHandle ManaDrainEffectHandle = FActiveGameplayEffectHandle::GenerateNewHandle(AbilitySystem);
 				AbilitySystem->RemoveActiveGameplayEffect(ManaDrainEffectHandle);
 			}
 			ActorInfo->AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ActorInfo->AbilitySystemComponent->MakeEffectContext());

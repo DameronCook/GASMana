@@ -95,13 +95,18 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
 
-	if (AbilitySystem && AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne"))) && !AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning"))))
+	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
+	float CurrentMana = AbilitySystem->GetNumericAttribute(UManaAttributeSet::GetManaAttribute());
+
+	if (CurrentMana > 0)
 	{
-		if (WallRunCheck())
+		if (AbilitySystem && AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne"))) && !AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning"))))
 		{
-			AbilitySystem->TryActivateAbilitiesByTag(WallRunTagContainer, true);
+			if (WallRunCheck())
+			{
+				AbilitySystem->TryActivateAbilitiesByTag(WallRunTagContainer, true);
+			}
 		}
 	}
 
@@ -109,11 +114,19 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 	{
 		UpdateWallRunVertical(DeltaTime);
 
+
+
 		FVector NewWallRunHorizontalDirection = UpdateWallRunHorizontal();
 		GetCharacterMovement()->Velocity.X = NewWallRunHorizontalDirection.X * WallRunStrength;
 		GetCharacterMovement()->Velocity.Y = NewWallRunHorizontalDirection.Y * WallRunStrength;
 
-		SetActorRotation(FMath::RInterpTo(GetActorRotation(), NewWallRunHorizontalDirection.Rotation(), DeltaTime, 5.0f)); //SetActorRotation(NewWallRunDirection.Rotation());
+		SetActorRotation(FMath::RInterpTo(GetActorRotation(), NewWallRunHorizontalDirection.Rotation(), DeltaTime, 5.0f));
+
+
+		if (CurrentMana <= 0.0f)
+		{
+			ActiveWallRunAbility->OnWallRunFinished();
+		}
 	}
 }
 
