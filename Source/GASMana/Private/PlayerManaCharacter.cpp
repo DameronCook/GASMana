@@ -101,7 +101,11 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 
 	if (CurrentMana > 0)
 	{
-		if (AbilitySystem && AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne"))) && !AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning"))))
+		bool bIsInAir = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne")));
+		bool bIsWallRunning = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
+		bool bIsWallJumping = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallJumping")));
+
+		if (AbilitySystem && bIsInAir && !bIsWallRunning && !bIsWallJumping)
 		{
 			if (WallRunCheck())
 			{
@@ -114,7 +118,7 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 	{
 		UpdateWallRunVertical(DeltaTime);
 
-
+		bool bForwardHit = ForwardWallRunCheck();
 
 		FVector NewWallRunHorizontalDirection = UpdateWallRunHorizontal();
 		GetCharacterMovement()->Velocity.X = NewWallRunHorizontalDirection.X * WallRunStrength;
@@ -123,7 +127,7 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 		SetActorRotation(FMath::RInterpTo(GetActorRotation(), NewWallRunHorizontalDirection.Rotation(), DeltaTime, 5.0f));
 
 
-		if (CurrentMana <= 0.0f)
+		if (CurrentMana <= 0.0f || bForwardHit)
 		{
 			ActiveWallRunAbility->OnWallRunFinished();
 		}
@@ -183,11 +187,34 @@ void APlayerManaCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode,
 
 bool APlayerManaCharacter::WallRunCheck()
 {
+
+	FHitResult OutHitLine;
+
+	// Line parameters
+	const FVector LineStartLocation = GetActorLocation();
+	const float LineTraceLength = 45.0f;
+	const FVector LineEndLocation = GetActorLocation() + (GetActorForwardVector() * LineTraceLength);
+	FVector LineOffset = FVector(0.0f, 0.0f, 80.0f);
+
+
+	//Trace Parameters
+	//bool bLineTraceComplex = false;
+	FCollisionQueryParams LineQueryParams;
+	LineQueryParams.AddIgnoredActor(this);
+
+	DrawDebugLine(GetWorld(), LineStartLocation - LineOffset, LineEndLocation - LineOffset, FColor::Red);
+	bool bLineHit = GetWorld()->LineTraceSingleByChannel(OutHitLine, LineStartLocation - LineOffset, LineEndLocation - LineOffset, ECollisionChannel::ECC_Visibility, LineQueryParams);
+
+	if (bLineHit)
+	{
+		return false;
+	}
+
 	FHitResult OutHit;
 
 	// Capsule parameters
 	const FVector CapsuleLocation = GetActorLocation();
-	const float CapsuleRadius = 40.0f;
+	const float CapsuleRadius = 38.0f;
 	const float CapsuleHalfHeight = 40.0f;
 	const FQuat CapsuleRotation = FQuat::Identity;
 
@@ -200,6 +227,7 @@ bool APlayerManaCharacter::WallRunCheck()
 	//DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation, FColor::Red, false, 0.f);
 
 	bool bHit = GetWorld()->SweepSingleByChannel(OutHit, CapsuleLocation, CapsuleLocation, CapsuleRotation,ECollisionChannel::ECC_Visibility, FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight), QueryParams);
+
 
 	if (bHit)
 	{
@@ -233,6 +261,11 @@ bool APlayerManaCharacter::WallRunCheck()
 			//Set the variables that need to be reset to start the vertical motion
 			WallRunElapsedTime = 0.0f;
 			WallRunStartZ = GetActorLocation().Z;
+			LastWallRunSineOffset = 0.0f; // If always start at base
+
+			// If you can start above the wall:
+			float CurrentZ = GetActorLocation().Z;
+			LastWallRunSineOffset = CurrentZ - WallRunStartZ;
 
 			//Start the wall run
 			return true;
@@ -274,6 +307,28 @@ bool APlayerManaCharacter::IsWallRunningAlongRightSide(FVector ImpactNormal)
 	return false;
 }
 
+bool APlayerManaCharacter::ForwardWallRunCheck()
+{
+	FHitResult OutHit;
+
+	// Line parameters
+	const FVector LineStartLocation = GetActorLocation();
+	const float LineTraceLength = 75.0f;
+	const FVector LineEndLocation = GetActorLocation() + (GetActorForwardVector() * LineTraceLength);
+
+	//Trace Parameters
+	bool bTraceComplex = false;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+
+	//DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
+	FVector LineOffset = FVector(0.0f, 0.0f, 80.0f);
+	bool bHitTop = GetWorld()->LineTraceSingleByChannel(OutHit, LineStartLocation + LineOffset, LineEndLocation + LineOffset, ECollisionChannel::ECC_Visibility, QueryParams);
+	bool bHitBottom = GetWorld()->LineTraceSingleByChannel(OutHit, LineStartLocation - LineOffset, LineEndLocation - LineOffset, ECollisionChannel::ECC_Visibility, QueryParams);
+
+	return bHitTop || bHitBottom;
+}
+
 FVector APlayerManaCharacter::SetWallRunDirection(FVector SideMultiplier, FVector ImpactNormal)
 {
 	return FVector::CrossProduct(ImpactNormal, SideMultiplier);
@@ -285,7 +340,7 @@ FVector APlayerManaCharacter::UpdateWallRunHorizontal()
 
 	// Capsule parameters
 	const FVector LineStartLocation = GetActorLocation();
-	const float LineTraceLength = 200.0f;
+	const float LineTraceLength = 75.0f;
 	const FVector LineEndLocation = (FVector::CrossProduct(WallRunDirection, WallRunDir) * LineTraceLength) + LineStartLocation;
 
 	//Trace Parameters
@@ -298,7 +353,8 @@ FVector APlayerManaCharacter::UpdateWallRunHorizontal()
 
 	if (bHit)
 	{
-		WallRunDirection = SetWallRunDirection(WallRunDir, OutHit.ImpactNormal);
+		WallRunImpactNormal = OutHit.ImpactNormal;
+		WallRunDirection = SetWallRunDirection(WallRunDir, WallRunImpactNormal);
 		return WallRunDirection.GetSafeNormal();
 	}
 	else
@@ -307,29 +363,61 @@ FVector APlayerManaCharacter::UpdateWallRunHorizontal()
 		{
 			ActiveWallRunAbility->OnWallRunFinished();
 		}
-		GetCharacterMovement()->Velocity.Set(WallRunDirection.X * 800, WallRunDirection.Z * 800, 0.0f);
-		return FVector();
+		GetCharacterMovement()->Velocity = FVector(WallRunDirection.X * WallRunStrength, WallRunDirection.Y * WallRunStrength, GetCharacterMovement()->Velocity.Z);		
+		return WallRunDirection;
 	}
 }
 
 void APlayerManaCharacter::UpdateWallRunVertical(float DeltaTime)
 {
+	FHitResult OutHit;
+
+	// Capsule parameters
+	const FVector LineStartLocation = GetActorLocation();
+	const float LineTraceLength = 100.0f;
+	const FVector LineEndLocation = (FVector::CrossProduct(WallRunDirection, WallRunDir) * LineTraceLength) + LineStartLocation;
+
+	//Trace Parameters
+	bool bTraceComplex = false;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+
+	const FVector LineBelowLoc = FVector(0.0f, 0.0f, -80.f);
+	const FVector LineAboveLoc = FVector(0.0f, 0.0f, 80.f);
+
+	//DrawDebugLine(GetWorld(), LineStartLocation + LineBelowLoc, LineEndLocation + LineBelowLoc, FColor::Red);
+	//DrawDebugLine(GetWorld(), LineStartLocation + LineAboveLoc, LineEndLocation + LineAboveLoc, FColor::Red);
+	bool bHitBelow = GetWorld()->LineTraceSingleByChannel(OutHit, LineStartLocation + LineBelowLoc, LineEndLocation + LineBelowLoc, ECollisionChannel::ECC_Visibility, QueryParams);
+	bool bHitTop = GetWorld()->LineTraceSingleByChannel(OutHit, LineStartLocation + LineAboveLoc, LineEndLocation + LineAboveLoc, ECollisionChannel::ECC_Visibility, QueryParams);
+
 	WallRunElapsedTime += DeltaTime;
 	float Time = WallRunElapsedTime / WallRunDuration;
-	if (Time >= 1.0f)
+	if (Time >= 1.0f || !bHitBelow)
 	{
 		if (ActiveWallRunAbility)
 		{
 			ActiveWallRunAbility->OnWallRunFinished();
+			GetCharacterMovement()->Velocity = FVector(WallRunDirection.X * WallRunStrength, WallRunDirection.Y * WallRunStrength, GetCharacterMovement()->Velocity.Z);
 			return;
 		}
 	}
 
 	float SineOffset = WallRunAmplitude * FMath::Sin(2 * PI * WallRunFreq * Time);
 
+
+	// Only allow upward movement if bHitTop is true, always allow downward
+	bool bMovingUp = SineOffset > LastWallRunSineOffset;
+	if (bMovingUp && !bHitTop)
+	{
+		return;
+	}
+
 	FVector CurrentLocation = GetActorLocation();
 	CurrentLocation.Z = WallRunStartZ + SineOffset;
 	SetActorLocation(CurrentLocation, true);
+
+	// Store for next frame
+	LastWallRunSineOffset = SineOffset;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -490,7 +578,14 @@ void APlayerManaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 void APlayerManaCharacter::Jump()
 {
-	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(JumpTagContainer, true);
+	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
+
+	if (AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning"))))
+	{
+		AbilitySystem->TryActivateAbilitiesByTag(WallJumpTagContainer, true);
+		return;
+	}
+	AbilitySystem->TryActivateAbilitiesByTag(JumpTagContainer, true);
 
 	//if (GEngine) {
 	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, "Jump!");

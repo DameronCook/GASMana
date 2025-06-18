@@ -5,6 +5,8 @@
 #include "../../Public/PlayerManaCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
+#include "ManaPlayerAnimInstance.h"
+
 
 UGA_ManaPlayerWallRun::UGA_ManaPlayerWallRun()
 {
@@ -49,7 +51,6 @@ void UGA_ManaPlayerWallRun::ActivateAbility(const FGameplayAbilitySpecHandle Han
 	if (PlayerCharacter && AbilitySystemComponent && CharacterMovement)
 	{
 		PlayerCharacter->SetWallRunAbility(this);
-		ManaDrainEffectHandle = PlayerCharacter->GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(PlayerCharacter->GetWallRunDrainEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 		/*
 		if (GEngine)
 		{
@@ -60,7 +61,8 @@ void UGA_ManaPlayerWallRun::ActivateAbility(const FGameplayAbilitySpecHandle Han
 		CharacterMovement->bOrientRotationToMovement = false;
 
 		//Apply Gameplay Effects
-		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetWallRunEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+		WallRunEffectHandle = AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetWallRunEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+		ManaDrainEffectHandle = PlayerCharacter->GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(PlayerCharacter->GetWallRunDrainEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetBlockMovementEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 		AbilitySystemComponent->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree")));
 		AbilitySystemComponent->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne")));
@@ -93,6 +95,7 @@ void UGA_ManaPlayerWallRun::OnWallRunFinished()
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Wall Run Finished!");
 	}
+
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
@@ -113,9 +116,28 @@ void UGA_ManaPlayerWallRun::EndAbility(const FGameplayAbilitySpecHandle Handle, 
 		{
 			PlayerCharacter->SetWallRunAbility(nullptr);
 
+
+			FVector WallNormal = PlayerCharacter->GetWallRunImpactNormal().GetSafeNormal();
+			FVector Forward = PlayerCharacter->GetActorForwardVector().GetSafeNormal();
+			FVector Bisector = (WallNormal + Forward).GetSafeNormal();
+
+			//Set the players rotation
+			FRotator JumpYaw = FRotator(0.f, Bisector.Rotation().Yaw, 0.f);
+			PlayerCharacter->SetActorRotation(JumpYaw);
+
+
+
+
+			if (UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(PlayerCharacter->GetMesh()->GetAnimInstance()))
+			{
+				AnimInstance->Montage_Play(PlayerCharacter->GetWallJumpMontage());
+			}
+
 			if (UAbilitySystemComponent* AbilitySystem = PlayerCharacter->GetAbilitySystemComponent())
 			{
 				AbilitySystem->RemoveActiveGameplayEffect(ManaDrainEffectHandle);
+				AbilitySystem->RemoveActiveGameplayEffect(WallRunEffectHandle);
+
 			}
 			ActorInfo->AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ActorInfo->AbilitySystemComponent->MakeEffectContext());
 
@@ -125,6 +147,8 @@ void UGA_ManaPlayerWallRun::EndAbility(const FGameplayAbilitySpecHandle Handle, 
 				CharacterMovement->bOrientRotationToMovement = true;
 				CharacterMovement->GravityScale = PlayerCharacter->GetOriginalGravityScale();
 
+				//Move the player a little bit away from the wall too so they won't immediately collide with the wall, restarting a run
+				PlayerCharacter->LaunchCharacter(Bisector * 500, true, false);
 			}
 		}
 	}

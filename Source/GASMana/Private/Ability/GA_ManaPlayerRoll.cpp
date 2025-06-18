@@ -73,7 +73,6 @@ void UGA_ManaPlayerRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 			RootMotionTask->OnFinish.AddDynamic(this, &UGA_ManaPlayerRoll::OnMotionTaskEnded);
 			RootMotionTask->ReadyForActivation();
 			//Now add a delegate to the root motion task that grants the player the "IsFree" tag again so they can move around a bit before the animation is over.
-
 		}
 		
 		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetRollingEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
@@ -131,6 +130,7 @@ void UGA_ManaPlayerRoll::OnMontageEnded()
 	// End the ability (get the current context)
 	//EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
+
 
 void UGA_ManaPlayerRoll::OnMotionTaskEnded()
 {

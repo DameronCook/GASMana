@@ -21,8 +21,13 @@ class GASMANA_API UGA_ManaPlayerWallRun : public UGameplayAbility
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
 	FActiveGameplayEffectHandle ManaDrainEffectHandle;
+	FActiveGameplayEffectHandle WallRunEffectHandle;
+
 
 public:
 	UFUNCTION()
 	void OnWallRunFinished();
+	
+	FORCEINLINE FActiveGameplayEffectHandle GetWallRunEffectHandle() { return WallRunEffectHandle; }
+
 };
