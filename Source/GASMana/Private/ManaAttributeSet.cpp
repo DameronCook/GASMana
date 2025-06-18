@@ -72,4 +72,13 @@ void UManaAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 		//}
 		SetStamina(FMath::Clamp(GetStamina(), 0.0f, GetMaxStamina()));
 	}
+
+	if (Data.EvaluatedData.Attribute == GetManaAttribute())
+	{
+		//if (GEngine)
+		//{
+		//		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, FString::Printf(TEXT("New Stamina: %f"), GetStamina()));
+		//}
+		SetMana(FMath::Clamp(GetMana(), 0.0f, GetMaxMana()));
+	}
 }

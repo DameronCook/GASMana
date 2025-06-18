@@ -5,7 +5,8 @@
 #include "CoreMinimal.h"
 #include "../GASManaCharacter.h"
 #include "../../GameplayTags/Classes/GameplayTagContainer.h"
-#include "I_ProgressBarInterface.h"
+#include "Interface/I_ProgressBarInterface.h"
+#include "Ability/GA_ManaPlayerWallRun.h"
 #include "PlayerManaCharacter.generated.h"
 
 
@@ -19,6 +20,13 @@ struct FGameplayTagContainer;
 /**
  * 
  */
+UENUM(BlueprintType)
+enum class EWallRunSide : uint8
+{
+	Left  UMETA(DisplayName = "Left"),
+	Right UMETA(DisplayName = "Right")
+};
+
 UCLASS()
 class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_ProgressBarInterface
 {
@@ -101,6 +109,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer WallRunTagContainer;
 
+	/** Wall Jump Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer WallJumpTagContainer;
+
 	//////////////////////////////////////////////////////////////////////////
 	// Effect Classes
 
@@ -136,6 +148,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Movement", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> WallRunEffectClass;
 
+	/** Wall Jump Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Movement", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> WallJumpEffectClass;
+
 	/** Normal Stamina Regen Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Stamina", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> StaminaRegenEffectClass;
@@ -143,6 +159,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Block Stamina Regen Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Stamina", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> StaminaRegenBlockEffectClass;
+
+	/** Mana Drain Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Mana", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> ManaWallRunDrainClass;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Montages
@@ -155,6 +175,22 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AttackMontage;
 
+	/** Wall Run Right Montage */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* WallRunLeftMontage;
+
+	/** Wall Run Right Montage */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* WallJumpMontage;
+
+	/** Wall Run left Montage*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* WallRunRightMontage;
+
+	/** Wall Run Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* PlayableWallRunMontage;
+
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -163,6 +199,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Roll MovementCurve */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Curves", meta = (AllowPrivateAccess = "true"))
 	UCurveFloat* DiveRollCurveFloat;
+
+	/** Wall Jump MovementCurve */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Curves", meta = (AllowPrivateAccess = "true"))
+	UCurveFloat* WallJumpCurveFloat;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Object References (Liable to move)
@@ -176,10 +216,70 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 
 	//////////////////////////////////////////////////////////////////////////
 	// Wall Run
+
+	/** Wall Run Side */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wall Run", meta = (AllowPrivateAccess = "true"))
+	EWallRunSide WallRunSide;
+
+	/** Wall Run Direction */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wall Run", meta = (AllowPrivateAccess = "true"))
+	FVector WallRunDirection;
+
+	/** Wall Run Direction */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wall Run", meta = (AllowPrivateAccess = "true"))
+	FVector WallRunDir;
+
+	/** Wall Run Speed */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wall Run", meta = (AllowPrivateAccess = "true"))
+	float WallRunStrength = 800.f;
+
+	/* Duration of Full Wall Run */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wall Run", meta = (AllowPrivateAccess = "true"))
+	float WallRunDuration = 2.0f;
+
+	/* Verticality of the  Wall Run */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wall Run", meta = (AllowPrivateAccess = "true"))
+	float WallRunAmplitude = 125.0f;
+
+	/* How much along the sine curve do we follow? */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wall Run", meta = (AllowPrivateAccess = "true"))
+	float WallRunFreq = 0.55f;
+
+
+	float WallRunElapsedTime = 0.0f;
+	float WallRunStartZ = 0.0f;
+	FVector WallRunImpactNormal;
+
+	float LastWallRunSineOffset = 0.0f;
+
 	UFUNCTION()
-	void WallRunCheck();
+	FVector UpdateWallRunHorizontal();
 
+	UFUNCTION()
+	void UpdateWallRunVertical(float DeltaTime);
 
+	UFUNCTION()
+	bool WallRunCheck();
+
+	UFUNCTION()
+	bool CanWallRunOnSurface(FVector ImpactNormal);
+
+	UFUNCTION()
+	bool IsWallRunningAlongRightSide(FVector ImpactNormal);
+
+	UFUNCTION()
+	bool ForwardWallRunCheck();
+
+	UFUNCTION()
+	FVector SetWallRunDirection(FVector SideMultiplier, FVector ImpactNormal);
+
+	/**Active wall run ability*/
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UGA_ManaPlayerWallRun* ActiveWallRunAbility = nullptr;
+
+	/////////////////////////////////////////////////////////////////////////
+	//Other
+	float OriginalGravityScale = 1.75f;
 
 protected:
 
@@ -233,21 +333,49 @@ public:
 	virtual float GetMana_Implementation() const override;
 	virtual float GetManaAsRatio_Implementation() const override;
 
-	/** Returns CameraBoom subobject **/
+
+
+
+	//////////////////////////////////////
+	//Getters
+	// 
+	//Components
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-	/** Returns BlockingEffectClass **/
+
+	//Effect Classes
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetBlockingEffectClass() const { return BlockingEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetRollingEffectClass() const { return RollingEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetAttackingEffectClass() const { return AttackingEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetFreeEffectClass() const { return FreeEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetBlockMovementEffectClass() const { return BlockMovementEffectClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetWallRunEffectClass() const { return WallRunEffectClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetWallJumpEffectClass() const { return WallJumpEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetStaminaRegenEffectClass() const { return StaminaRegenEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetStaminaRegenBlockEffectClass() const { return StaminaRegenBlockEffectClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetWallRunDrainEffectClass() const { return ManaWallRunDrainClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetAirborneEffectClass() const { return AirborneEffectClass; }
+
+	//Montages
 	FORCEINLINE UAnimMontage* GetRollMontage() const { return RollMontage; }
 	FORCEINLINE UAnimMontage* GetAttackMontage() const { return AttackMontage; }
+	FORCEINLINE UAnimMontage* GetWallRunMontage() const { return PlayableWallRunMontage; }
+	FORCEINLINE UAnimMontage* GetWallJumpMontage() const { return WallJumpMontage; }
 	FORCEINLINE UCurveFloat* GetDiveRollCurveFloat() const { return DiveRollCurveFloat; }
+	FORCEINLINE UCurveFloat* GetWallJumpCurveFloat() const { return WallJumpCurveFloat; }
+
+	//Input Actions
 	FORCEINLINE UInputAction* GetMoveAction() const { return MoveAction; }
 	FORCEINLINE FVector GetCachedInputDirection() const { return CachedInputDirection; }
+
+	//Movement
+	FORCEINLINE FVector GetWallRunDirection() const { return WallRunDirection; }
+	FORCEINLINE FVector GetWallRunImpactNormal() const { return WallRunImpactNormal; }
+	FORCEINLINE UGA_ManaPlayerWallRun* GetWallRunAbility() { return ActiveWallRunAbility; }
+	FORCEINLINE float GetOriginalGravityScale() const { return OriginalGravityScale; }
+
+
+	//////////////////////////////////////
+	//Setters
+	FORCEINLINE UGA_ManaPlayerWallRun* SetWallRunAbility(UGA_ManaPlayerWallRun* WallRunAbility) { return ActiveWallRunAbility = WallRunAbility; }
 };

@@ -4,6 +4,8 @@
 #include "Engine/LocalPlayer.h"
 #include "AbilitySystemComponent.h"
 #include "Public/ManaAttributeSet.h"
+#include "Components/CapsuleComponent.h"
+#include "Public/Interface/I_PickUpInterface.h"
 
 //DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -12,6 +14,9 @@
 
 AGASManaCharacter::AGASManaCharacter()
 {
+	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AGASManaCharacter::OnCapsuleBeginOverlap);
+
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystem"));
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
@@ -39,6 +44,16 @@ void AGASManaCharacter::FinishedBlocking()
 {
 	//Empty for now. Whenever other actors inherit from this, they can override this function
 
+}
+
+void AGASManaCharacter::OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && OtherActor->Implements<UI_PickUpInterface>())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OtherActor: %s"), *GetNameSafe(OtherActor));
+		UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
+		II_PickUpInterface::Execute_OnPickedUp(OtherActor, this, AbilitySystem);
+	}
 }
 
 void AGASManaCharacter::HandleMelee()
