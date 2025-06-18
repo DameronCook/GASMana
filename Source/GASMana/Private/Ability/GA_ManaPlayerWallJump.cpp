@@ -47,24 +47,25 @@ void UGA_ManaPlayerWallJump::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 		FVector Forward = PlayerCharacter->GetActorForwardVector().GetSafeNormal();
 		FVector Bisector = (WallNormal + Forward).GetSafeNormal();
 		
+		float WallDot = FVector::DotProduct(InputDirection, WallNormal);
 
-		float Dot = FVector::DotProduct(InputDirection, WallRunDirection);
-
-		if (Dot > 0.3f)
+		if (WallDot > 0.1f)
 		{
-			if (GEngine)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Used Input!"));
-			}
 			Direction = Bisector + InputDirection;
+
+			//if (GEngine)
+			//{
+			//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Used Input!"));
+			//}
 		}
 		else
 		{
-			if (GEngine)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Didn't use Input!"));
-			}
 			Direction = Bisector;
+
+	/*		if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Didin't use Input!"));
+			}*/
 		}
 
 		Direction.Z = 0.3f; 

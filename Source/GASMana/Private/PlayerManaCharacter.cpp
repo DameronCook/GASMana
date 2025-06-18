@@ -202,7 +202,7 @@ bool APlayerManaCharacter::WallRunCheck()
 	FCollisionQueryParams LineQueryParams;
 	LineQueryParams.AddIgnoredActor(this);
 
-	DrawDebugLine(GetWorld(), LineStartLocation - LineOffset, LineEndLocation - LineOffset, FColor::Red);
+	//DrawDebugLine(GetWorld(), LineStartLocation - LineOffset, LineEndLocation - LineOffset, FColor::Red);
 	bool bLineHit = GetWorld()->LineTraceSingleByChannel(OutHitLine, LineStartLocation - LineOffset, LineEndLocation - LineOffset, ECollisionChannel::ECC_Visibility, LineQueryParams);
 
 	if (bLineHit)
@@ -240,10 +240,10 @@ bool APlayerManaCharacter::WallRunCheck()
 				WallRunSide = EWallRunSide::Right;
 				WallRunDir = FVector(0, 0, -1);
 				WallRunDirection = SetWallRunDirection(WallRunDir, OutHit.ImpactNormal);
-				if (GEngine)
+	/*			if (GEngine)
 				{
 					GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, "Wall Run along Right!");
-				}
+				}*/
 				PlayableWallRunMontage = WallRunRightMontage;
 			}
 			else
@@ -251,10 +251,10 @@ bool APlayerManaCharacter::WallRunCheck()
 				WallRunSide = EWallRunSide::Left;
 				WallRunDir = FVector(0, 0, 1);
 				WallRunDirection = SetWallRunDirection(WallRunDir, OutHit.ImpactNormal);
-				if (GEngine)
+			/*	if (GEngine)
 				{
 					GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, "Wall Run along Left!");
-				}
+				}*/
 				PlayableWallRunMontage = WallRunLeftMontage;
 			}
 
