@@ -7,6 +7,7 @@
 #include "../../GameplayTags/Classes/GameplayTagContainer.h"
 #include "Interface/I_ProgressBarInterface.h"
 #include "Ability/GA_ManaPlayerWallRun.h"
+#include "Ability/GA_ManaPlayerMantle.h"
 #include "Components/AdvancedCameraComponent.h"
 #include "PlayerManaCharacter.generated.h"
 
@@ -88,7 +89,6 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* RollAction;
 
-
 	/* Cached direction of input (always calculated) */
 	FVector CachedInputDirection;
 
@@ -118,6 +118,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Wall Jump Tag Container */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer WallJumpTagContainer;
+
+	/** Wall Jump Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer MantleTagContainer;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Effect Classes
@@ -169,6 +173,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Mana Drain Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Mana", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> ManaWallRunDrainClass;
+
+	/** Mana Drain Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Mana", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> MantleClass;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Montages
@@ -283,6 +291,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UGA_ManaPlayerWallRun* ActiveWallRunAbility = nullptr;
 
+	/**Active mantle ability*/
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UGA_ManaPlayerMantle* ActiveMantleAbility = nullptr;
+
 	/////////////////////////////////////////////////////////////////////////
 	//Other
 	float OriginalGravityScale = 2.0;
@@ -304,6 +316,9 @@ protected:
 	virtual void FinishedBlocking() override;
 
 	virtual void Jump() override;
+
+	UFUNCTION(BlueprintCallable)
+	void OnMantleEnded();
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
@@ -393,6 +408,7 @@ public:
 	FORCEINLINE FVector GetWallRunDirection() const { return WallRunDirection; }
 	FORCEINLINE FVector GetWallRunImpactNormal() const { return WallRunImpactNormal; }
 	FORCEINLINE UGA_ManaPlayerWallRun* GetWallRunAbility() { return ActiveWallRunAbility; }
+	FORCEINLINE UGA_ManaPlayerMantle* GetMantleAbility() { return ActiveMantleAbility; }
 	FORCEINLINE EWallRunSide GetWallRunSide() { return WallRunSide; }
 	FORCEINLINE float GetOriginalGravityScale() const { return OriginalGravityScale; }
 
@@ -400,4 +416,5 @@ public:
 	//////////////////////////////////////
 	//Setters
 	FORCEINLINE UGA_ManaPlayerWallRun* SetWallRunAbility(UGA_ManaPlayerWallRun* WallRunAbility) { return ActiveWallRunAbility = WallRunAbility; }
+	FORCEINLINE UGA_ManaPlayerMantle* SetMantleAbility(UGA_ManaPlayerMantle* MantleAbility) { return ActiveMantleAbility = MantleAbility; }
 };
