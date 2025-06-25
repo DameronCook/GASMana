@@ -18,6 +18,7 @@ UGA_ManaPlayerWallJump::UGA_ManaPlayerWallJump()
 	//Required Tags
 	ActivationRequiredTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
 
+	//Blocked Tags
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallJumping")));
 }
 

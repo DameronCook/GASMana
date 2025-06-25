@@ -52,9 +52,8 @@ APlayerManaCharacter::APlayerManaCharacter()
 	// Using the camera boom, add lag to creatae a more reactive camera
 	CameraBoom->bEnableCameraRotationLag = true;
 	CameraBoom->bEnableCameraLag = true;
-	CameraBoom->CameraRotationLagSpeed = 5.f;
+	CameraBoom->CameraRotationLagSpeed = 8.f;
 	CameraBoom->CameraLagSpeed = 5.f;
-
 
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
@@ -719,6 +718,11 @@ void APlayerManaCharacter::Jump()
 	//if (GEngine) {
 	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, "Jump!");
 	//}
+}
+
+void APlayerManaCharacter::OnMantleEnded()
+{
+	GetMantleAbility()->OnMantleEnded();
 }
 
 void APlayerManaCharacter::Move(const FInputActionValue& Value)
