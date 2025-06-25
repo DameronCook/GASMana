@@ -17,6 +17,7 @@
 #include "Blueprint/UserWidget.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Actors/BaseManaEnemy.h"
+#include "Components/AdvancedCameraComponent.h"
 
 APlayerManaCharacter::APlayerManaCharacter()
 {
@@ -48,10 +49,20 @@ APlayerManaCharacter::APlayerManaCharacter()
 	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
+	// Using the camera boom, add lag to creatae a more reactive camera
+	CameraBoom->bEnableCameraRotationLag = true;
+	CameraBoom->bEnableCameraLag = true;
+	CameraBoom->CameraRotationLagSpeed = 5.f;
+	CameraBoom->CameraLagSpeed = 5.f;
+
+
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+	//Create an advanced camera controller
+	AdvancedCameraComponent = CreateDefaultSubobject<UAdvancedCameraComponent>(TEXT("AdvancedCameraComponent"));
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -89,6 +100,9 @@ void APlayerManaCharacter::BeginPlay()
 	}
 
 	UpdateStaminaRegen();
+
+
+	SetDefaultCameraState();
 }
 
 void APlayerManaCharacter::Tick(float DeltaTime)
@@ -118,6 +132,8 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 	{
 		UpdateWallRunVertical(DeltaTime);
 
+		SetWallRunCameraState();
+
 		bool bForwardHit = ForwardWallRunCheck();
 
 		FVector NewWallRunHorizontalDirection = UpdateWallRunHorizontal();
@@ -126,12 +142,29 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 
 		SetActorRotation(FMath::RInterpTo(GetActorRotation(), NewWallRunHorizontalDirection.Rotation(), DeltaTime, 5.0f));
 
-
 		if (CurrentMana <= 0.0f || bForwardHit)
 		{
 			ActiveWallRunAbility->OnWallRunFinished();
 		}
 	}
+
+	//Manually handle camera while player "Is Free"
+
+	bool bIsFree = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree")));
+
+	if (bIsFree)
+	{
+		bool bIsBlocking = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsBlocking")));
+		bool bIsRunning = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsRunning")));
+
+		if (bIsBlocking && !bIsRunning)
+		{
+			SetShieldCameraState();
+			return;
+		}
+		SetDefaultCameraState();
+	}
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -165,6 +198,11 @@ void APlayerManaCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode,
 
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
 
+	//if (GEngine)
+	//{
+	//	GEngine->AddOnScreenDebugMessage(1, .1f, FColor::Red, "MovementModeChangedCalled");
+	//}
+
 	if (!AbilitySystem)
 	{
 		return;
@@ -192,7 +230,7 @@ bool APlayerManaCharacter::WallRunCheck()
 
 	// Line parameters
 	const FVector LineStartLocation = GetActorLocation();
-	const float LineTraceLength = 45.0f;
+	const float LineTraceLength = 40.0f;
 	const FVector LineEndLocation = GetActorLocation() + (GetActorForwardVector() * LineTraceLength);
 	FVector LineOffset = FVector(0.0f, 0.0f, 80.0f);
 
@@ -202,7 +240,7 @@ bool APlayerManaCharacter::WallRunCheck()
 	FCollisionQueryParams LineQueryParams;
 	LineQueryParams.AddIgnoredActor(this);
 
-	DrawDebugLine(GetWorld(), LineStartLocation - LineOffset, LineEndLocation - LineOffset, FColor::Red);
+	//DrawDebugLine(GetWorld(), LineStartLocation - LineOffset, LineEndLocation - LineOffset, FColor::Red);
 	bool bLineHit = GetWorld()->LineTraceSingleByChannel(OutHitLine, LineStartLocation - LineOffset, LineEndLocation - LineOffset, ECollisionChannel::ECC_Visibility, LineQueryParams);
 
 	if (bLineHit)
@@ -240,10 +278,10 @@ bool APlayerManaCharacter::WallRunCheck()
 				WallRunSide = EWallRunSide::Right;
 				WallRunDir = FVector(0, 0, -1);
 				WallRunDirection = SetWallRunDirection(WallRunDir, OutHit.ImpactNormal);
-				if (GEngine)
+	/*			if (GEngine)
 				{
 					GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, "Wall Run along Right!");
-				}
+				}*/
 				PlayableWallRunMontage = WallRunRightMontage;
 			}
 			else
@@ -251,10 +289,10 @@ bool APlayerManaCharacter::WallRunCheck()
 				WallRunSide = EWallRunSide::Left;
 				WallRunDir = FVector(0, 0, 1);
 				WallRunDirection = SetWallRunDirection(WallRunDir, OutHit.ImpactNormal);
-				if (GEngine)
+			/*	if (GEngine)
 				{
 					GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, "Wall Run along Left!");
-				}
+				}*/
 				PlayableWallRunMontage = WallRunLeftMontage;
 			}
 
@@ -313,7 +351,7 @@ bool APlayerManaCharacter::ForwardWallRunCheck()
 
 	// Line parameters
 	const FVector LineStartLocation = GetActorLocation();
-	const float LineTraceLength = 75.0f;
+	const float LineTraceLength = 40.0f;
 	const FVector LineEndLocation = GetActorLocation() + (GetActorForwardVector() * LineTraceLength);
 
 	//Trace Parameters
@@ -321,7 +359,7 @@ bool APlayerManaCharacter::ForwardWallRunCheck()
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
 
-	//DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
+	DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
 	FVector LineOffset = FVector(0.0f, 0.0f, 80.0f);
 	bool bHitTop = GetWorld()->LineTraceSingleByChannel(OutHit, LineStartLocation + LineOffset, LineEndLocation + LineOffset, ECollisionChannel::ECC_Visibility, QueryParams);
 	bool bHitBottom = GetWorld()->LineTraceSingleByChannel(OutHit, LineStartLocation - LineOffset, LineEndLocation - LineOffset, ECollisionChannel::ECC_Visibility, QueryParams);
@@ -396,6 +434,10 @@ void APlayerManaCharacter::UpdateWallRunVertical(float DeltaTime)
 	{
 		if (ActiveWallRunAbility)
 		{
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, "Wall Run Ended!");
+			}
 			ActiveWallRunAbility->OnWallRunFinished();
 			GetCharacterMovement()->Velocity = FVector(WallRunDirection.X * WallRunStrength, WallRunDirection.Y * WallRunStrength, GetCharacterMovement()->Velocity.Z);
 			return;
@@ -515,6 +557,93 @@ float APlayerManaCharacter::GetManaAsRatio_Implementation() const
 {
 	return GetMana_Implementation()/ GetAbilitySystemComponent()->GetNumericAttribute(UManaAttributeSet::GetMaxManaAttribute());
 }
+
+void APlayerManaCharacter::SetDefaultCameraState()
+{
+
+	// Restore normal camera control
+	//CameraBoom->bUsePawnControlRotation = true;
+	//CameraBoom->SetRelativeRotation(FRotator::ZeroRotator);
+	CameraBoom->bDoCollisionTest = true;
+
+	// In PlayerManaCharacter.cpp, when wall run ends:
+	FCameraState DefaultState;
+	DefaultState.TargetArmLength = 400.f;
+	DefaultState.CameraRotation = FRotator(GetControlRotation().Pitch, GetControlRotation().Yaw, 0.f);
+	DefaultState.CameraFOV = 90.f;
+
+	AdvancedCameraComponent->SetCameraState(DefaultState, 5.f);
+}
+
+void APlayerManaCharacter::SetWallRunCameraState()
+{
+	//CameraBoom->bUsePawnControlRotation = false;
+	CameraBoom->bDoCollisionTest = false;
+
+	float newRoll = (WallRunSide == EWallRunSide::Right) ? -15.f : 15.f;
+	float newYaw = (WallRunSide == EWallRunSide::Right) ? 10.f : -10.f;
+	float newPitch = -25.f;
+
+	FRotator WallRunCameraRotation = GetActorForwardVector().Rotation();
+
+	WallRunCameraRotation.Pitch += newPitch;
+	WallRunCameraRotation.Yaw += newYaw;
+	WallRunCameraRotation.Roll += newRoll;
+
+	FCameraState WallRunState;
+	WallRunState.TargetArmLength = 125.f;
+	WallRunState.CameraRotation = WallRunCameraRotation;
+	WallRunState.CameraFOV = 110.f; 
+
+	AdvancedCameraComponent->SetCameraState(WallRunState, 5.f);
+}
+
+void APlayerManaCharacter::SetRollCameraState()
+{
+	FRotator RollCameraRotation = GetActorForwardVector().Rotation();
+
+	RollCameraRotation.Pitch -= 15.f;
+	RollCameraRotation.Roll = 0.f;
+
+	FCameraState RollState;
+	RollState.TargetArmLength = 150.f;
+	RollState.CameraRotation = RollCameraRotation;
+	RollState.CameraFOV = 100.f;
+
+	AdvancedCameraComponent->SetCameraState(RollState, 7.f);
+}
+
+void APlayerManaCharacter::SetWallJumpCameraState()
+{
+	FRotator JumpCameraRotation = GetActorForwardVector().Rotation();
+
+	JumpCameraRotation.Yaw += (WallRunSide == EWallRunSide::Right) ? -90.f : 90.f;
+	JumpCameraRotation.Roll = 0.f;
+
+	FCameraState JumpState;
+	JumpState.TargetArmLength = 10.f;
+	JumpState.CameraRotation = JumpCameraRotation;
+	JumpState.CameraFOV = 120.f;
+
+	AdvancedCameraComponent->SetCameraState(JumpState, 20.f);
+}
+
+void APlayerManaCharacter::SetShieldCameraState()
+{
+	FRotator ShieldCamRot = GetActorForwardVector().Rotation();
+
+	ShieldCamRot.Pitch -= 10.f;
+	ShieldCamRot.Roll = 0.f;
+
+
+	FCameraState ShieldState;
+	ShieldState.TargetArmLength = 250.f;
+	ShieldState.CameraRotation = ShieldCamRot;
+	ShieldState.CameraFOV = 90.f;
+
+	AdvancedCameraComponent->SetCameraState(ShieldState, 10.f);
+}
+
 
 void APlayerManaCharacter::OnBlockingTagChanged(const FGameplayTag Tag, int32 NewCount)
 {

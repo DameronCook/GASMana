@@ -51,6 +51,7 @@ void UGA_ManaPlayerWallRun::ActivateAbility(const FGameplayAbilitySpecHandle Han
 	if (PlayerCharacter && AbilitySystemComponent && CharacterMovement)
 	{
 		PlayerCharacter->SetWallRunAbility(this);
+		PlayerCharacter->SetWallRunCameraState();
 		/*
 		if (GEngine)
 		{
@@ -91,10 +92,10 @@ void UGA_ManaPlayerWallRun::ActivateAbility(const FGameplayAbilitySpecHandle Han
 
 void UGA_ManaPlayerWallRun::OnWallRunFinished()
 {
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Wall Run Finished!");
-	}
+	//if (GEngine)
+	//{
+	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Wall Run Finished!");
+	//}
 
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
@@ -115,6 +116,9 @@ void UGA_ManaPlayerWallRun::EndAbility(const FGameplayAbilitySpecHandle Handle, 
 		if (PlayerCharacter)
 		{
 			PlayerCharacter->SetWallRunAbility(nullptr);
+
+			PlayerCharacter->SetDefaultCameraState();
+
 
 
 			FVector WallNormal = PlayerCharacter->GetWallRunImpactNormal().GetSafeNormal();

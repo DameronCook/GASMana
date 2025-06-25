@@ -32,9 +32,7 @@ void UGA_ManaPlayerBlock::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
 	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
 	if (PlayerCharacter && PlayerCharacter->GetBlockingEffectClass() && AbilitySystemComponent)
-	{
-
-		
+	{	
 		AbilitySystemComponent->ApplyGameplayEffectToSelf(
 			PlayerCharacter->GetBlockingEffectClass()->GetDefaultObject<UGameplayEffect>(),
 			1.0f,

@@ -28,18 +28,23 @@ void UGA_ManaPlayerWallJump::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
 	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
 
-	AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetAirborneEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
-	WallJumpEffectHandle = AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetWallJumpEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
-
-	//Cancel the wall run ability
-	FGameplayTag WallRunTag = FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning"));
-	FGameplayTagContainer WallRunTags;
-	WallRunTags.AddTag(WallRunTag);
-	AbilitySystemComponent->RemoveActiveGameplayEffect(PlayerCharacter->GetWallRunAbility()->GetWallRunEffectHandle());
 
 
-	if (PlayerCharacter)
+
+	if (PlayerCharacter && AbilitySystemComponent)
 	{
+		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetAirborneEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+		WallJumpEffectHandle = AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetWallJumpEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+
+		//Cancel the wall run ability
+		FGameplayTag WallRunTag = FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning"));
+		FGameplayTagContainer WallRunTags;
+		WallRunTags.AddTag(WallRunTag);
+		AbilitySystemComponent->RemoveActiveGameplayEffect(PlayerCharacter->GetWallRunAbility()->GetWallRunEffectHandle());
+
+		PlayerCharacter->GetWallRunAbility()->OnWallRunFinished();
+		PlayerCharacter->SetWallJumpCameraState();
+
 		FVector Direction;
 		FVector InputDirection = PlayerCharacter->GetCachedInputDirection().GetSafeNormal();
 		FVector WallRunDirection = PlayerCharacter->GetWallRunDirection().GetSafeNormal();
@@ -47,24 +52,25 @@ void UGA_ManaPlayerWallJump::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 		FVector Forward = PlayerCharacter->GetActorForwardVector().GetSafeNormal();
 		FVector Bisector = (WallNormal + Forward).GetSafeNormal();
 		
+		float WallDot = FVector::DotProduct(InputDirection, WallNormal);
 
-		float Dot = FVector::DotProduct(InputDirection, WallRunDirection);
-
-		if (Dot > 0.3f)
+		if (WallDot > 0.1f)
 		{
-			if (GEngine)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Used Input!"));
-			}
 			Direction = Bisector + InputDirection;
+
+			//if (GEngine)
+			//{
+			//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Used Input!"));
+			//}
 		}
 		else
 		{
-			if (GEngine)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Didn't use Input!"));
-			}
 			Direction = Bisector;
+
+	/*		if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Didin't use Input!"));
+			}*/
 		}
 
 		Direction.Z = 0.3f; 
@@ -96,9 +102,12 @@ void UGA_ManaPlayerWallJump::EndAbility(const FGameplayAbilitySpecHandle Handle,
 	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
 	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
 
+
+	PlayerCharacter->SetDefaultCameraState();
+
 	if (AbilitySystemComponent)
 	{
-		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetAirborneEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+		//AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetAirborneEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 
 		AbilitySystemComponent->RemoveActiveGameplayEffect(WallJumpEffectHandle);
 	}

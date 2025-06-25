@@ -21,6 +21,7 @@ UGA_ManaPlayerRoll::UGA_ManaPlayerRoll()
 	//Blocked Tags
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
 }
 
 void UGA_ManaPlayerRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -39,7 +40,7 @@ void UGA_ManaPlayerRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 
 	if (PlayerCharacter && PlayerCharacter->GetRollingEffectClass() && PlayerCharacter->GetBlockMovementEffectClass() && AbilitySystemComponent)
 	{
-		
+		PlayerCharacter->SetRollCameraState();		
 		//Cancel all abilities with the Player.IsAttacking tag
 		FGameplayTag AttackTag = FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking"));
 		FGameplayTagContainer AttackTags;
@@ -119,6 +120,7 @@ void UGA_ManaPlayerRoll::EndAbility(const FGameplayAbilitySpecHandle Handle, con
 
 		if (PlayerCharacter)
 		{
+			PlayerCharacter->SetDefaultCameraState();
 			PlayerCharacter->UpdateStaminaRegen();
 			ActorInfo->AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ActorInfo->AbilitySystemComponent->MakeEffectContext());
 		}

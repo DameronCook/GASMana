@@ -7,6 +7,7 @@
 #include "../../GameplayTags/Classes/GameplayTagContainer.h"
 #include "Interface/I_ProgressBarInterface.h"
 #include "Ability/GA_ManaPlayerWallRun.h"
+#include "Components/AdvancedCameraComponent.h"
 #include "PlayerManaCharacter.generated.h"
 
 
@@ -43,6 +44,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 
+	/** Camera Controller Component */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UAdvancedCameraComponent* AdvancedCameraComponent;
+
 	/** Player HUD */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
 	UUserWidget* PlayerHUD;
@@ -50,6 +55,7 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Player HUD Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UUserWidget> PlayerHUDClass;
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// Input
@@ -279,7 +285,7 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 
 	/////////////////////////////////////////////////////////////////////////
 	//Other
-	float OriginalGravityScale = 1.75f;
+	float OriginalGravityScale = 2.0;
 
 protected:
 
@@ -333,8 +339,23 @@ public:
 	virtual float GetMana_Implementation() const override;
 	virtual float GetManaAsRatio_Implementation() const override;
 
+	//////////////////////////////////////
+	//Camera States
 
+	UFUNCTION(Category = "Camera")
+	void SetDefaultCameraState();
 
+	UFUNCTION(Category = "Camera")
+	void SetWallRunCameraState();
+
+	UFUNCTION(Category = "Camera")
+	void SetRollCameraState();
+
+	UFUNCTION(Category = "Camera")
+	void SetWallJumpCameraState();
+
+	UFUNCTION(Category = "Camera")
+	void SetShieldCameraState();
 
 	//////////////////////////////////////
 	//Getters
@@ -372,6 +393,7 @@ public:
 	FORCEINLINE FVector GetWallRunDirection() const { return WallRunDirection; }
 	FORCEINLINE FVector GetWallRunImpactNormal() const { return WallRunImpactNormal; }
 	FORCEINLINE UGA_ManaPlayerWallRun* GetWallRunAbility() { return ActiveWallRunAbility; }
+	FORCEINLINE EWallRunSide GetWallRunSide() { return WallRunSide; }
 	FORCEINLINE float GetOriginalGravityScale() const { return OriginalGravityScale; }
 
 
