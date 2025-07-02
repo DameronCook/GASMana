@@ -58,8 +58,8 @@ void UGA_ManaPlayerRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 
 		PlayerCharacter->SetActorRotation(PlayerRotation, ETeleportType::None);
 			
-		float Strength = 500.f; // Adjust as needed
-		float Duration = 0.5f; // Duration in seconds
+		float Strength = 500.f;
+		float Duration = 0.5f; 
 		bool bIsAdditive = false;
 		bool bDisableDestinationReachedInterrupt = false;
 		UCurveFloat* StrengthOverTime = PlayerCharacter->GetDiveRollCurveFloat();

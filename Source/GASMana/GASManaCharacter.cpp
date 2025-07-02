@@ -86,6 +86,7 @@ void AGASManaCharacter::GiveDefaultAbilities()
 	}
 
 	//Uncomment below to see what abilities and specs the player is given
+	/*
 	if (GEngine && AbilitySystemComponent)
 	{
 		int32 Key = 1; // Unique key for each message
@@ -101,6 +102,7 @@ void AGASManaCharacter::GiveDefaultAbilities()
 			}
 		}
 	}
+	*/
 }
 
 void AGASManaCharacter::InitializeAttributes()

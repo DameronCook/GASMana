@@ -8,7 +8,10 @@
 #include "Interface/I_ProgressBarInterface.h"
 #include "Ability/GA_ManaPlayerWallRun.h"
 #include "Ability/GA_ManaPlayerMantle.h"
+#include "Ability/GA_ManaPlayerHook.h"
+#include "Ability/GA_ManaPlayerZipToPoint.h"
 #include "Components/AdvancedCameraComponent.h"
+#include "Components/AC_HookShot.h"
 #include "PlayerManaCharacter.generated.h"
 
 
@@ -48,6 +51,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Camera Controller Component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UAdvancedCameraComponent* AdvancedCameraComponent;
+
+	/** Hook Shot Component */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hooks, meta = (AllowPrivateAccess = "true"))
+	UAC_HookShot* HookShotComponent;
 
 	/** Player HUD */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
@@ -89,6 +96,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* RollAction;
 
+	/** Hook Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* HookAction;
+
 	/* Cached direction of input (always calculated) */
 	FVector CachedInputDirection;
 
@@ -119,9 +130,17 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer WallJumpTagContainer;
 
-	/** Wall Jump Tag Container */
+	/** Mantle Tag Container */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer MantleTagContainer;
+
+	/** Hook Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer HookTagContainer;
+
+	/** Hook Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer ZipToPointTagContainer;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Effect Classes
@@ -174,9 +193,17 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Mana", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> ManaWallRunDrainClass;
 
-	/** Mana Drain Effect Class */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Mana", meta = (AllowPrivateAccess = "true"))
+	/** Mantle Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Movement", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> MantleClass;
+
+	/** Hook Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Hook", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> HookClass;
+
+	/** Zip To Point Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Hook", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> ZipToPointClass;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Montages
@@ -217,6 +244,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Wall Jump MovementCurve */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Curves", meta = (AllowPrivateAccess = "true"))
 	UCurveFloat* WallJumpCurveFloat;
+
+	/** Wall Jump MovementCurve */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Curves", meta = (AllowPrivateAccess = "true"))
+	UCurveFloat* ZipToPointCurveFloat;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Object References (Liable to move)
@@ -295,6 +326,14 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UGA_ManaPlayerMantle* ActiveMantleAbility = nullptr;
 
+	/**Active hook ability*/
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UGA_ManaPlayerHook* ActiveHookAbility = nullptr;
+
+	/**Active zip ability*/
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UGA_ManaPlayerZipToPoint* ActiveZipAbility = nullptr;
+
 	/////////////////////////////////////////////////////////////////////////
 	//Other
 	float OriginalGravityScale = 2.0;
@@ -333,8 +372,11 @@ protected:
 	void Block(const FInputActionValue& Value);
 	void StopBlock(const FInputActionValue& Value);
 
-	/**Called for attack input */
+	/**Called for roll input */
 	void Roll(const FInputActionValue& Value);
+
+	/**Called for hook input */
+	void Hook(const FInputActionValue& Value);
 
 public:
 	APlayerManaCharacter();
@@ -364,6 +406,9 @@ public:
 	void SetWallRunCameraState();
 
 	UFUNCTION(Category = "Camera")
+	void SetZipToPointCameraState();
+
+	UFUNCTION(Category = "Camera")
 	void SetRollCameraState();
 
 	UFUNCTION(Category = "Camera")
@@ -378,6 +423,7 @@ public:
 	//Components
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE class UAC_HookShot* GetHookShot() const { return HookShotComponent; }
 
 	//Effect Classes
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetBlockingEffectClass() const { return BlockingEffectClass; }
@@ -391,6 +437,12 @@ public:
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetStaminaRegenBlockEffectClass() const { return StaminaRegenBlockEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetWallRunDrainEffectClass() const { return ManaWallRunDrainClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetAirborneEffectClass() const { return AirborneEffectClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetZipToPointEffectClass() const { return ZipToPointClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetHookEffectClass() const { return HookClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetMantleEffectClass() const { return MantleClass; }
+
+	//Ability Classes and Tags
+	FORCEINLINE FGameplayTagContainer GetZipToPointTag() const { return ZipToPointTagContainer; }
 
 	//Montages
 	FORCEINLINE UAnimMontage* GetRollMontage() const { return RollMontage; }
@@ -399,6 +451,7 @@ public:
 	FORCEINLINE UAnimMontage* GetWallJumpMontage() const { return WallJumpMontage; }
 	FORCEINLINE UCurveFloat* GetDiveRollCurveFloat() const { return DiveRollCurveFloat; }
 	FORCEINLINE UCurveFloat* GetWallJumpCurveFloat() const { return WallJumpCurveFloat; }
+	FORCEINLINE UCurveFloat* GetZipToPointCurveFloat() const { return ZipToPointCurveFloat; }
 
 	//Input Actions
 	FORCEINLINE UInputAction* GetMoveAction() const { return MoveAction; }
@@ -409,6 +462,8 @@ public:
 	FORCEINLINE FVector GetWallRunImpactNormal() const { return WallRunImpactNormal; }
 	FORCEINLINE UGA_ManaPlayerWallRun* GetWallRunAbility() { return ActiveWallRunAbility; }
 	FORCEINLINE UGA_ManaPlayerMantle* GetMantleAbility() { return ActiveMantleAbility; }
+	FORCEINLINE UGA_ManaPlayerHook* GetHookAbility() { return ActiveHookAbility; }
+	FORCEINLINE UGA_ManaPlayerZipToPoint* GetZipAbility() { return ActiveZipAbility; }
 	FORCEINLINE EWallRunSide GetWallRunSide() { return WallRunSide; }
 	FORCEINLINE float GetOriginalGravityScale() const { return OriginalGravityScale; }
 
@@ -417,4 +472,6 @@ public:
 	//Setters
 	FORCEINLINE UGA_ManaPlayerWallRun* SetWallRunAbility(UGA_ManaPlayerWallRun* WallRunAbility) { return ActiveWallRunAbility = WallRunAbility; }
 	FORCEINLINE UGA_ManaPlayerMantle* SetMantleAbility(UGA_ManaPlayerMantle* MantleAbility) { return ActiveMantleAbility = MantleAbility; }
+	FORCEINLINE UGA_ManaPlayerHook* SetHookAbility(UGA_ManaPlayerHook* HookAbility) { return ActiveHookAbility = HookAbility; }
+	FORCEINLINE UGA_ManaPlayerZipToPoint* SetZipToPointAbility(UGA_ManaPlayerZipToPoint* ZipAbility) { return ActiveZipAbility = ZipAbility; }
 };
