@@ -17,7 +17,9 @@
 #include "Blueprint/UserWidget.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Actors/BaseManaEnemy.h"
+#include "Actors/ManaHookParent.h"
 #include "Components/AdvancedCameraComponent.h"
+#include "Components/AC_HookShot.h"
 
 APlayerManaCharacter::APlayerManaCharacter()
 {
@@ -62,6 +64,9 @@ APlayerManaCharacter::APlayerManaCharacter()
 
 	//Create an advanced camera controller
 	AdvancedCameraComponent = CreateDefaultSubobject<UAdvancedCameraComponent>(TEXT("AdvancedCameraComponent"));
+
+	//Create an advanced camera controller
+	HookShotComponent = CreateDefaultSubobject<UAC_HookShot>(TEXT("HookShotComponent"));
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -147,6 +152,11 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 		}
 	}
 
+	if (IsValid(ActiveZipAbility))
+	{
+		SetZipToPointCameraState();
+	}
+
 	//Manually handle camera while player "Is Free"
 
 	bool bIsFree = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree")));
@@ -180,6 +190,13 @@ void APlayerManaCharacter::Landed(const FHitResult& Hit)
 		AbilitySystem->ApplyGameplayEffectToSelf(GroundedEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
 	}
 
+	if (GetZipAbility())
+	{
+		if (GetHookShot())
+		{
+			GetHookShot()->EndGrapple();
+		}
+	}
 	//Remove the grounded effect by tag
 	FGameplayTagContainer AirborneTags;
 	AirborneTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne")));
@@ -435,7 +452,7 @@ void APlayerManaCharacter::UpdateWallRunVertical(float DeltaTime)
 		{
 			if (GEngine)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, "Wall Run Ended!");
+				//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, "Wall Run Ended!");
 			}
 			ActiveWallRunAbility->OnWallRunFinished();
 			GetCharacterMovement()->Velocity = FVector(WallRunDirection.X * WallRunStrength, WallRunDirection.Y * WallRunStrength, GetCharacterMovement()->Velocity.Z);
@@ -574,6 +591,30 @@ void APlayerManaCharacter::SetDefaultCameraState()
 	AdvancedCameraComponent->SetCameraState(DefaultState, 5.f);
 }
 
+void APlayerManaCharacter::SetZipToPointCameraState()
+{
+	//CameraBoom->bUsePawnControlRotation = false;
+	CameraBoom->bDoCollisionTest = false;
+	
+
+	FRotator AngleToTarget = GetActorForwardVector().Rotation();
+
+	if (GetHookShot() && GetHookShot()->GetCurrentTarget())
+	{
+		FVector DirectionToTarget = (GetHookShot()->GetCurrentTarget()->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+		AngleToTarget = DirectionToTarget.Rotation();
+	}
+
+	FRotator ZipToPointCameraRotation = AngleToTarget;
+
+	FCameraState ZipToPointState;
+	ZipToPointState.TargetArmLength = 1.f;
+	ZipToPointState.CameraRotation = ZipToPointCameraRotation;
+	ZipToPointState.CameraFOV = 110.f;
+
+	AdvancedCameraComponent->SetCameraState(ZipToPointState, 6.f);
+}
+
 void APlayerManaCharacter::SetWallRunCameraState()
 {
 	//CameraBoom->bUsePawnControlRotation = false;
@@ -685,6 +726,9 @@ void APlayerManaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 		// Rolling
 		EnhancedInputComponent->BindAction(RollAction, ETriggerEvent::Started, this, &APlayerManaCharacter::Roll);
+
+		// Rolling
+		EnhancedInputComponent->BindAction(HookAction, ETriggerEvent::Started, this, &APlayerManaCharacter::Hook);
 
 		// Blocking
 		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Ongoing, this, &APlayerManaCharacter::Block);
@@ -834,6 +878,10 @@ void APlayerManaCharacter::Roll(const FInputActionValue& Value)
 	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(RollTagContainer, true);
 }
 
+void APlayerManaCharacter::Hook(const FInputActionValue& Value)
+{
+	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(HookTagContainer, true);
+}
 
 //////////////////////////////////////////////////////////////////////////
 // Ability Regen
