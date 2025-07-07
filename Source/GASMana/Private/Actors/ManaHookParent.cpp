@@ -12,7 +12,7 @@
 // Sets default values
 AManaHookParent::AManaHookParent()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh")); 
 

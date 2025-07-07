@@ -21,6 +21,7 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 struct FGameplayTagContainer;
+class UGA_ManaPlayerSwing;
 
 /**
  * 
@@ -138,9 +139,13 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer HookTagContainer;
 
-	/** Hook Tag Container */
+	/** Zip To Point Tag Container */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer ZipToPointTagContainer;
+
+	/** Swing Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer SwingTagContainer;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Effect Classes
@@ -204,6 +209,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Zip To Point Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Hook", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> ZipToPointClass;
+
+	/** Swing Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Hook", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> SwingClass;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Montages
@@ -334,6 +343,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UGA_ManaPlayerZipToPoint* ActiveZipAbility = nullptr;
 
+	/**Active swing ability*/
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UGA_ManaPlayerSwing* ActiveSwingAbility = nullptr;
+
 	/////////////////////////////////////////////////////////////////////////
 	//Other
 	float OriginalGravityScale = 2.0;
@@ -438,11 +451,13 @@ public:
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetWallRunDrainEffectClass() const { return ManaWallRunDrainClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetAirborneEffectClass() const { return AirborneEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetZipToPointEffectClass() const { return ZipToPointClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetSwingEffectClass() const { return SwingClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetHookEffectClass() const { return HookClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetMantleEffectClass() const { return MantleClass; }
 
 	//Ability Classes and Tags
 	FORCEINLINE FGameplayTagContainer GetZipToPointTag() const { return ZipToPointTagContainer; }
+	FORCEINLINE FGameplayTagContainer GetSwingTag() const { return SwingTagContainer; }
 
 	//Montages
 	FORCEINLINE UAnimMontage* GetRollMontage() const { return RollMontage; }
@@ -464,6 +479,7 @@ public:
 	FORCEINLINE UGA_ManaPlayerMantle* GetMantleAbility() { return ActiveMantleAbility; }
 	FORCEINLINE UGA_ManaPlayerHook* GetHookAbility() { return ActiveHookAbility; }
 	FORCEINLINE UGA_ManaPlayerZipToPoint* GetZipAbility() { return ActiveZipAbility; }
+	FORCEINLINE UGA_ManaPlayerSwing* GetSwingAbility() { return ActiveSwingAbility; }
 	FORCEINLINE EWallRunSide GetWallRunSide() { return WallRunSide; }
 	FORCEINLINE float GetOriginalGravityScale() const { return OriginalGravityScale; }
 
@@ -474,4 +490,5 @@ public:
 	FORCEINLINE UGA_ManaPlayerMantle* SetMantleAbility(UGA_ManaPlayerMantle* MantleAbility) { return ActiveMantleAbility = MantleAbility; }
 	FORCEINLINE UGA_ManaPlayerHook* SetHookAbility(UGA_ManaPlayerHook* HookAbility) { return ActiveHookAbility = HookAbility; }
 	FORCEINLINE UGA_ManaPlayerZipToPoint* SetZipToPointAbility(UGA_ManaPlayerZipToPoint* ZipAbility) { return ActiveZipAbility = ZipAbility; }
+	FORCEINLINE UGA_ManaPlayerSwing* SetSwingAbility(UGA_ManaPlayerSwing* SwingAbility) { return ActiveSwingAbility = SwingAbility; }
 };

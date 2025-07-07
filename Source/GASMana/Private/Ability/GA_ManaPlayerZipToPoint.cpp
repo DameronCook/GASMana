@@ -28,7 +28,7 @@ void UGA_ManaPlayerZipToPoint::ActivateAbility(const FGameplayAbilitySpecHandle 
 	if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
 	{
 		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Couldn't Commit Roll!"));
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Couldn't Commit Zip to Point!"));
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		return;
 	}
