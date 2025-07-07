@@ -14,6 +14,7 @@
 #include "Effect/GE_ManaPlayerGrounded.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Blueprint/UserWidget.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Actors/BaseManaEnemy.h"
@@ -155,6 +156,11 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 	if (IsValid(ActiveZipAbility))
 	{
 		SetZipToPointCameraState();
+	}
+
+	if (IsValid(ActiveSwingAbility))
+	{
+		SetSwingCameraState();
 	}
 
 	//Manually handle camera while player "Is Free"
@@ -388,6 +394,52 @@ FVector APlayerManaCharacter::SetWallRunDirection(FVector SideMultiplier, FVecto
 	return FVector::CrossProduct(ImpactNormal, SideMultiplier);
 }
 
+FVector APlayerManaCharacter::GamepadRightSwingForce(float MovementInput)
+{
+	float VelocitySize = GetVelocity().Size();
+	VelocitySize = UKismetMathLibrary::FClamp(VelocitySize, 0.f, 1000.f);
+
+	float ReduceSwingForceVelocity = 70.f / SwingSpeedBalancer;
+
+	float FinalVelocity = VelocitySize * ReduceSwingForceVelocity;
+
+	float Input = MovementInput * FinalVelocity;
+
+	FVector FinalPlayerRightVector;
+
+	FVector PlayerRightVector = GetActorRightVector();
+	
+	FinalPlayerRightVector = FVector(PlayerRightVector.X, PlayerRightVector.Y, 0.f).GetSafeNormal();
+
+	FVector FinalForce = UKismetMathLibrary::Multiply_VectorFloat(FinalPlayerRightVector, Input);
+
+	return FinalForce;
+}
+
+FVector APlayerManaCharacter::GamepadForwardSwingForce(float MovementInput)
+{
+	float VelocitySize = GetVelocity().Size();
+	VelocitySize = UKismetMathLibrary::FClamp(VelocitySize, 0.f, 1000.f);
+
+	float ReduceSwingForceVelocity = 70.f / SwingSpeedBalancer;
+
+	float FinalVelocity = VelocitySize * ReduceSwingForceVelocity;
+
+	float FinalMovementInput = MovementInput / 5.f;
+
+	float Input = MovementInput * FinalVelocity;
+
+	FVector FinalPlayerForwardVector;
+
+	FVector PlayerForwardVector = GetActorForwardVector();
+
+	FinalPlayerForwardVector = FVector(PlayerForwardVector.X, PlayerForwardVector.Y, 0.f).GetSafeNormal();
+
+	FVector FinalForce = UKismetMathLibrary::Multiply_VectorFloat(FinalPlayerForwardVector, Input);
+
+	return FinalForce;
+}
+
 FVector APlayerManaCharacter::UpdateWallRunHorizontal()
 {
 	FHitResult OutHit;
@@ -615,6 +667,19 @@ void APlayerManaCharacter::SetZipToPointCameraState()
 	AdvancedCameraComponent->SetCameraState(ZipToPointState, 6.f);
 }
 
+void APlayerManaCharacter::SetSwingCameraState()
+{
+	CameraBoom->bDoCollisionTest = true;
+
+	// In PlayerManaCharacter.cpp, when wall run ends:
+	FCameraState SwingState;
+	SwingState.TargetArmLength = 600.f;
+	SwingState.CameraRotation = FRotator(GetControlRotation().Pitch, GetControlRotation().Yaw, 0.f);
+	SwingState.CameraFOV = 90.f;
+
+	AdvancedCameraComponent->SetCameraState(SwingState, 5.f);
+}
+
 void APlayerManaCharacter::SetWallRunCameraState()
 {
 	//CameraBoom->bUsePawnControlRotation = false;
@@ -757,6 +822,12 @@ void APlayerManaCharacter::Jump()
 		AbilitySystem->TryActivateAbilitiesByTag(WallJumpTagContainer, true);
 		return;
 	}
+
+	if (AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwinging"))))
+	{
+		AbilitySystem->TryActivateAbilitiesByTag(SwingJumpTagContainer, true);
+		return;
+	}
 	AbilitySystem->TryActivateAbilitiesByTag(JumpTagContainer, true);
 
 	//if (GEngine) {
@@ -773,6 +844,7 @@ void APlayerManaCharacter::Move(const FInputActionValue& Value)
 {
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
 	bool IsFree = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree")));
+	bool IsSwinging = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwinging")));
 	
 	if (AbilitySystem)
 	{
@@ -824,6 +896,13 @@ void APlayerManaCharacter::Move(const FInputActionValue& Value)
 				// add movement 
 				AddMovementInput(ForwardDirection, MovementVector.Y);
 				AddMovementInput(RightDirection, MovementVector.X);
+			}
+
+			if (IsSwinging)
+			{
+				GetCharacterMovement()->AddForce(GamepadRightSwingForce(MovementVector.X));
+				GetCharacterMovement()->AddForce(GamepadForwardSwingForce(MovementVector.Y));
+				GEngine->AddOnScreenDebugMessage(6, .1f, FColor::Purple, "Applying Swinging Force and input!");
 			}
 		}
 	}

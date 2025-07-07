@@ -49,7 +49,7 @@ void UGA_ManaPlayerZipToPoint::ActivateAbility(const FGameplayAbilitySpecHandle 
 		AManaHookParent* Hook = HookShot->GetCurrentTarget();
 		FVector OffsetAlignment = FVector::ZeroVector;
 		ERootMotionMoveToActorTargetOffsetType OffsetType = ERootMotionMoveToActorTargetOffsetType::AlignToWorldSpace;
-		float Duration = .35f;
+		float Duration = .45f;
 		UCurveFloat* CurveFloatHorizontal = PlayerCharacter->GetZipToPointCurveFloat();
 		UCurveFloat* CurveFloatVertical = PlayerCharacter->GetZipToPointCurveFloat();
 		bool bNewMovementMode = false;

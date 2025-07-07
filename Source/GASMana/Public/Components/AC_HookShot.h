@@ -91,6 +91,7 @@ class GASMANA_API UAC_HookShot : public UActorComponent
 	UFUNCTION()
 	FVector FindSwingArcForce(APlayerManaCharacter* Character, float MinVelocity, float MaxVelocity, float ReduceSwingForceFactor);
 
+
 	UFUNCTION()
 	float FindSwingAngle(APlayerManaCharacter* Character);
 
@@ -109,6 +110,9 @@ public:
 	void AttemptGrapple();
 
 	void EndGrapple();
+
+	UFUNCTION()
+	FVector FindSwingLaunchForce(APlayerManaCharacter* Character, float ForwardSpeed, float UpSpeed);
 
 	FORCEINLINE class AManaHookParent* GetCurrentTarget() { return CurrentTarget; }
 

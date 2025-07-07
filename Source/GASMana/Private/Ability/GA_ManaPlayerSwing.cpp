@@ -30,7 +30,7 @@ void UGA_ManaPlayerSwing::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 	if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
 	{
 		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Couldn't Commit Zip to Point!"));
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Couldn't Commit Swing!"));
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		return;
 	}

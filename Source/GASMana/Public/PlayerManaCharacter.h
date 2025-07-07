@@ -10,6 +10,7 @@
 #include "Ability/GA_ManaPlayerMantle.h"
 #include "Ability/GA_ManaPlayerHook.h"
 #include "Ability/GA_ManaPlayerZipToPoint.h"
+#include "Ability/GA_ManaPlayerSwing.h"
 #include "Components/AdvancedCameraComponent.h"
 #include "Components/AC_HookShot.h"
 #include "PlayerManaCharacter.generated.h"
@@ -21,7 +22,6 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 struct FGameplayTagContainer;
-class UGA_ManaPlayerSwing;
 
 /**
  * 
@@ -147,6 +147,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer SwingTagContainer;
 
+	/** Swing Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer SwingJumpTagContainer;
+
 	//////////////////////////////////////////////////////////////////////////
 	// Effect Classes
 
@@ -213,6 +217,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Swing Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Hook", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> SwingClass;
+
+	/** Swing Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Hook", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> SwingJumpClass;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Montages
@@ -327,6 +335,20 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UFUNCTION()
 	FVector SetWallRunDirection(FVector SideMultiplier, FVector ImpactNormal);
 
+	////////////////////////////////////////////
+	//Swing Variables
+	UFUNCTION()
+	FVector GamepadRightSwingForce(float MovementInput);
+	UFUNCTION()
+	FVector GamepadForwardSwingForce(float MovementInput);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Swing", meta = (AllowPrivateAccess = "true"))
+	float SwingSpeedBalancer = 12.f;
+
+
+	//////////////////////////////////////////
+	//Active Abilities
+
 	/**Active wall run ability*/
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UGA_ManaPlayerWallRun* ActiveWallRunAbility = nullptr;
@@ -422,6 +444,9 @@ public:
 	void SetZipToPointCameraState();
 
 	UFUNCTION(Category = "Camera")
+	void SetSwingCameraState();
+
+	UFUNCTION(Category = "Camera")
 	void SetRollCameraState();
 
 	UFUNCTION(Category = "Camera")
@@ -452,6 +477,7 @@ public:
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetAirborneEffectClass() const { return AirborneEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetZipToPointEffectClass() const { return ZipToPointClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetSwingEffectClass() const { return SwingClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetSwingJumpEffectClass() const { return SwingJumpClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetHookEffectClass() const { return HookClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetMantleEffectClass() const { return MantleClass; }
 
@@ -482,6 +508,7 @@ public:
 	FORCEINLINE UGA_ManaPlayerSwing* GetSwingAbility() { return ActiveSwingAbility; }
 	FORCEINLINE EWallRunSide GetWallRunSide() { return WallRunSide; }
 	FORCEINLINE float GetOriginalGravityScale() const { return OriginalGravityScale; }
+	FORCEINLINE float GetSwingSpeedBalancer() const { return SwingSpeedBalancer; }
 
 
 	//////////////////////////////////////
