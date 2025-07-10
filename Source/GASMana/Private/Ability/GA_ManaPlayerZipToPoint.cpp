@@ -28,7 +28,7 @@ void UGA_ManaPlayerZipToPoint::ActivateAbility(const FGameplayAbilitySpecHandle 
 	if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
 	{
 		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Couldn't Commit Roll!"));
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Couldn't Commit Zip to Point!"));
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		return;
 	}
@@ -49,7 +49,7 @@ void UGA_ManaPlayerZipToPoint::ActivateAbility(const FGameplayAbilitySpecHandle 
 		AManaHookParent* Hook = HookShot->GetCurrentTarget();
 		FVector OffsetAlignment = FVector::ZeroVector;
 		ERootMotionMoveToActorTargetOffsetType OffsetType = ERootMotionMoveToActorTargetOffsetType::AlignToWorldSpace;
-		float Duration = .35f;
+		float Duration = .45f;
 		UCurveFloat* CurveFloatHorizontal = PlayerCharacter->GetZipToPointCurveFloat();
 		UCurveFloat* CurveFloatVertical = PlayerCharacter->GetZipToPointCurveFloat();
 		bool bNewMovementMode = false;

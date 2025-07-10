@@ -74,6 +74,8 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UWidgetComponent> TargetTypeWidget;
 
+	FORCEINLINE EGrappleType GetGrappleType() { return GrappleType; }
+
 
 protected:
 	virtual void BeginPlay() override;

@@ -14,6 +14,7 @@
 #include "Effect/GE_ManaPlayerGrounded.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Blueprint/UserWidget.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Actors/BaseManaEnemy.h"
@@ -115,65 +116,74 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 
 
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
-	float CurrentMana = AbilitySystem->GetNumericAttribute(UManaAttributeSet::GetManaAttribute());
+	UCharacterMovementComponent* CharMove = GetCharacterMovement();
 
-	if (CurrentMana > 0)
+	if (AbilitySystem)
 	{
-		bool bIsInAir = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne")));
-		bool bIsWallRunning = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
-		bool bIsWallJumping = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallJumping")));
+		float CurrentMana = AbilitySystem->GetNumericAttribute(UManaAttributeSet::GetManaAttribute());
 
-		if (AbilitySystem && bIsInAir && !bIsWallRunning && !bIsWallJumping)
+		if (CurrentMana > 0)
 		{
-			if (WallRunCheck())
+			bool bIsInAir = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne")));
+			bool bIsWallRunning = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
+			bool bIsWallJumping = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallJumping")));
+
+			if (AbilitySystem && bIsInAir && !bIsWallRunning && !bIsWallJumping)
 			{
-				AbilitySystem->TryActivateAbilitiesByTag(WallRunTagContainer, true);
+				if (WallRunCheck())
+				{
+					AbilitySystem->TryActivateAbilitiesByTag(WallRunTagContainer, true);
+				}
 			}
 		}
-	}
 
-	if (ActiveWallRunAbility)
-	{
-		UpdateWallRunVertical(DeltaTime);
-
-		SetWallRunCameraState();
-
-		bool bForwardHit = ForwardWallRunCheck();
-
-		FVector NewWallRunHorizontalDirection = UpdateWallRunHorizontal();
-		GetCharacterMovement()->Velocity.X = NewWallRunHorizontalDirection.X * WallRunStrength;
-		GetCharacterMovement()->Velocity.Y = NewWallRunHorizontalDirection.Y * WallRunStrength;
-
-		SetActorRotation(FMath::RInterpTo(GetActorRotation(), NewWallRunHorizontalDirection.Rotation(), DeltaTime, 5.0f));
-
-		if (CurrentMana <= 0.0f || bForwardHit)
+		if (ActiveWallRunAbility)
 		{
-			ActiveWallRunAbility->OnWallRunFinished();
+			UpdateWallRunVertical(DeltaTime);
+
+			SetWallRunCameraState();
+
+			bool bForwardHit = ForwardWallRunCheck();
+
+			FVector NewWallRunHorizontalDirection = UpdateWallRunHorizontal();
+			GetCharacterMovement()->Velocity.X = NewWallRunHorizontalDirection.X * WallRunStrength;
+			GetCharacterMovement()->Velocity.Y = NewWallRunHorizontalDirection.Y * WallRunStrength;
+
+			SetActorRotation(FMath::RInterpTo(GetActorRotation(), NewWallRunHorizontalDirection.Rotation(), DeltaTime, 5.0f));
+
+			if (CurrentMana <= 0.0f || bForwardHit || !CharMove->IsFalling())
+			{
+				ActiveWallRunAbility->OnWallRunFinished(); //This line is suscceptible to crash that's not how you spell that
+			}
+		}
+
+		if (IsValid(ActiveZipAbility))
+		{
+			SetZipToPointCameraState();
+		}
+
+		if (IsValid(ActiveSwingAbility))
+		{
+			SetSwingCameraState();
+		}
+
+		//Manually handle camera while player "Is Free"
+
+		bool bIsFree = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree")));
+
+		if (bIsFree)
+		{
+			bool bIsBlocking = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsBlocking")));
+			bool bIsRunning = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsRunning")));
+
+			if (bIsBlocking && !bIsRunning)
+			{
+				SetShieldCameraState();
+				return;
+			}
+			SetDefaultCameraState();
 		}
 	}
-
-	if (IsValid(ActiveZipAbility))
-	{
-		SetZipToPointCameraState();
-	}
-
-	//Manually handle camera while player "Is Free"
-
-	bool bIsFree = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree")));
-
-	if (bIsFree)
-	{
-		bool bIsBlocking = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsBlocking")));
-		bool bIsRunning = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsRunning")));
-
-		if (bIsBlocking && !bIsRunning)
-		{
-			SetShieldCameraState();
-			return;
-		}
-		SetDefaultCameraState();
-	}
-
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -375,7 +385,7 @@ bool APlayerManaCharacter::ForwardWallRunCheck()
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
 
-	DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
+	//DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
 	FVector LineOffset = FVector(0.0f, 0.0f, 80.0f);
 	bool bHitTop = GetWorld()->LineTraceSingleByChannel(OutHit, LineStartLocation + LineOffset, LineEndLocation + LineOffset, ECollisionChannel::ECC_Visibility, QueryParams);
 	bool bHitBottom = GetWorld()->LineTraceSingleByChannel(OutHit, LineStartLocation - LineOffset, LineEndLocation - LineOffset, ECollisionChannel::ECC_Visibility, QueryParams);
@@ -386,6 +396,50 @@ bool APlayerManaCharacter::ForwardWallRunCheck()
 FVector APlayerManaCharacter::SetWallRunDirection(FVector SideMultiplier, FVector ImpactNormal)
 {
 	return FVector::CrossProduct(ImpactNormal, SideMultiplier);
+}
+
+FVector APlayerManaCharacter::GamepadRightSwingForce(float MovementInput)
+{
+	float VelocitySize = GetVelocity().Size();
+	VelocitySize = UKismetMathLibrary::FClamp(VelocitySize, 0.f, 1000.f);
+
+	float ReduceSwingForceVelocity = 50.f / SwingSpeedBalancer;
+
+	float FinalVelocity = VelocitySize * ReduceSwingForceVelocity;
+
+	float Input = MovementInput * FinalVelocity;
+
+	FVector FinalPlayerRightVector;
+
+	FVector PlayerRightVector = GetActorRightVector();
+	
+	FinalPlayerRightVector = FVector(PlayerRightVector.X, PlayerRightVector.Y, 0.f).GetSafeNormal();
+
+	FVector FinalForce = UKismetMathLibrary::Multiply_VectorFloat(FinalPlayerRightVector, Input);
+
+	return FinalForce;
+}
+
+FVector APlayerManaCharacter::GamepadForwardSwingForce(float MovementInput)
+{
+	float VelocitySize = GetVelocity().Size();
+	VelocitySize = UKismetMathLibrary::FClamp(VelocitySize, 0.f, 1000.f);
+
+	float ReduceSwingForceVelocity = 50.f / SwingSpeedBalancer;
+
+	float FinalVelocity = VelocitySize * ReduceSwingForceVelocity;
+
+	float Input = MovementInput * FinalVelocity;
+
+	FVector FinalPlayerForwardVector;
+
+	FVector PlayerForwardVector = GetActorForwardVector();
+
+	FinalPlayerForwardVector = FVector(PlayerForwardVector.X, PlayerForwardVector.Y, 0.f).GetSafeNormal();
+
+	FVector FinalForce = UKismetMathLibrary::Multiply_VectorFloat(FinalPlayerForwardVector, Input);
+
+	return FinalForce;
 }
 
 FVector APlayerManaCharacter::UpdateWallRunHorizontal()
@@ -610,9 +664,23 @@ void APlayerManaCharacter::SetZipToPointCameraState()
 	FCameraState ZipToPointState;
 	ZipToPointState.TargetArmLength = 1.f;
 	ZipToPointState.CameraRotation = ZipToPointCameraRotation;
-	ZipToPointState.CameraFOV = 110.f;
+	ZipToPointState.CameraFOV = 100.f;
 
-	AdvancedCameraComponent->SetCameraState(ZipToPointState, 6.f);
+	AdvancedCameraComponent->SetCameraState(ZipToPointState, 4.f);
+}
+
+void APlayerManaCharacter::SetSwingCameraState()
+{
+	CameraBoom->bDoCollisionTest = true;
+	FRotator AngleToTarget = GetActorForwardVector().Rotation();
+
+	// In PlayerManaCharacter.cpp, when wall run ends:
+	FCameraState SwingState;
+	SwingState.TargetArmLength = 750.f;
+	SwingState.CameraRotation = AngleToTarget;//FRotator(GetControlRotation().Pitch, GetControlRotation().Yaw, 0.f);
+	SwingState.CameraFOV = 90.f;
+
+	AdvancedCameraComponent->SetCameraState(SwingState, 20.f);
 }
 
 void APlayerManaCharacter::SetWallRunCameraState()
@@ -757,6 +825,12 @@ void APlayerManaCharacter::Jump()
 		AbilitySystem->TryActivateAbilitiesByTag(WallJumpTagContainer, true);
 		return;
 	}
+
+	if (AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwinging"))))
+	{
+		AbilitySystem->TryActivateAbilitiesByTag(SwingJumpTagContainer, true);
+		return;
+	}
 	AbilitySystem->TryActivateAbilitiesByTag(JumpTagContainer, true);
 
 	//if (GEngine) {
@@ -773,6 +847,7 @@ void APlayerManaCharacter::Move(const FInputActionValue& Value)
 {
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
 	bool IsFree = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree")));
+	bool IsSwinging = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwinging")));
 	
 	if (AbilitySystem)
 	{
@@ -824,6 +899,13 @@ void APlayerManaCharacter::Move(const FInputActionValue& Value)
 				// add movement 
 				AddMovementInput(ForwardDirection, MovementVector.Y);
 				AddMovementInput(RightDirection, MovementVector.X);
+			}
+
+			if (IsSwinging)
+			{
+				GetCharacterMovement()->AddForce(GamepadRightSwingForce(MovementVector.X));
+				GetCharacterMovement()->AddForce(GamepadForwardSwingForce(MovementVector.Y));
+				GEngine->AddOnScreenDebugMessage(6, .1f, FColor::Purple, "Applying Swinging Force and input!");
 			}
 		}
 	}

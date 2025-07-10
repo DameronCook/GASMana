@@ -17,7 +17,8 @@ enum class EGrappleState : uint8
 	E_Inactive  UMETA(DisplayName = "Inactive"),
 	E_Firing UMETA(DisplayName = "Firing"),
 	E_NearTarget UMETA(DisplayName = "NearTarget"),
-	E_ZipToPointTarget UMETA(DisplayName = "ZipToPoint")
+	E_ZipToPointTarget UMETA(DisplayName = "ZipToPoint"),
+	E_SwingTarget UMETA(DisplayName = "Swing"),
 
 };
 
@@ -41,6 +42,9 @@ class GASMANA_API UAC_HookShot : public UActorComponent
 
 	UFUNCTION()
 	void ZipToPointTarget(float DeltaTime);
+
+	UFUNCTION()
+	void SwingTarget(float DeltaTime);
 
 	UPROPERTY()
 	float MaxGrappleDistance;
@@ -74,15 +78,40 @@ class GASMANA_API UAC_HookShot : public UActorComponent
 	bool DrawLineToTarget(ACharacter* Character, AActor* OverlappedActor);
 	float CalculateAngleToTarget(ACharacter* Character, AActor* OverlappedActor);
 	void SetCurrentTarget(AManaHookParent* Hook);
+/// //////////////////////////////////////////
+/// 	Swing Hook Variables & Functions
+
+	FVector OptimalSwingPoint;
+	FVector SwingTargetLocation;
+	float SwingAngle;
+
+	UFUNCTION()
+	FVector FindOptimalSwingPoint(APlayerManaCharacter* Character);
+
+	UFUNCTION()
+	FVector FindSwingArcForce(APlayerManaCharacter* Character, float MinVelocity, float MaxVelocity, float ReduceSwingForceFactor);
+
+
+	UFUNCTION()
+	float FindSwingAngle(APlayerManaCharacter* Character);
+
+	UFUNCTION()
+	FRotator FindCharacterRotation(APlayerManaCharacter* Character, float DeltaTime);
+
+	UFUNCTION()
+	FRotator FindSwingSideAngle(APlayerManaCharacter* Character);
+
 
 public:	
 	UAC_HookShot();
-
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void AttemptGrapple();
 
 	void EndGrapple();
+
+	UFUNCTION()
+	FVector FindSwingLaunchForce(APlayerManaCharacter* Character, float ForwardSpeed, float UpSpeed);
 
 	FORCEINLINE class AManaHookParent* GetCurrentTarget() { return CurrentTarget; }
 
