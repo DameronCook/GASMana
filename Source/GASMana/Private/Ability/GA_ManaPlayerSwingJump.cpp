@@ -1,14 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Ability/GA_ManaPlayerSwingJump.h"
 #include "Ability/GA_ManaPlayerSwing.h"
 #include "../../Public/PlayerManaCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/AC_HookShot.h"
 #include "Kismet/KismetMathLibrary.h"
-
-
 
 UGA_ManaPlayerSwingJump::UGA_ManaPlayerSwingJump()
 {
@@ -56,7 +53,7 @@ void UGA_ManaPlayerSwingJump::ActivateAbility(const FGameplayAbilitySpecHandle H
 		
 		if (PlayerHook)
 		{
-			FVector LaunchDir = PlayerHook->FindSwingLaunchForce(PlayerCharacter, 20.f, 15.f);
+			FVector LaunchDir = PlayerHook->FindSwingLaunchForce(PlayerCharacter, 7.f, 7.f);
 			LaunchDir = UKismetMathLibrary::Divide_VectorFloat(LaunchDir, PlayerCharacter->GetSwingSpeedBalancer());
 			LaunchDir = UKismetMathLibrary::Multiply_VectorFloat(LaunchDir, CharacterMovement->GravityScale);
 

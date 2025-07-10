@@ -343,7 +343,7 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	FVector GamepadForwardSwingForce(float MovementInput);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Swing", meta = (AllowPrivateAccess = "true"))
-	float SwingSpeedBalancer = 12.f;
+	float SwingSpeedBalancer = 20.f;
 
 
 	//////////////////////////////////////////

@@ -82,7 +82,7 @@ class GASMANA_API UAC_HookShot : public UActorComponent
 /// 	Swing Hook Variables & Functions
 
 	FVector OptimalSwingPoint;
-	FVector SwingMovementForce;
+	FVector SwingTargetLocation;
 	float SwingAngle;
 
 	UFUNCTION()
@@ -104,7 +104,6 @@ class GASMANA_API UAC_HookShot : public UActorComponent
 
 public:	
 	UAC_HookShot();
-
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void AttemptGrapple();

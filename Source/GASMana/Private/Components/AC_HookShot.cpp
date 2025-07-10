@@ -24,6 +24,7 @@ UAC_HookShot::UAC_HookShot()
 
 	GrappleState = EGrappleState::E_Inactive;
 	MaxGrappleDistance = 2000.f;
+	PrimaryComponentTick.TickGroup = ETickingGroup::TG_PrePhysics;
 }
 
 void UAC_HookShot::BeginPlay()
@@ -169,8 +170,9 @@ void UAC_HookShot::NearTarget()
 			case EGrappleType::E_Swing:
 				GrappleState = EGrappleState::E_SwingTarget;
 				CharMove->MaxWalkSpeed = 1600.f;
-				CharMove->GravityScale = 6.f;
+				CharMove->GravityScale = 3.f;
 				OptimalSwingPoint = FindOptimalSwingPoint(PlayerCharacter);
+				SwingTargetLocation = CurrentTarget->GetActorLocation();
 				break;
 			default:
 				GrappleState = EGrappleState::E_ZipToPointTarget;
@@ -256,7 +258,7 @@ void UAC_HookShot::SwingTarget(float DeltaTime)
 		bool bTraceComplex = false;
 		FCollisionQueryParams QueryParams;
 		// Draw the debug capsule
-		DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation, FColor::Red, false, 0.f);
+		//DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation, FColor::Red, false, 0.f);
 
 		bool bHit = GetWorld()->SweepSingleByChannel(OutHit, CapsuleLocation, CapsuleLocation, CapsuleRotation, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight), QueryParams);
 	
@@ -273,32 +275,74 @@ void UAC_HookShot::SwingTarget(float DeltaTime)
 		if (CharMove)
 		{
 			//First, let's find the swing arc force
-			//We need to calculate how much to reduce this force as the swing continues though depending on How far we are from the target
-			FVector SwingTargetDir = PlayerCharacter->GetActorLocation() - OptimalSwingPoint;
-			float SwingTargetSize = UKismetMathLibrary::VSize(SwingTargetDir);
-			float ReductionForce = UKismetMathLibrary::FClamp((8000.f / SwingTargetSize), 1.f, 4.f);
-			FVector SwingArcForce = FindSwingArcForce(PlayerCharacter, 600, 2400, ReductionForce);
-			SwingArcForce = UKismetMathLibrary::Multiply_VectorFloat(SwingArcForce, 1.2f);
 
-			//Next, if the player is along the bottom of the swing arc, speed them up a bit
+			FVector SwingTargetDir = PlayerCharacter->GetActorLocation() - OptimalSwingPoint;
+			float SwingTargetDist = SwingTargetDir.Length();
+			float ReductionForce = UKismetMathLibrary::FClamp((8000.f / SwingTargetDist), 1.f, 4.f); 	//We need to calculate how much to reduce this force as the swing continues though depending on How far we are from the target
+			FVector SwingArcForce = FindSwingArcForce(PlayerCharacter, 400.f, 2000.f, ReductionForce);		
+
+
+			//Next, if the player is along the bottom of the swing arc, speed them up a bit. This will prevennt them from staying on the ground too much
 			FVector BottomSwingVelocityBoost = FVector::ZeroVector;
-			if (SwingAngle > -5.f && SwingAngle < 20.f)
+			FVector SmallUpwardForce = FVector::ZeroVector;
+			if (SwingAngle > -20.f && SwingAngle < 20.f)
 			{
-				BottomSwingVelocityBoost = PlayerCharacter->GetVelocity().GetSafeNormal() * 100;
-				GEngine->AddOnScreenDebugMessage(1, 0.1f, FColor::Red, "I should be BOOOSTING THE PLAYER");
+				BottomSwingVelocityBoost = PlayerCharacter->GetVelocity().GetSafeNormal() * 60000.f;
+				//GEngine->AddOnScreenDebugMessage(1, 0.1f, FColor::Red, "I should be BOOOSTING THE PLAYER");
+
+				/*  I don't like how this feels I think
+				//Finally, Add a small upward force to the player. Only when the player is along the bottom of their arc. This *should* counteract the slow lengthening of the hook that can result in the player colliding with the ground
+				SmallUpwardForce = FVector(0.f, 0.f, 50000.f);
+				*/
 			}
 
+			//Also, Speed them up in the direction the camera is facing. This will keep the player always moving forward! The camera's rotation is kinda locked to the swing... might need to change that
+			UCameraComponent* Cam = PlayerCharacter->GetFollowCamera(); 
+			FVector CamForwardAdder = FVector::ZeroVector;
+			if (Cam)
+			{
+				FVector CamForward = Cam->GetForwardVector();
+				CamForwardAdder = FVector(CamForward.X, CamForward.Y, 0.f).GetSafeNormal();
+				CamForwardAdder *= 75000.f;
+			}
 
 			//Now, We combine the forces to make an ULTIMATE swing force that we add to the character movement component
-			SwingMovementForce = SwingArcForce + BottomSwingVelocityBoost;
+			FVector SwingMovementForce = SwingArcForce + BottomSwingVelocityBoost + CamForwardAdder + SmallUpwardForce;
 
-			GEngine->AddOnScreenDebugMessage(3, 0.1f, FColor::Red, SwingMovementForce.ToString());
+			//GEngine->AddOnScreenDebugMessage(3, 0.1f, FColor::Red, SwingMovementForce.ToString());
 
-			CharMove->AddForce(SwingMovementForce * CharMove->Mass); // <---- Okay, maybe we need to multiply by mass? CharMove->Mass
+			CharMove->AddForce(SwingMovementForce); // <---- Okay, maybe we need to multiply by mass? CharMove->Mass
+
+
+			// Okay cast a line down and whenever the player is just above the ground, offset their position so that they won't hit it at the bottom of a swing
+			FHitResult OutLineHit;
+
+			// Line parameters
+			const FVector LineStartLocation = PlayerCharacter->GetActorLocation();
+			const float LineTraceLength = 300.f;
+			const FVector LineEndLocation = PlayerCharacter->GetActorLocation() + (PlayerCharacter->GetActorUpVector() * -LineTraceLength);
+
+			//Trace Parameters
+			FCollisionQueryParams LineQueryParams;
+			LineQueryParams.AddIgnoredActor(PlayerCharacter);
+
+			//DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
+			bool bBottomLineHit = GetWorld()->LineTraceSingleByChannel(OutLineHit, LineStartLocation, LineEndLocation, ECollisionChannel::ECC_Visibility, LineQueryParams);
+
+			if (bBottomLineHit)
+			{
+				//GEngine->AddOnScreenDebugMessage(8, 0.1f, FColor::Purple, "I should be OFFSETTING THE PLAYER Z AAAAAAAAAA");
+				float AddOffset = UKismetMathLibrary::MapRangeClamped(OutLineHit.Distance, 0.f, LineTraceLength, 25.f, 1.f);
+
+				PlayerCharacter->AddActorWorldOffset(FVector(0.f, 0.f, AddOffset));
+			}
 
 			//Also, let's rotate the player in the direction of the swing force
 			FRotator CharacterRotation = FindCharacterRotation(PlayerCharacter, DeltaTime);
 			PlayerCharacter->SetActorRotation(CharacterRotation);
+
+			FRotator ControlInterp = UKismetMathLibrary::RInterpTo(PlayerCharacter->GetController()->GetControlRotation(), FRotator(CharacterRotation.Pitch, CharacterRotation.Yaw, 0.f), DeltaTime, 4.0f);
+			PlayerCharacter->GetController()->SetControlRotation(ControlInterp);
 
 			//Then, we find the new swing angle considering the force of the swing, the direction to the swing point, and the velocity of the player
 			SwingAngle = FindSwingAngle(PlayerCharacter);
@@ -317,11 +361,26 @@ void UAC_HookShot::SwingTarget(float DeltaTime)
 				if (DirectionVelocityDot >= 0)
 				{
 					FVector ProjectedVelocity = UKismetMathLibrary::ProjectVectorOnToPlane(PlayerCharacter->GetVelocity(), DirectionToSwingPointNormal);
-					FVector ClampedVelocity = UKismetMathLibrary::ClampVectorSize(ProjectedVelocity, -3200, 3200);
+					FVector ClampedVelocity = UKismetMathLibrary::ClampVectorSize(ProjectedVelocity, -3600, 3600);
 
 					CharMove->Velocity = ClampedVelocity;
 					GEngine->AddOnScreenDebugMessage(4, 0.1f, FColor::Orange, CharMove->Velocity.ToString());
 
+				}
+			}
+		}
+
+		if (PlayerCharacter->GetCachedInputDirection().Size() <= 0.1f)
+		{
+			if (SwingAngle < 18.f && SwingAngle > -18.f)
+			{
+				if (PlayerCharacter->GetVelocity().Size() < 8.f)
+				{
+					EndGrapple();
+					if (PlayerCharacter->GetSwingAbility())
+					{
+						PlayerCharacter->GetSwingAbility()->CancelSwing();
+					}
 				}
 			}
 		}
@@ -510,11 +569,12 @@ FVector UAC_HookShot::FindSwingArcForce(APlayerManaCharacter* Character, float M
 	if (Character)
 	{
 		FVector ClampedVelocity = UKismetMathLibrary::ClampVectorSize(Character->GetVelocity(), MinVelocity, MaxVelocity);
-		FVector SwingTargetDir = Character->GetActorLocation() - CurrentTarget->GetActorLocation();
+		FVector SwingTargetDir = Character->GetActorLocation() - SwingTargetLocation;
 		float DirectionalDot = UKismetMathLibrary::Dot_VectorVector(ClampedVelocity, SwingTargetDir);
+		SwingTargetDir.Normalize();
 
-		FVector SwingForce = UKismetMathLibrary::Multiply_VectorFloat(SwingTargetDir.GetSafeNormal(), DirectionalDot);
-		SwingForce /= -2.f;
+		FVector SwingForce = UKismetMathLibrary::Multiply_VectorFloat(SwingTargetDir, DirectionalDot);
+		SwingForce *= -2.f;
 		SwingForce /= ReduceSwingForceFactor;
 		return SwingForce;
 	}
@@ -565,11 +625,13 @@ FRotator UAC_HookShot::FindCharacterRotation(APlayerManaCharacter* Character, fl
 {
 	if (Character)
 	{
-		float RotationFromVelocity = UKismetMathLibrary::MakeRotFromX(Character->GetVelocity()).Yaw;
+		FRotator RotationFromVelocity = UKismetMathLibrary::MakeRotFromX(Character->GetVelocity());
 		FRotator SwingSideAngle = FindSwingSideAngle(Character);
-		FRotator TargetRotation = FRotator(SwingSideAngle.Roll, SwingSideAngle.Pitch, RotationFromVelocity);
+		FRotator TargetRotation = FRotator(SwingSideAngle.Pitch, RotationFromVelocity.Yaw, SwingSideAngle.Roll);
 
-		FRotator InterpToRotation = UKismetMathLibrary::RInterpTo(Character->GetActorRotation(), TargetRotation, DeltaTime, 10.f);
+		FRotator InterpToRotation = UKismetMathLibrary::RInterpTo(Character->GetActorRotation(), TargetRotation, DeltaTime, 2.f);
+
+		return InterpToRotation;
 	}
 
 	return FRotator();
@@ -582,7 +644,9 @@ FRotator UAC_HookShot::FindSwingSideAngle(APlayerManaCharacter* Character)
 		FVector DirectionToPlayer = (OptimalSwingPoint - Character->GetActorLocation()).GetSafeNormal();
 		FVector PlayerVelocity = Character->GetVelocity().GetSafeNormal();
 
-		FRotator SwingSideAngle = UKismetMathLibrary::MakeRotFromZY(DirectionToPlayer, UKismetMathLibrary::Cross_VectorVector(PlayerVelocity, DirectionToPlayer) * -1);
+		FVector CrossProduct = UKismetMathLibrary::Cross_VectorVector(PlayerVelocity, DirectionToPlayer) * -1;
+
+		FRotator SwingSideAngle = UKismetMathLibrary::MakeRotFromZY(DirectionToPlayer, CrossProduct);
 		
 		return SwingSideAngle;
 	}

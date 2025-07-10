@@ -116,70 +116,74 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 
 
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
-	float CurrentMana = AbilitySystem->GetNumericAttribute(UManaAttributeSet::GetManaAttribute());
+	UCharacterMovementComponent* CharMove = GetCharacterMovement();
 
-	if (CurrentMana > 0)
+	if (AbilitySystem)
 	{
-		bool bIsInAir = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne")));
-		bool bIsWallRunning = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
-		bool bIsWallJumping = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallJumping")));
+		float CurrentMana = AbilitySystem->GetNumericAttribute(UManaAttributeSet::GetManaAttribute());
 
-		if (AbilitySystem && bIsInAir && !bIsWallRunning && !bIsWallJumping)
+		if (CurrentMana > 0)
 		{
-			if (WallRunCheck())
+			bool bIsInAir = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne")));
+			bool bIsWallRunning = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
+			bool bIsWallJumping = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallJumping")));
+
+			if (AbilitySystem && bIsInAir && !bIsWallRunning && !bIsWallJumping)
 			{
-				AbilitySystem->TryActivateAbilitiesByTag(WallRunTagContainer, true);
+				if (WallRunCheck())
+				{
+					AbilitySystem->TryActivateAbilitiesByTag(WallRunTagContainer, true);
+				}
 			}
 		}
-	}
 
-	if (ActiveWallRunAbility)
-	{
-		UpdateWallRunVertical(DeltaTime);
-
-		SetWallRunCameraState();
-
-		bool bForwardHit = ForwardWallRunCheck();
-
-		FVector NewWallRunHorizontalDirection = UpdateWallRunHorizontal();
-		GetCharacterMovement()->Velocity.X = NewWallRunHorizontalDirection.X * WallRunStrength;
-		GetCharacterMovement()->Velocity.Y = NewWallRunHorizontalDirection.Y * WallRunStrength;
-
-		SetActorRotation(FMath::RInterpTo(GetActorRotation(), NewWallRunHorizontalDirection.Rotation(), DeltaTime, 5.0f));
-
-		if (CurrentMana <= 0.0f || bForwardHit)
+		if (ActiveWallRunAbility)
 		{
-			ActiveWallRunAbility->OnWallRunFinished();
+			UpdateWallRunVertical(DeltaTime);
+
+			SetWallRunCameraState();
+
+			bool bForwardHit = ForwardWallRunCheck();
+
+			FVector NewWallRunHorizontalDirection = UpdateWallRunHorizontal();
+			GetCharacterMovement()->Velocity.X = NewWallRunHorizontalDirection.X * WallRunStrength;
+			GetCharacterMovement()->Velocity.Y = NewWallRunHorizontalDirection.Y * WallRunStrength;
+
+			SetActorRotation(FMath::RInterpTo(GetActorRotation(), NewWallRunHorizontalDirection.Rotation(), DeltaTime, 5.0f));
+
+			if (CurrentMana <= 0.0f || bForwardHit || !CharMove->IsFalling())
+			{
+				ActiveWallRunAbility->OnWallRunFinished(); //This line is suscceptible to crash that's not how you spell that
+			}
+		}
+
+		if (IsValid(ActiveZipAbility))
+		{
+			SetZipToPointCameraState();
+		}
+
+		if (IsValid(ActiveSwingAbility))
+		{
+			SetSwingCameraState();
+		}
+
+		//Manually handle camera while player "Is Free"
+
+		bool bIsFree = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree")));
+
+		if (bIsFree)
+		{
+			bool bIsBlocking = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsBlocking")));
+			bool bIsRunning = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsRunning")));
+
+			if (bIsBlocking && !bIsRunning)
+			{
+				SetShieldCameraState();
+				return;
+			}
+			SetDefaultCameraState();
 		}
 	}
-
-	if (IsValid(ActiveZipAbility))
-	{
-		SetZipToPointCameraState();
-	}
-
-	if (IsValid(ActiveSwingAbility))
-	{
-		SetSwingCameraState();
-	}
-
-	//Manually handle camera while player "Is Free"
-
-	bool bIsFree = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree")));
-
-	if (bIsFree)
-	{
-		bool bIsBlocking = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsBlocking")));
-		bool bIsRunning = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsRunning")));
-
-		if (bIsBlocking && !bIsRunning)
-		{
-			SetShieldCameraState();
-			return;
-		}
-		SetDefaultCameraState();
-	}
-
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -381,7 +385,7 @@ bool APlayerManaCharacter::ForwardWallRunCheck()
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
 
-	DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
+	//DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
 	FVector LineOffset = FVector(0.0f, 0.0f, 80.0f);
 	bool bHitTop = GetWorld()->LineTraceSingleByChannel(OutHit, LineStartLocation + LineOffset, LineEndLocation + LineOffset, ECollisionChannel::ECC_Visibility, QueryParams);
 	bool bHitBottom = GetWorld()->LineTraceSingleByChannel(OutHit, LineStartLocation - LineOffset, LineEndLocation - LineOffset, ECollisionChannel::ECC_Visibility, QueryParams);
@@ -399,7 +403,7 @@ FVector APlayerManaCharacter::GamepadRightSwingForce(float MovementInput)
 	float VelocitySize = GetVelocity().Size();
 	VelocitySize = UKismetMathLibrary::FClamp(VelocitySize, 0.f, 1000.f);
 
-	float ReduceSwingForceVelocity = 70.f / SwingSpeedBalancer;
+	float ReduceSwingForceVelocity = 50.f / SwingSpeedBalancer;
 
 	float FinalVelocity = VelocitySize * ReduceSwingForceVelocity;
 
@@ -421,11 +425,9 @@ FVector APlayerManaCharacter::GamepadForwardSwingForce(float MovementInput)
 	float VelocitySize = GetVelocity().Size();
 	VelocitySize = UKismetMathLibrary::FClamp(VelocitySize, 0.f, 1000.f);
 
-	float ReduceSwingForceVelocity = 70.f / SwingSpeedBalancer;
+	float ReduceSwingForceVelocity = 50.f / SwingSpeedBalancer;
 
 	float FinalVelocity = VelocitySize * ReduceSwingForceVelocity;
-
-	float FinalMovementInput = MovementInput / 5.f;
 
 	float Input = MovementInput * FinalVelocity;
 
@@ -662,22 +664,23 @@ void APlayerManaCharacter::SetZipToPointCameraState()
 	FCameraState ZipToPointState;
 	ZipToPointState.TargetArmLength = 1.f;
 	ZipToPointState.CameraRotation = ZipToPointCameraRotation;
-	ZipToPointState.CameraFOV = 110.f;
+	ZipToPointState.CameraFOV = 100.f;
 
-	AdvancedCameraComponent->SetCameraState(ZipToPointState, 6.f);
+	AdvancedCameraComponent->SetCameraState(ZipToPointState, 4.f);
 }
 
 void APlayerManaCharacter::SetSwingCameraState()
 {
 	CameraBoom->bDoCollisionTest = true;
+	FRotator AngleToTarget = GetActorForwardVector().Rotation();
 
 	// In PlayerManaCharacter.cpp, when wall run ends:
 	FCameraState SwingState;
-	SwingState.TargetArmLength = 600.f;
-	SwingState.CameraRotation = FRotator(GetControlRotation().Pitch, GetControlRotation().Yaw, 0.f);
+	SwingState.TargetArmLength = 750.f;
+	SwingState.CameraRotation = AngleToTarget;//FRotator(GetControlRotation().Pitch, GetControlRotation().Yaw, 0.f);
 	SwingState.CameraFOV = 90.f;
 
-	AdvancedCameraComponent->SetCameraState(SwingState, 5.f);
+	AdvancedCameraComponent->SetCameraState(SwingState, 20.f);
 }
 
 void APlayerManaCharacter::SetWallRunCameraState()

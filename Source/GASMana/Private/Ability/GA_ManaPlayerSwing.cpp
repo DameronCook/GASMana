@@ -5,6 +5,8 @@
 #include "PlayerManaCharacter.h"
 #include "Components/AC_HookShot.h"
 #include "Actors/ManaHookParent.h"
+#include "GameFramework/SpringArmComponent.h"
+
 
 
 UGA_ManaPlayerSwing::UGA_ManaPlayerSwing()
@@ -43,7 +45,7 @@ void UGA_ManaPlayerSwing::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 		PlayerCharacter->SetSwingAbility(this);
 		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetSwingEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 	
-		
+		//PlayerCharacter->GetCameraBoom()->bEnableCameraLag = false;
 	}
 }
 
@@ -61,6 +63,8 @@ void UGA_ManaPlayerSwing::EndAbility(const FGameplayAbilitySpecHandle Handle, co
 		FGameplayTagContainer Tags;
 		Tags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwinging")));
 		AbilitySystemComponent->RemoveActiveEffectsWithGrantedTags(Tags);
+		//PlayerCharacter->GetCameraBoom()->bEnableCameraLag = true;
+
 	}
 }
 
