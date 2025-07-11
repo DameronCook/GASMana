@@ -22,7 +22,7 @@ UGA_ManaPlayerSwing::UGA_ManaPlayerSwing()
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsHooked")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsZipToPoint")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsMantling")));
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwing")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwinging")));
 }
 
 void UGA_ManaPlayerSwing::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)

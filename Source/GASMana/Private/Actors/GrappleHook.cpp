@@ -9,7 +9,7 @@ AGrappleHook::AGrappleHook()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	HookMesh = CreateDefaultSubobject<UStaticMesh>(TEXT("Hook"));
+	//HookMesh = CreateDefaultSubobject<UStaticMesh>(TEXT("Hook"));
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	ProjectileMovementComponent->ProjectileGravityScale = 0.f;

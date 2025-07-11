@@ -115,31 +115,14 @@ void UGA_ManaPlayerWallRun::EndAbility(const FGameplayAbilitySpecHandle Handle, 
 
 		if (PlayerCharacter)
 		{
-			PlayerCharacter->SetWallRunAbility(nullptr);
-
-			PlayerCharacter->SetDefaultCameraState();
-
-<<<<<<< Updated upstream
-
-
-			FVector WallNormal = PlayerCharacter->GetWallRunImpactNormal().GetSafeNormal();
-			FVector Forward = PlayerCharacter->GetActorForwardVector().GetSafeNormal();
-			FVector Bisector = (WallNormal + Forward).GetSafeNormal();
-
-			//Set the players rotation
-			FRotator JumpYaw = FRotator(0.f, Bisector.Rotation().Yaw, 0.f);
-			PlayerCharacter->SetActorRotation(JumpYaw);
-
-
-
-
-			if (UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(PlayerCharacter->GetMesh()->GetAnimInstance()))
-=======
 			UAC_WallRun* WallRunComponent = PlayerCharacter->GetWallRun();
-
+			
 			if (WallRunComponent)
->>>>>>> Stashed changes
 			{
+				PlayerCharacter->SetWallRunAbility(nullptr);
+
+				PlayerCharacter->SetDefaultCameraState();
+
 				FVector WallNormal = WallRunComponent->GetWallRunImpactNormal().GetSafeNormal();
 				FVector Forward = PlayerCharacter->GetActorForwardVector().GetSafeNormal();
 				FVector Bisector = (WallNormal + Forward).GetSafeNormal();
@@ -151,25 +134,24 @@ void UGA_ManaPlayerWallRun::EndAbility(const FGameplayAbilitySpecHandle Handle, 
 
 				if (UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(PlayerCharacter->GetMesh()->GetAnimInstance()))
 				{
-					AnimInstance->Montage_Play(WallRunComponent->GetWallJumpMontage());
-				}
 
-				if (UAbilitySystemComponent* AbilitySystem = PlayerCharacter->GetAbilitySystemComponent())
-				{
-					AbilitySystem->RemoveActiveGameplayEffect(ManaDrainEffectHandle);
-					AbilitySystem->RemoveActiveGameplayEffect(WallRunEffectHandle);
+					if (UAbilitySystemComponent* AbilitySystem = PlayerCharacter->GetAbilitySystemComponent())
+					{
+						AbilitySystem->RemoveActiveGameplayEffect(ManaDrainEffectHandle);
+						AbilitySystem->RemoveActiveGameplayEffect(WallRunEffectHandle);
 
-				}
-				ActorInfo->AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ActorInfo->AbilitySystemComponent->MakeEffectContext());
+					}
+					ActorInfo->AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ActorInfo->AbilitySystemComponent->MakeEffectContext());
 
-				UCharacterMovementComponent* CharacterMovement = PlayerCharacter->GetCharacterMovement();
-				if (CharacterMovement)
-				{
-					CharacterMovement->bOrientRotationToMovement = true;
-					CharacterMovement->GravityScale = PlayerCharacter->GetOriginalGravityScale();
+					UCharacterMovementComponent* CharacterMovement = PlayerCharacter->GetCharacterMovement();
+					if (CharacterMovement)
+					{
+						CharacterMovement->bOrientRotationToMovement = true;
+						CharacterMovement->GravityScale = PlayerCharacter->GetOriginalGravityScale();
 
-					//Move the player a little bit away from the wall too so they won't immediately collide with the wall, restarting a run
-					PlayerCharacter->LaunchCharacter(Bisector * 500, true, false);
+						//Move the player a little bit away from the wall too so they won't immediately collide with the wall, restarting a run
+						PlayerCharacter->LaunchCharacter(Bisector * 500, true, false);
+					}
 				}
 			}
 		}

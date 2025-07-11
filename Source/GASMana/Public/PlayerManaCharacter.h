@@ -8,12 +8,12 @@
 #include "Interface/I_ProgressBarInterface.h"
 #include "Ability/GA_ManaPlayerWallRun.h"
 #include "Ability/GA_ManaPlayerMantle.h"
+#include "Ability/GA_ManaPlayerZipToPoint.h"
+#include "Ability/GA_ManaPlayerSwing.h"
+#include "Ability/GA_ManaPlayerHook.h"
 #include "Components/AdvancedCameraComponent.h"
-<<<<<<< Updated upstream
-=======
 #include "Components/AC_HookShot.h"
 #include "Components/AC_WallRun.h"
->>>>>>> Stashed changes
 #include "PlayerManaCharacter.generated.h"
 
 
@@ -44,17 +44,14 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UAdvancedCameraComponent* AdvancedCameraComponent;
 
-<<<<<<< Updated upstream
-=======
 	/** Hook Shot Component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hooks, meta = (AllowPrivateAccess = "true"))
 	UAC_HookShot* HookShotComponent;
 
-	/** Hook Shot Component */
+	/** Wall Run Component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hooks, meta = (AllowPrivateAccess = "true"))
 	UAC_WallRun* WallRunComponent;
 
->>>>>>> Stashed changes
 	/** Player HUD */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
 	UUserWidget* PlayerHUD;
@@ -95,6 +92,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* RollAction;
 
+	/** Hook Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* HookAction;
+
 	/* Cached direction of input (always calculated) */
 	FVector CachedInputDirection;
 
@@ -128,6 +129,22 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Wall Jump Tag Container */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer MantleTagContainer;
+
+	/** Zip To Point Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer ZipToPointTagContainer;
+
+	/** Zip To Point Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer SwingTagContainer;
+
+	/** Zip To Point Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer SwingJumpTagContainer;
+
+	/** Zip To Point Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer HookTagContainer;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Effect Classes
@@ -180,9 +197,25 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Mana", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> ManaWallRunDrainClass;
 
-	/** Mana Drain Effect Class */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Mana", meta = (AllowPrivateAccess = "true"))
+	/** Mantle Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Movement", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> MantleClass;
+
+	/** ZipToPoint Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Hook", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> ZipToPointClass;
+
+	/** Swing Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Hook", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> SwingClass;
+
+	/** Swing Jump Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Hook", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> SwingJumpClass;
+
+	/** Swing Jump Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Hook", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> HookClass;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Montages
@@ -202,15 +235,9 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Curves", meta = (AllowPrivateAccess = "true"))
 	UCurveFloat* DiveRollCurveFloat;
 
-<<<<<<< Updated upstream
-	/** Wall Jump MovementCurve */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Curves", meta = (AllowPrivateAccess = "true"))
-	UCurveFloat* WallJumpCurveFloat;
-=======
 	/** Zip to Point MovementCurve */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Curves", meta = (AllowPrivateAccess = "true"))
 	UCurveFloat* ZipToPointCurveFloat;
->>>>>>> Stashed changes
 
 	//////////////////////////////////////////////////////////////////////////
 	// Object References (Liable to move)
@@ -222,66 +249,6 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UFUNCTION()
 	void OnBlockingTagChanged(const FGameplayTag Tag, int32 NewCount);
 
-<<<<<<< Updated upstream
-	//////////////////////////////////////////////////////////////////////////
-	// Wall Run
-
-	/** Wall Run Side */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wall Run", meta = (AllowPrivateAccess = "true"))
-	EWallRunSide WallRunSide;
-
-	/** Wall Run Direction */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wall Run", meta = (AllowPrivateAccess = "true"))
-	FVector WallRunDirection;
-
-	/** Wall Run Direction */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wall Run", meta = (AllowPrivateAccess = "true"))
-	FVector WallRunDir;
-
-	/** Wall Run Speed */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wall Run", meta = (AllowPrivateAccess = "true"))
-	float WallRunStrength = 800.f;
-
-	/* Duration of Full Wall Run */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wall Run", meta = (AllowPrivateAccess = "true"))
-	float WallRunDuration = 2.0f;
-
-	/* Verticality of the  Wall Run */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wall Run", meta = (AllowPrivateAccess = "true"))
-	float WallRunAmplitude = 125.0f;
-
-	/* How much along the sine curve do we follow? */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wall Run", meta = (AllowPrivateAccess = "true"))
-	float WallRunFreq = 0.55f;
-
-
-	float WallRunElapsedTime = 0.0f;
-	float WallRunStartZ = 0.0f;
-	FVector WallRunImpactNormal;
-
-	float LastWallRunSineOffset = 0.0f;
-
-	UFUNCTION()
-	FVector UpdateWallRunHorizontal();
-
-	UFUNCTION()
-	void UpdateWallRunVertical(float DeltaTime);
-
-	UFUNCTION()
-	bool WallRunCheck();
-
-	UFUNCTION()
-	bool CanWallRunOnSurface(FVector ImpactNormal);
-
-	UFUNCTION()
-	bool IsWallRunningAlongRightSide(FVector ImpactNormal);
-
-	UFUNCTION()
-	bool ForwardWallRunCheck();
-
-	UFUNCTION()
-	FVector SetWallRunDirection(FVector SideMultiplier, FVector ImpactNormal);
-=======
 	////////////////////////////////////////////
 	//Swing Variables
 	UFUNCTION()
@@ -295,7 +262,6 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 
 	//////////////////////////////////////////
 	//Active Abilities
->>>>>>> Stashed changes
 
 	/**Active wall run ability*/
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
@@ -304,6 +270,18 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/**Active mantle ability*/
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UGA_ManaPlayerMantle* ActiveMantleAbility = nullptr;
+
+	/**Active mantle ability*/
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UGA_ManaPlayerHook* ActiveHookAbility = nullptr;
+
+	/**Active mantle ability*/
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UGA_ManaPlayerZipToPoint* ActiveZipAbility = nullptr;
+
+	/**Active mantle ability*/
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UGA_ManaPlayerSwing* ActiveSwingAbility = nullptr;
 
 	/////////////////////////////////////////////////////////////////////////
 	//Other
@@ -346,6 +324,9 @@ protected:
 	/**Called for attack input */
 	void Roll(const FInputActionValue& Value);
 
+	/**Called for hook input */
+	void Hook(const FInputActionValue& Value);
+
 public:
 	APlayerManaCharacter();
 
@@ -374,6 +355,12 @@ public:
 	void SetWallRunCameraState(UAC_WallRun* WallRun);
 
 	UFUNCTION(Category = "Camera")
+	void SetZipToPointCameraState();
+
+	UFUNCTION(Category = "Camera")
+	void SetSwingCameraState();
+
+	UFUNCTION(Category = "Camera")
 	void SetRollCameraState();
 
 	UFUNCTION(Category = "Camera")
@@ -388,11 +375,8 @@ public:
 	//Components
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-<<<<<<< Updated upstream
-=======
 	FORCEINLINE class UAC_HookShot* GetHookShot() const { return HookShotComponent; }
 	FORCEINLINE class UAC_WallRun* GetWallRun() const { return WallRunComponent; }
->>>>>>> Stashed changes
 
 	//Effect Classes
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetBlockingEffectClass() const { return BlockingEffectClass; }
@@ -406,8 +390,6 @@ public:
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetStaminaRegenBlockEffectClass() const { return StaminaRegenBlockEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetWallRunDrainEffectClass() const { return ManaWallRunDrainClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetAirborneEffectClass() const { return AirborneEffectClass; }
-<<<<<<< Updated upstream
-=======
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetZipToPointEffectClass() const { return ZipToPointClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetSwingEffectClass() const { return SwingClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetSwingJumpEffectClass() const { return SwingJumpClass; }
@@ -418,17 +400,12 @@ public:
 	FORCEINLINE FGameplayTagContainer GetZipToPointTag() const { return ZipToPointTagContainer; }
 	FORCEINLINE FGameplayTagContainer GetSwingTag() const { return SwingTagContainer; }
 	FORCEINLINE FGameplayTagContainer GetWallRunTag() const { return WallRunTagContainer; }
->>>>>>> Stashed changes
 
 	//Montages
 	FORCEINLINE UAnimMontage* GetRollMontage() const { return RollMontage; }
 	FORCEINLINE UAnimMontage* GetAttackMontage() const { return AttackMontage; }
 	FORCEINLINE UCurveFloat* GetDiveRollCurveFloat() const { return DiveRollCurveFloat; }
-<<<<<<< Updated upstream
-	FORCEINLINE UCurveFloat* GetWallJumpCurveFloat() const { return WallJumpCurveFloat; }
-=======
 	FORCEINLINE UCurveFloat* GetZipToPointCurveFloat() const { return ZipToPointCurveFloat; }
->>>>>>> Stashed changes
 
 	//Input Actions
 	FORCEINLINE UInputAction* GetMoveAction() const { return MoveAction; }
@@ -437,13 +414,10 @@ public:
 	//Movement
 	FORCEINLINE UGA_ManaPlayerWallRun* GetWallRunAbility() { return ActiveWallRunAbility; }
 	FORCEINLINE UGA_ManaPlayerMantle* GetMantleAbility() { return ActiveMantleAbility; }
-<<<<<<< Updated upstream
-	FORCEINLINE EWallRunSide GetWallRunSide() { return WallRunSide; }
-=======
 	FORCEINLINE UGA_ManaPlayerHook* GetHookAbility() { return ActiveHookAbility; }
 	FORCEINLINE UGA_ManaPlayerZipToPoint* GetZipAbility() { return ActiveZipAbility; }
 	FORCEINLINE UGA_ManaPlayerSwing* GetSwingAbility() { return ActiveSwingAbility; }
->>>>>>> Stashed changes
+	FORCEINLINE float GetSwingSpeedBalancer() const { return SwingSpeedBalancer; }
 	FORCEINLINE float GetOriginalGravityScale() const { return OriginalGravityScale; }
 
 
@@ -451,4 +425,7 @@ public:
 	//Setters
 	FORCEINLINE UGA_ManaPlayerWallRun* SetWallRunAbility(UGA_ManaPlayerWallRun* WallRunAbility) { return ActiveWallRunAbility = WallRunAbility; }
 	FORCEINLINE UGA_ManaPlayerMantle* SetMantleAbility(UGA_ManaPlayerMantle* MantleAbility) { return ActiveMantleAbility = MantleAbility; }
+	FORCEINLINE UGA_ManaPlayerHook* SetHookAbility(UGA_ManaPlayerHook* HookAbility) { return ActiveHookAbility = HookAbility; }
+	FORCEINLINE UGA_ManaPlayerZipToPoint* SetZipToPointAbility(UGA_ManaPlayerZipToPoint* ZipAbility) { return ActiveZipAbility = ZipAbility; }
+	FORCEINLINE UGA_ManaPlayerSwing* SetSwingAbility(UGA_ManaPlayerSwing* SwingAbility) { return ActiveSwingAbility = SwingAbility; }
 };
