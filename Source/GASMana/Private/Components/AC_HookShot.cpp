@@ -90,6 +90,8 @@ void UAC_HookShot::Inactive()
 		//DrawDebugSphere(GetWorld(), SpherePos, SphereRadius, 12, FColor::Red);
 
 		FindAndSetBestTarget(OutActors, PlayerCharacter);
+		//GEngine->AddOnScreenDebugMessage(1, .1f, FColor::Green, FString::Printf(TEXT("Calling Find and set best target!!!")));
+
 	}
 }
 
@@ -112,23 +114,46 @@ void UAC_HookShot::FindAndSetBestTarget(TArray<AActor*, FDefaultAllocator>& OutA
 				{
 					BestAngle = CurrentAngle;
 					BestTarget = CurrentTargetLocal;
+					GEngine->AddOnScreenDebugMessage(2, .1f, FColor::Green, FString::Printf(TEXT("Setting Best Target")));
+					CurrentTarget = BestTarget;
 				}
 			}
 		}
+	}
+
+	GEngine->AddOnScreenDebugMessage(1, .1f, FColor::Green, FString::Printf(TEXT("Best Angle: %f"), BestAngle));
+
+	if (BestAngle > 1.2f)
+	{
+		BestTarget->SetActive(false);
+		BestTarget = NULL;
+		GEngine->AddOnScreenDebugMessage(2, .1f, FColor::Red, FString::Printf(TEXT("Returning NULL AHAHAHAHA")));
+
 	}
 	SetCurrentTarget(BestTarget);
 }
 
 void UAC_HookShot::SetCurrentTarget(AManaHookParent* Hook)
 {
-	if (Hook)
+	if (IsValid(Hook))
 	{
+		GEngine->AddOnScreenDebugMessage(3, .1f, FColor::Green, FString::Printf(TEXT("Current target should be set")));
 		if (IsValid(CurrentTarget))
 		{
 			CurrentTarget->SetActive(false);
+			CurrentTarget = Hook;
+			CurrentTarget->SetActive(true);
 		}
-		CurrentTarget = Hook;
-		CurrentTarget->SetActive(true);
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(3, .1f, FColor::Green, FString::Printf(TEXT("Current hook must be null then")));
+
+		if (IsValid(CurrentTarget))
+		{
+			CurrentTarget->SetActive(false);
+			CurrentTarget = NULL;
+		}
 	}
 }
 
@@ -227,13 +252,12 @@ void UAC_HookShot::ZipToPointTarget(float DeltaTime)
 				PlayerCharacter->GetAbilitySystemComponent()->TryActivateAbilitiesByTag(PlayerCharacter->GetZipToPointTag(), true);
 
 				//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString("I'm now on Zip To Point Target State!!!"));
+
+				FVector DirectionToTarget = (CurrentTarget->GetActorLocation() - PlayerCharacter->GetActorLocation()).GetSafeNormal();
+				FRotator AngleToTarget = DirectionToTarget.Rotation();
+
+				PlayerCharacter->SetActorRotation(FMath::RInterpTo(PlayerCharacter->GetActorRotation(), AngleToTarget, DeltaTime, 7.f));
 			}
-
-
-			FVector DirectionToTarget = (CurrentTarget->GetActorLocation() - PlayerCharacter->GetActorLocation()).GetSafeNormal();
-			FRotator AngleToTarget = DirectionToTarget.Rotation();
-
-			PlayerCharacter->SetActorRotation(FMath::RInterpTo(PlayerCharacter->GetActorRotation(), AngleToTarget, DeltaTime, 7.f));
 		}
 	}
 }
@@ -269,6 +293,7 @@ void UAC_HookShot::SwingTarget(float DeltaTime)
 			{
 				PlayerCharacter->GetSwingAbility()->CancelSwing();
 			}
+			return;
 		}
 
 		UCharacterMovementComponent* CharMove = PlayerCharacter->GetCharacterMovement();
@@ -364,7 +389,7 @@ void UAC_HookShot::SwingTarget(float DeltaTime)
 					FVector ClampedVelocity = UKismetMathLibrary::ClampVectorSize(ProjectedVelocity, -3600, 3600);
 
 					CharMove->Velocity = ClampedVelocity;
-					GEngine->AddOnScreenDebugMessage(4, 0.1f, FColor::Orange, CharMove->Velocity.ToString());
+					//GEngine->AddOnScreenDebugMessage(4, 0.1f, FColor::Orange, CharMove->Velocity.ToString());
 
 				}
 			}
@@ -479,13 +504,13 @@ void UAC_HookShot::AttemptGrapple()
 				}
 			}
 			//If the player just so happens to be wall running, launch them away and end the wall run
-			if (PlayerCharacter->GetWallRunAbility())
+			if (PlayerCharacter->GetWallRunAbility() && PlayerCharacter->GetWallRun())
 			{
-				FVector WallNormal = PlayerCharacter->GetWallRunImpactNormal().GetSafeNormal();
+				FVector WallNormal = PlayerCharacter->GetWallRun()->GetWallRunImpactNormal().GetSafeNormal();
 				FVector Forward = PlayerCharacter->GetActorForwardVector().GetSafeNormal();
 				FVector Bisector = (WallNormal + Forward).GetSafeNormal();
 
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Just checkin' I read this");
+				//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Just checkin' I read this");
 
 				PlayerCharacter->GetWallRunAbility()->OnWallRunFinished();
 
@@ -614,7 +639,7 @@ float UAC_HookShot::FindSwingAngle(APlayerManaCharacter* Character)
 
 		FRotator SwingRot = UKismetMathLibrary::MakeRotFromZX(DirectionToPlayer, CrossProduct * -1);
 
-		GEngine->AddOnScreenDebugMessage(2, 0.1f, FColor::Orange, FString::Printf(TEXT("Calculating Swing Angle: %f"), SwingRot.Roll)); 
+		//GEngine->AddOnScreenDebugMessage(2, 0.1f, FColor::Orange, FString::Printf(TEXT("Calculating Swing Angle: %f"), SwingRot.Roll)); 
 
 		return SwingRot.Roll;
 	}

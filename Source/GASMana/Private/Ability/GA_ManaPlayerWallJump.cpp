@@ -6,8 +6,6 @@
 #include "Abilities/Tasks/AbilityTask_ApplyRootMotionConstantForce.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-
-
 UGA_ManaPlayerWallJump::UGA_ManaPlayerWallJump()
 {
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
@@ -29,68 +27,71 @@ void UGA_ManaPlayerWallJump::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
 	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
 
-
-
-
 	if (PlayerCharacter && AbilitySystemComponent)
 	{
-		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetAirborneEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
-		WallJumpEffectHandle = AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetWallJumpEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
-
-		//Cancel the wall run ability
-		FGameplayTag WallRunTag = FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning"));
-		FGameplayTagContainer WallRunTags;
-		WallRunTags.AddTag(WallRunTag);
-		AbilitySystemComponent->RemoveActiveGameplayEffect(PlayerCharacter->GetWallRunAbility()->GetWallRunEffectHandle());
-
-		PlayerCharacter->GetWallRunAbility()->OnWallRunFinished();
-		PlayerCharacter->SetWallJumpCameraState();
-
-		FVector Direction;
-		FVector InputDirection = PlayerCharacter->GetCachedInputDirection().GetSafeNormal();
-		FVector WallRunDirection = PlayerCharacter->GetWallRunDirection().GetSafeNormal();
-		FVector WallNormal = PlayerCharacter->GetWallRunImpactNormal().GetSafeNormal();
-		FVector Forward = PlayerCharacter->GetActorForwardVector().GetSafeNormal();
-		FVector Bisector = (WallNormal + Forward).GetSafeNormal();
+		UAC_WallRun* WallRunComponent = PlayerCharacter->GetWallRun();
 		
-		float WallDot = FVector::DotProduct(InputDirection, WallNormal);
-
-		if (WallDot > 0.1f)
+		if (WallRunComponent)
 		{
-			Direction = Bisector + InputDirection;
 
-			//if (GEngine)
-			//{
-			//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Used Input!"));
-			//}
-		}
-		else
-		{
-			Direction = Bisector;
+			AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetAirborneEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+			WallJumpEffectHandle = AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetWallJumpEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 
-	/*		if (GEngine)
+			//Cancel the wall run ability
+			FGameplayTag WallRunTag = FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning"));
+			FGameplayTagContainer WallRunTags;
+			WallRunTags.AddTag(WallRunTag);
+			AbilitySystemComponent->RemoveActiveGameplayEffect(PlayerCharacter->GetWallRunAbility()->GetWallRunEffectHandle());
+
+			PlayerCharacter->GetWallRunAbility()->OnWallRunFinished();
+			PlayerCharacter->SetWallJumpCameraState(WallRunComponent);
+
+			FVector Direction;
+			FVector InputDirection = PlayerCharacter->GetCachedInputDirection().GetSafeNormal();
+			FVector WallRunDirection = WallRunComponent->GetWallRunDirection().GetSafeNormal();
+			FVector WallNormal = WallRunComponent->GetWallRunImpactNormal().GetSafeNormal();
+			FVector Forward = PlayerCharacter->GetActorForwardVector().GetSafeNormal();
+			FVector Bisector = (WallNormal + Forward).GetSafeNormal();
+
+			float WallDot = FVector::DotProduct(InputDirection, WallNormal);
+
+			if (WallDot > 0.1f)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Didin't use Input!"));
-			}*/
-		}
+				Direction = Bisector + InputDirection;
 
-		Direction.Z = 0.3f; 
+				//if (GEngine)
+				//{
+				//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Used Input!"));
+				//}
+			}
+			else
+			{
+				Direction = Bisector;
 
-		float Strength = 600.f; // Adjust as needed
-		float Duration = 0.25f; // Duration in seconds
-		bool bIsAdditive = false;
-		bool bDisableDestinationReachedInterrupt = false;
-		UCurveFloat* StrengthOverTime = PlayerCharacter->GetWallJumpCurveFloat();
-		ERootMotionFinishVelocityMode VelocityOnFinishMode = ERootMotionFinishVelocityMode::MaintainLastRootMotionVelocity;
-		FVector SetVelocityOnFinish = PlayerCharacter->GetCharacterMovement()->Velocity;
-		float ClampVelocityOnFinish = 0.f;
+				/*		if (GEngine)
+						{
+							GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Didin't use Input!"));
+						}*/
+			}
 
-		UAbilityTask_ApplyRootMotionConstantForce* RootMotionTask = UAbilityTask_ApplyRootMotionConstantForce::ApplyRootMotionConstantForce(this, NAME_None, Direction, Strength, Duration, false, StrengthOverTime, VelocityOnFinishMode, SetVelocityOnFinish, false, false);
+			Direction.Z = 0.3f;
 
-		if (RootMotionTask)
-		{
-			RootMotionTask->OnFinish.AddDynamic(this, &UGA_ManaPlayerWallJump::OnMotionTaskEnded);
-			RootMotionTask->ReadyForActivation();
+			float Strength = 600.f; // Adjust as needed
+			float Duration = 0.25f; // Duration in seconds
+			bool bIsAdditive = false;
+			bool bDisableDestinationReachedInterrupt = false;
+			UCurveFloat* StrengthOverTime = WallRunComponent->GetWallJumpCurveFloat();
+			ERootMotionFinishVelocityMode VelocityOnFinishMode = ERootMotionFinishVelocityMode::MaintainLastRootMotionVelocity;
+			FVector SetVelocityOnFinish = PlayerCharacter->GetCharacterMovement()->Velocity;
+			float ClampVelocityOnFinish = 0.f;
+
+			UAbilityTask_ApplyRootMotionConstantForce* RootMotionTask = UAbilityTask_ApplyRootMotionConstantForce::ApplyRootMotionConstantForce(this, NAME_None, Direction, Strength, Duration, false, StrengthOverTime, VelocityOnFinishMode, SetVelocityOnFinish, false, false);
+
+			if (RootMotionTask)
+			{
+				RootMotionTask->OnFinish.AddDynamic(this, &UGA_ManaPlayerWallJump::OnMotionTaskEnded);
+				RootMotionTask->ReadyForActivation();
+			}
 		}
 	}
 
