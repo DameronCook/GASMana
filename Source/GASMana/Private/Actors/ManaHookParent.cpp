@@ -14,8 +14,6 @@ AManaHookParent::AManaHookParent()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh")); 
-
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCol"));
 	Sphere->SetSphereRadius(32.f);
 	Sphere->SetupAttachment(Mesh);
@@ -23,19 +21,15 @@ AManaHookParent::AManaHookParent()
 	switch (GrappleType)
 	{
 	case EGrappleType::E_ZipToPoint:
-		Mesh->SetStaticMesh(ZipToPointMesh);
 		WidgetClass = ZipToPointWidget;
 		break;
 	case EGrappleType::E_Launch:
-		Mesh->SetStaticMesh(LaunchMesh);
 		WidgetClass = LaunchWidget;
 		break;
 	case EGrappleType::E_LaunchUp:
-		Mesh->SetStaticMesh(LaunchUpMesh);
 		WidgetClass = LunchUpWidget;
 		break;
 	case EGrappleType::E_Swing:
-		Mesh->SetStaticMesh(SwingMesh);
 		WidgetClass = SwingWidget;
 		break;
 	default:

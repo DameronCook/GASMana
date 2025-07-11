@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "PlayerManaCharacter.h"
 #include "Ability/GA_ManaPlayerHook.h"
+#include "PlayerManaCharacter.h"
 
 UGA_ManaPlayerHook::UGA_ManaPlayerHook()
 {
