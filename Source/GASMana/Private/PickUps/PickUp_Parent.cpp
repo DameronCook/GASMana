@@ -4,8 +4,8 @@
 #include "PickUps/PickUp_Parent.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "../GASManaCharacter.h"
 #include "Components/CapsuleComponent.h"
-
 
 
 // Sets default values
@@ -36,6 +36,16 @@ void APickUp_Parent::OnPickedUp_Implementation(AActor* Picker, UAbilitySystemCom
 			AbilitySystem->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 		}
 	}
+
+	if (!FlashColor.IsNearlyZero())
+	{
+		if (AGASManaCharacter* Char = Cast<AGASManaCharacter>(Picker))
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, "Playing Material Effect");
+			Char->PlayFlashEffect(FlashColor, FlashLength);
+		}
+	}
+
 	Destroy();
 }
 

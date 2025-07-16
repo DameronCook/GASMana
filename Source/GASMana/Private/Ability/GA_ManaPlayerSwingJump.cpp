@@ -41,7 +41,7 @@ void UGA_ManaPlayerSwingJump::ActivateAbility(const FGameplayAbilitySpecHandle H
 
 	if (PlayerCharacter && AbilitySystemComponent && CharacterMovement)
 	{
-		PlayerCharacter->SetDefaultCameraState();
+		PlayerCharacter->SwitchCamaeraState(ECameraState::E_Default);
 		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetSwingJumpEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 		
 		if (PlayerCharacter->GetSwingAbility())

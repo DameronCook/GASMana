@@ -51,7 +51,9 @@ void UGA_ManaPlayerWallRun::ActivateAbility(const FGameplayAbilitySpecHandle Han
 	if (PlayerCharacter && AbilitySystemComponent && CharacterMovement && WallRunComponent)
 	{
 		PlayerCharacter->SetWallRunAbility(this);
-		PlayerCharacter->SetWallRunCameraState(WallRunComponent);
+		PlayerCharacter->SwitchCamaeraState(ECameraState::E_WallRun);
+		//PlayerCharacter->PlayFlashEffect(FVector(0.f, 0.f, 1.f), 2.f); Need to play SOME VFX here when the player is wall running but this ain't it
+
 		/*
 		if (GEngine)
 		{
@@ -121,7 +123,7 @@ void UGA_ManaPlayerWallRun::EndAbility(const FGameplayAbilitySpecHandle Handle, 
 			{
 				PlayerCharacter->SetWallRunAbility(nullptr);
 
-				PlayerCharacter->SetDefaultCameraState();
+				PlayerCharacter->SwitchCamaeraState(ECameraState::E_Default);
 
 				FVector WallNormal = WallRunComponent->GetWallRunImpactNormal().GetSafeNormal();
 				FVector Forward = PlayerCharacter->GetActorForwardVector().GetSafeNormal();

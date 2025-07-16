@@ -46,6 +46,8 @@ class GASMANA_API UAC_HookShot : public UActorComponent
 	UFUNCTION()
 	void SwingTarget(float DeltaTime);
 
+	void PushForceAwayFromWalls(APlayerManaCharacter* PlayerCharacter, FVector PushAwayDirection);
+
 	UPROPERTY()
 	float MaxGrappleDistance;
 
@@ -78,6 +80,8 @@ class GASMANA_API UAC_HookShot : public UActorComponent
 	bool DrawLineToTarget(ACharacter* Character, AActor* OverlappedActor);
 	float CalculateAngleToTarget(ACharacter* Character, AActor* OverlappedActor);
 	void SetCurrentTarget(AManaHookParent* Hook);
+
+
 /// //////////////////////////////////////////
 /// 	Swing Hook Variables & Functions
 
@@ -114,6 +118,7 @@ public:
 	FVector FindSwingLaunchForce(APlayerManaCharacter* Character, float ForwardSpeed, float UpSpeed);
 
 	FORCEINLINE class AManaHookParent* GetCurrentTarget() { return CurrentTarget; }
+	FORCEINLINE FVector GetCharacterInitDir() { return CharacterInitDirection; }
 
 protected:
 	virtual void BeginPlay() override;

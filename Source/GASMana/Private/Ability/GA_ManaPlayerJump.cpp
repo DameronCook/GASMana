@@ -3,7 +3,8 @@
 
 #include "Ability/GA_ManaPlayerJump.h"
 #include "Effect/GE_ManaPlayerAirborne.h"
-#include "../../Public/PlayerManaCharacter.h"
+#include "PlayerManaCharacter.h"
+#include "Abilities/Tasks/AbilityTask_ApplyRootMotionJumpForce.h"
 
 UGA_ManaPlayerJump::UGA_ManaPlayerJump()
 {
@@ -24,12 +25,21 @@ void UGA_ManaPlayerJump::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 	if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))
 	{
 		//First, make the character jump
-		ACharacter* Character = CastChecked<ACharacter>(ActorInfo->AvatarActor.Get());
+		APlayerManaCharacter* Character = CastChecked<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
 
+		
 		Character->ACharacter::Jump();
+
+		//UAbilityTask_ApplyRootMotionJumpForce* JumpTask = UAbilityTask_ApplyRootMotionJumpForce::ApplyRootMotionJumpForce(this, NAME_None, Character->GetActorRotation(), 0.f, 300.f, 1.25f, .5f, true, ERootMotionFinishVelocityMode::MaintainLastRootMotionVelocity, FVector::ZeroVector, 0.f, nullptr, Character->GetJumpCurve());
 
 		//if (GEngine) {
 		//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, "Jump Ability Activated!");
+		//}
+
+		//if (JumpTask)
+		//{
+			//JumpTask->OnFinish.AddDynamic(this, &UGA_ManaPlayerJump::EndAbility);//, <bool, bool, FVector>);
+			//JumpTask->ReadyForActivation();
 		//}
 
 		//Next, Commit the ability

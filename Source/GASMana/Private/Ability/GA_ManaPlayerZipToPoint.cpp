@@ -6,6 +6,8 @@
 #include "PlayerManaCharacter.h"
 #include "Components/AC_HookShot.h"
 #include "Actors/ManaHookParent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+
 
 UGA_ManaPlayerZipToPoint::UGA_ManaPlayerZipToPoint()
 {
@@ -40,6 +42,7 @@ void UGA_ManaPlayerZipToPoint::ActivateAbility(const FGameplayAbilitySpecHandle 
 
 	if (PlayerCharacter && AbilitySystemComponent)
 	{
+		PlayerCharacter->AddActorWorldOffset(FVector(0.f, 0.f, 50.f));
 		PlayerCharacter->SetZipToPointAbility(this);
 		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetZipToPointEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 
@@ -87,9 +90,27 @@ void UGA_ManaPlayerZipToPoint::EndAbility(const FGameplayAbilitySpecHandle Handl
 	{
 		PlayerCharacter->SetZipToPointAbility(nullptr);
 		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetAirborneEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 		FGameplayTagContainer Tags;
 		Tags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsZipToPoint")));
 		AbilitySystemComponent->RemoveActiveEffectsWithGrantedTags(Tags);
+
+	}
+
+	UCharacterMovementComponent* CharMove = PlayerCharacter->GetCharacterMovement();
+
+	if (CharMove)
+	{
+
+		//Launch Character FIRST before we clear out the current target .
+		//Launch in direction of target for added boost to get over small gaps... Listen it makes the game feel better
+		FVector LaunchDir = PlayerCharacter->GetHookShot()->GetCharacterInitDir();
+		LaunchDir *= 1100.f;
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, LaunchDir.ToString());
+
+		CharMove->Launch(FVector(LaunchDir.X, LaunchDir.Y, 950.f));
+
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Orange, "END GRAPPLE CALLED LAUNCH CHARACTER BITCH");
 
 	}
 

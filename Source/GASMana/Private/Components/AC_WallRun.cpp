@@ -4,7 +4,7 @@
 #include "Components/AC_WallRun.h"
 #include "PlayerManaCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values for this component's properties
 UAC_WallRun::UAC_WallRun()
@@ -41,8 +41,9 @@ void UAC_WallRun::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 		bool bIsInAir = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne")));
 		bool bIsWallRunning = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
 		bool bIsWallJumping = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallJumping")));
+		bool bIsZipToPoint = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsZipToPoint")));
 
-		if (AbilitySystem && bIsInAir && !bIsWallRunning && !bIsWallJumping)
+		if (AbilitySystem && bIsInAir && !bIsWallRunning && !bIsWallJumping && !bIsZipToPoint)
 		{
 			if (WallRunCheck(PlayerCharacter, CharMove))
 			{
@@ -58,7 +59,7 @@ void UAC_WallRun::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 		{
 			UpdateWallRunVertical(DeltaTime, PlayerCharacter, WallRunAbility, CharMove);
 
-			PlayerCharacter->SetWallRunCameraState(this);
+			PlayerCharacter->SwitchCamaeraState(ECameraState::E_WallRun);
 
 			bool bForwardHit = ForwardWallRunCheck(PlayerCharacter);
 
@@ -116,16 +117,16 @@ bool UAC_WallRun::WallRunCheck(ACharacter* Character, UCharacterMovementComponen
 	QueryParams.AddIgnoredActor(Character);
 
 	// Draw the debug capsule
+	
 	//DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation, FColor::Red, false, 0.f);
 
 	bool bHit = GetWorld()->SweepSingleByChannel(OutHit, CapsuleLocation, CapsuleLocation, CapsuleRotation, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight), QueryParams);
-
-
 	if (bHit)
 	{
 		//DrawDebugPoint(GetWorld(), OutHit.ImpactPoint, 20, FColor::Green, false, 1.0f);
 		if (CanWallRunOnSurface(OutHit.ImpactNormal, CharMove))
 		{
+			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, "Can Wall Run on Surface!");
 			//Initialize variables based on side of wall here
 			if (IsWallRunningAlongRightSide(OutHit.ImpactNormal, Character))
 			{
@@ -171,17 +172,22 @@ bool UAC_WallRun::CanWallRunOnSurface(FVector ImpactNormal, UCharacterMovementCo
 	//Calculate if the wall we're on is angled down like an overhang 
 	if (ImpactNormal.Z < -.09)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, .2f, FColor::Red, "Overhang detected! Canceling wall run!");
 		return false;
 	}
 
 	//Calculate Surface Angle  of the impact point
-	FVector XYVector = FVector(ImpactNormal.X, ImpactNormal.Y, 0);				//Gives us the XY Plane of the surface normal. Basically it gives us the horizontal plane of the point
-	XYVector.Normalize();														//Enures it's a unit vector		
-	double FloorAngle = acos(XYVector.Dot(ImpactNormal));						//Gives the angle in radians between the two vectors. So the Dot product returns how different the two planes are. 
-	FMath::RadiansToDegrees(FloorAngle);										//Convert to degrees for later implementation
+	FVector XYVector = FVector(ImpactNormal.X, ImpactNormal.Y, 0).GetSafeNormal();				//Gives us the XY Plane of the surface normal. Basically it gives us the horizontal plane of the point
+	float DotProduct = FVector::DotProduct(XYVector, ImpactNormal);
+	double FloorAngle = acos(DotProduct);														//Gives the angle in radians between the two vectors. So the Dot product returns how different the two planes are. 
+	FloorAngle = FMath::RadiansToDegrees(FloorAngle);											//Convert to degrees for later implementation
 
 	//Calculate Angle walkable by the floor
 	double WalkableFloorAngle = CharMove->GetWalkableFloorAngle();
+
+	//GEngine->AddOnScreenDebugMessage(1, 2.f, FColor::Red, FString::Printf(TEXT("Floor Angle: %f"), FloorAngle));
+	//GEngine->AddOnScreenDebugMessage(2, 2.f, FColor::Red, FString::Printf(TEXT("WalkableFloor Angle: %f"), WalkableFloorAngle));
+
 
 	return FloorAngle < WalkableFloorAngle;
 }

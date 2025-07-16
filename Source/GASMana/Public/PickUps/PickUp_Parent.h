@@ -23,4 +23,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
 	class UCapsuleComponent* CapsuleComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flash")
+	FVector FlashColor = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flash")
+	FName FlashParamName = "EffectColor";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flash")
+	FName FlashLengthName = "EffectLength";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flash")
+	float FlashLength = 1.f;
 };

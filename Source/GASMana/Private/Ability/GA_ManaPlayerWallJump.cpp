@@ -44,7 +44,7 @@ void UGA_ManaPlayerWallJump::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 			AbilitySystemComponent->RemoveActiveGameplayEffect(PlayerCharacter->GetWallRunAbility()->GetWallRunEffectHandle());
 
 			PlayerCharacter->GetWallRunAbility()->OnWallRunFinished();
-			PlayerCharacter->SetWallJumpCameraState(WallRunComponent);
+			PlayerCharacter->SwitchCamaeraState(ECameraState::E_WallRun);
 
 			FVector Direction;
 			FVector InputDirection = PlayerCharacter->GetCachedInputDirection().GetSafeNormal();
@@ -74,7 +74,7 @@ void UGA_ManaPlayerWallJump::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 						}*/
 			}
 
-			Direction.Z = 0.3f;
+			Direction.Z = 0.45f;
 
 			float Strength = 600.f; // Adjust as needed
 			float Duration = 0.25f; // Duration in seconds
@@ -107,7 +107,7 @@ void UGA_ManaPlayerWallJump::EndAbility(const FGameplayAbilitySpecHandle Handle,
 	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
 
 
-	PlayerCharacter->SetDefaultCameraState();
+	PlayerCharacter->SwitchCamaeraState(ECameraState::E_Default);
 
 	if (AbilitySystemComponent)
 	{
