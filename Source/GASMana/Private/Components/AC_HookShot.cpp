@@ -103,9 +103,9 @@ void UAC_HookShot::FindAndSetBestTarget(TArray<AActor*, FDefaultAllocator>& OutA
 	for (AActor* overlappedActor : OutActors) {
 		UE_LOG(LogTemp, Log, TEXT("OverlappedActor: %s"), *overlappedActor->GetName());
 		AManaHookParent* CurrentTargetLocal = Cast<AManaHookParent>(overlappedActor);
-
 		if (IsValid(CurrentTargetLocal))
 		{
+			CurrentTargetLocal->SetActive(false);
 			bool bHitHook = DrawLineToTarget(PlayerCharacter, CurrentTargetLocal);
 			if (bHitHook)
 			{
@@ -114,20 +114,20 @@ void UAC_HookShot::FindAndSetBestTarget(TArray<AActor*, FDefaultAllocator>& OutA
 				{
 					BestAngle = CurrentAngle;
 					BestTarget = CurrentTargetLocal;
-					GEngine->AddOnScreenDebugMessage(2, .1f, FColor::Green, FString::Printf(TEXT("Setting Best Target")));
+					//GEngine->AddOnScreenDebugMessage(2, .1f, FColor::Green, FString::Printf(TEXT("Setting Best Target")));
 					CurrentTarget = BestTarget;
 				}
 			}
 		}
 	}
 
-	GEngine->AddOnScreenDebugMessage(1, .1f, FColor::Green, FString::Printf(TEXT("Best Angle: %f"), BestAngle));
+	//GEngine->AddOnScreenDebugMessage(3, .1f, FColor::Green, FString::Printf(TEXT("Best Angle: %f"), BestAngle));
 
 	if (BestAngle > 1.2f)
 	{
 		BestTarget->SetActive(false);
 		BestTarget = NULL;
-		GEngine->AddOnScreenDebugMessage(2, .1f, FColor::Red, FString::Printf(TEXT("Returning NULL AHAHAHAHA")));
+		//GEngine->AddOnScreenDebugMessage(4, .1f, FColor::Red, FString::Printf(TEXT("Returning NULL AHAHAHAHA")));
 
 	}
 	SetCurrentTarget(BestTarget);
@@ -196,8 +196,10 @@ void UAC_HookShot::NearTarget()
 				GrappleState = EGrappleState::E_SwingTarget;
 				CharMove->MaxWalkSpeed = 1600.f;
 				CharMove->GravityScale = 3.f;
+				//CharMove->Launch(FVector::UpVector * 10000.f);
 				OptimalSwingPoint = FindOptimalSwingPoint(PlayerCharacter);
 				SwingTargetLocation = CurrentTarget->GetActorLocation();
+				CharacterInitDirection = (SwingTargetLocation - PlayerCharacter->GetActorLocation()).GetSafeNormal();
 				break;
 			default:
 				GrappleState = EGrappleState::E_ZipToPointTarget;
@@ -226,7 +228,8 @@ void UAC_HookShot::ZipToPointTarget(float DeltaTime)
 		FCollisionQueryParams QueryParams;
 
 		// Draw the debug capsule
-		DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation, FColor::Red, false, 0.f);
+		
+		//DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation, FColor::Red, false, 0.f);
 
 		bool bHit = GetWorld()->SweepSingleByChannel(OutHit, CapsuleLocation, CapsuleLocation, CapsuleRotation, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight), QueryParams);
 
@@ -246,6 +249,7 @@ void UAC_HookShot::ZipToPointTarget(float DeltaTime)
 
 					}
 				}
+
 			}
 			else
 			{
@@ -336,31 +340,14 @@ void UAC_HookShot::SwingTarget(float DeltaTime)
 
 			//GEngine->AddOnScreenDebugMessage(3, 0.1f, FColor::Red, SwingMovementForce.ToString());
 
-			CharMove->AddForce(SwingMovementForce); // <---- Okay, maybe we need to multiply by mass? CharMove->Mass
+			CharMove->AddForce(SwingMovementForce);
 
 
 			// Okay cast a line down and whenever the player is just above the ground, offset their position so that they won't hit it at the bottom of a swing
-			FHitResult OutLineHit;
-
-			// Line parameters
-			const FVector LineStartLocation = PlayerCharacter->GetActorLocation();
-			const float LineTraceLength = 300.f;
-			const FVector LineEndLocation = PlayerCharacter->GetActorLocation() + (PlayerCharacter->GetActorUpVector() * -LineTraceLength);
-
-			//Trace Parameters
-			FCollisionQueryParams LineQueryParams;
-			LineQueryParams.AddIgnoredActor(PlayerCharacter);
-
-			//DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
-			bool bBottomLineHit = GetWorld()->LineTraceSingleByChannel(OutLineHit, LineStartLocation, LineEndLocation, ECollisionChannel::ECC_Visibility, LineQueryParams);
-
-			if (bBottomLineHit)
-			{
-				//GEngine->AddOnScreenDebugMessage(8, 0.1f, FColor::Purple, "I should be OFFSETTING THE PLAYER Z AAAAAAAAAA");
-				float AddOffset = UKismetMathLibrary::MapRangeClamped(OutLineHit.Distance, 0.f, LineTraceLength, 25.f, 1.f);
-
-				PlayerCharacter->AddActorWorldOffset(FVector(0.f, 0.f, AddOffset));
-			}
+			PushForceAwayFromWalls(PlayerCharacter, PlayerCharacter->GetActorUpVector() * -1);
+			PushForceAwayFromWalls(PlayerCharacter, PlayerCharacter->GetActorForwardVector());
+			PushForceAwayFromWalls(PlayerCharacter, PlayerCharacter->GetActorRightVector());
+			PushForceAwayFromWalls(PlayerCharacter, PlayerCharacter->GetActorRightVector() * -1);
 
 			//Also, let's rotate the player in the direction of the swing force
 			FRotator CharacterRotation = FindCharacterRotation(PlayerCharacter, DeltaTime);
@@ -409,6 +396,31 @@ void UAC_HookShot::SwingTarget(float DeltaTime)
 				}
 			}
 		}
+	}
+}
+
+void UAC_HookShot::PushForceAwayFromWalls(APlayerManaCharacter* PlayerCharacter, FVector PushAwayDirection)
+{
+	FHitResult OutLineHit;
+
+	// Line parameters
+	const FVector LineStartLocation = PlayerCharacter->GetActorLocation();
+	const float LineTraceLength = 300.f;
+	const FVector LineEndLocation = PlayerCharacter->GetActorLocation() + (PushAwayDirection * LineTraceLength);
+
+	//Trace Parameters
+	FCollisionQueryParams LineQueryParams;
+	LineQueryParams.AddIgnoredActor(PlayerCharacter);
+
+	//DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
+	bool bBottomLineHit = GetWorld()->LineTraceSingleByChannel(OutLineHit, LineStartLocation, LineEndLocation, ECollisionChannel::ECC_Visibility, LineQueryParams);
+
+	if (bBottomLineHit)
+	{
+		//GEngine->AddOnScreenDebugMessage(8, 0.1f, FColor::Purple, "I should be OFFSETTING THE PLAYER Z AAAAAAAAAA");
+		float AddOffset = UKismetMathLibrary::MapRangeClamped(OutLineHit.Distance, 0.f, LineTraceLength, 25.f, 1.f);
+
+		PlayerCharacter->AddActorWorldOffset(FVector(0.f, 0.f, AddOffset));
 	}
 }
 
@@ -558,7 +570,6 @@ void UAC_HookShot::EndGrapple()
 	{
 		CharMove->MaxWalkSpeed = 700.f;
 		CharMove->GravityScale = 2.f;
-
 	}
 }
 

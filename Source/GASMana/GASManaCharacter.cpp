@@ -22,6 +22,7 @@ AGASManaCharacter::AGASManaCharacter()
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 
 	Attributes = CreateDefaultSubobject<UManaAttributeSet>(TEXT("Attributes"));
+
 }
 
 void AGASManaCharacter::AddEquipment(FName SocketName, TSubclassOf<AManaEquipmentParent> EquipmentClass)
@@ -53,6 +54,18 @@ void AGASManaCharacter::OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedCom
 		UE_LOG(LogTemp, Warning, TEXT("OtherActor: %s"), *GetNameSafe(OtherActor));
 		UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
 		II_PickUpInterface::Execute_OnPickedUp(OtherActor, this, AbilitySystem);
+	}
+}
+
+void AGASManaCharacter::PlayFlashEffect(FVector InColor, float FlashLength)
+{
+	USkeletalMeshComponent* CharMesh = GetMesh();
+
+	if (CharMesh)
+	{
+		CharMesh->SetVectorParameterValueOnMaterials("EffectColor", InColor);
+		CharMesh->SetScalarParameterValueOnMaterials("StartTime", GetWorld()->GetTimeSeconds());
+		CharMesh->SetScalarParameterValueOnMaterials("EffectLength", FlashLength);
 	}
 }
 

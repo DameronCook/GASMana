@@ -239,6 +239,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Curves", meta = (AllowPrivateAccess = "true"))
 	UCurveFloat* ZipToPointCurveFloat;
 
+	/** Jump MovementCurve */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Curves", meta = (AllowPrivateAccess = "true"))
+	UCurveFloat* JumpCurveFloat;
+
 	//////////////////////////////////////////////////////////////////////////
 	// Object References (Liable to move)
 
@@ -348,6 +352,9 @@ public:
 	//////////////////////////////////////
 	//Camera States
 
+	UFUNCTION(Category = "CAMERA")
+	void SwitchCamaeraState(ECameraState NewState);
+	/*
 	UFUNCTION(Category = "Camera")
 	void SetDefaultCameraState();
 
@@ -368,6 +375,8 @@ public:
 
 	UFUNCTION(Category = "Camera")
 	void SetShieldCameraState();
+
+	*/
 
 	//////////////////////////////////////
 	//Getters
@@ -406,6 +415,7 @@ public:
 	FORCEINLINE UAnimMontage* GetAttackMontage() const { return AttackMontage; }
 	FORCEINLINE UCurveFloat* GetDiveRollCurveFloat() const { return DiveRollCurveFloat; }
 	FORCEINLINE UCurveFloat* GetZipToPointCurveFloat() const { return ZipToPointCurveFloat; }
+	FORCEINLINE UCurveFloat* GetJumpCurve() const { return JumpCurveFloat; }
 
 	//Input Actions
 	FORCEINLINE UInputAction* GetMoveAction() const { return MoveAction; }

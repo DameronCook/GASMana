@@ -67,7 +67,6 @@ protected:
 	/* Runs on begin overlap */
 	UFUNCTION(BlueprintCallable, Category = "Overlap")
 	virtual void OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
 public:
 
 
@@ -75,7 +74,9 @@ public:
 	virtual void OnRep_PlayerState() override;
 	virtual void InitializeAttributes();
 	virtual void GiveDefaultAbilities();
-
+	
+	UFUNCTION(BlueprintCallable)
+	void PlayFlashEffect(FVector InColor, float FlashLength);
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Abilities")
 	TSubclassOf<class UGameplayEffect> DefaultAttributeEffect;

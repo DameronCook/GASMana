@@ -111,41 +111,12 @@ void APlayerManaCharacter::BeginPlay()
 	UpdateStaminaRegen();
 
 
-	SetDefaultCameraState();
+	SwitchCamaeraState(ECameraState::E_Default);
 }
 
 void APlayerManaCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-
-	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
-
-	if (IsValid(ActiveZipAbility))
-	{
-		SetZipToPointCameraState();
-	}
-
-	if (IsValid(ActiveSwingAbility))
-	{
-		SetSwingCameraState();
-	}
-
-	//Manually handle camera while player "Is Free"
-	bool bIsFree = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree")));
-
-	if (bIsFree)
-	{
-		bool bIsBlocking = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsBlocking")));
-		bool bIsRunning = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsRunning")));
-
-		if (bIsBlocking && !bIsRunning)
-		{
-			SetShieldCameraState();
-			return;
-		}
-		SetDefaultCameraState();
-	}
 
 }
 
@@ -345,6 +316,12 @@ float APlayerManaCharacter::GetManaAsRatio_Implementation() const
 
 //////////////////// -- Camera States -- \\\\\\\\\\\\\\\\\\\\\\\
 
+void APlayerManaCharacter::SwitchCamaeraState(ECameraState NewState)
+{
+	AdvancedCameraComponent->CamState = NewState;
+}
+
+/*
 void APlayerManaCharacter::SetDefaultCameraState()
 {
 
@@ -407,7 +384,7 @@ void APlayerManaCharacter::SetWallRunCameraState(UAC_WallRun* WallRun)
 
 	float newRoll = (WallRun->GetWallRunSide() == EWallRunSide::Right) ? -15.f : 15.f;
 	float newYaw = (WallRun->GetWallRunSide() == EWallRunSide::Right) ? 10.f : -10.f;
-	float newPitch = -25.f;
+	float newPitch = 0.f;
 
 	FRotator WallRunCameraRotation = GetActorForwardVector().Rotation();
 
@@ -468,7 +445,7 @@ void APlayerManaCharacter::SetShieldCameraState()
 
 	AdvancedCameraComponent->SetCameraState(ShieldState, 10.f);
 }
-
+*/
 void APlayerManaCharacter::OnBlockingTagChanged(const FGameplayTag Tag, int32 NewCount)
 {
     // Tag was removed if NewCount == 0
@@ -681,6 +658,7 @@ void APlayerManaCharacter::Hook(const FInputActionValue& Value)
 	if (HookShot->GetCurrentTarget())
 	{
 		GetAbilitySystemComponent()->TryActivateAbilitiesByTag(HookTagContainer, true);
+		PlayFlashEffect(FVector(0.f, 0.f, 1.f), .5f);
 	}
 }
 
