@@ -12,4 +12,5 @@ AGASManaGameMode::AGASManaGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+
 }

@@ -2,6 +2,32 @@
 
 
 #include "ManaPlayerAnimInstance.h"
+#include "PlayerManaCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+
+
+void UManaPlayerAnimInstance::NativeInitializeAnimation()
+{
+	Super::NativeInitializeAnimation();
+
+	ManaCharacter = Cast<APlayerManaCharacter>(TryGetPawnOwner());
+	if (ManaCharacter)
+	{
+		ManaMovementComponent = ManaCharacter->GetCharacterMovement();
+	}
+}
+
+void UManaPlayerAnimInstance::NativeUpdateAnimation(float DeltaTime)
+{
+	Super::NativeUpdateAnimation(DeltaTime);
+
+	if (ManaMovementComponent)
+	{
+		GroundSpeed = (UKismetMathLibrary::VSizeXY(ManaMovementComponent->Velocity));
+		isFalling = ManaMovementComponent->IsFalling();
+	}
+}
 
 void UManaPlayerAnimInstance::SetIsBlocking(bool bBlocking)
 {
@@ -31,4 +57,3 @@ void UManaPlayerAnimInstance::SetIsRunning(bool bRunning)
 	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("bIsRunning: %s"), bIsRunning ? TEXT("true") : TEXT("false")));
 	//}
 }
-

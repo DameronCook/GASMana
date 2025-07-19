@@ -42,6 +42,7 @@ class GASMANA_API UAdvancedCameraComponent : public UActorComponent
 
 	bool ChangeCamera = false;
 
+
 	UFUNCTION(Category = "Camera")
 	void SetDefaultCameraState(APlayerManaCharacter* PlayerCharacter);
 
