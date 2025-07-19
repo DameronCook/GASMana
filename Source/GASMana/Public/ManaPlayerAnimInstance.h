@@ -25,7 +25,23 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Moving")
 	bool bIsRunning = false;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Blocking")
+	float GroundSpeed = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Blocking")
+	bool isFalling = false;
+
 public:
+	virtual void NativeInitializeAnimation() override;
+	virtual void NativeUpdateAnimation(float DeltaTime) override;
+
+	UPROPERTY(BlueprintReadOnly)
+	class APlayerManaCharacter* ManaCharacter;
+
+	UPROPERTY(BlueprintReadOnly)
+	class UCharacterMovementComponent* ManaMovementComponent;
+
+
 	UFUNCTION(BlueprintCallable, Category = "Blocking")
 	void SetIsBlocking(bool bBlocking);
 	

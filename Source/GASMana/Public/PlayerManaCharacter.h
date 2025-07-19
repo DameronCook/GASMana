@@ -6,6 +6,8 @@
 #include "../GASManaCharacter.h"
 #include "../../GameplayTags/Classes/GameplayTagContainer.h"
 #include "Interface/I_ProgressBarInterface.h"
+#include "Interface/CameraActorInterface.h"
+#include "Interface/PlayerCharacterInterface.h"
 #include "Ability/GA_ManaPlayerWallRun.h"
 #include "Ability/GA_ManaPlayerMantle.h"
 #include "Ability/GA_ManaPlayerZipToPoint.h"
@@ -25,7 +27,7 @@ struct FInputActionValue;
 struct FGameplayTagContainer;
 
 UCLASS()
-class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_ProgressBarInterface
+class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_ProgressBarInterface, public ICameraActorInterface, public IPlayerCharacterInterface 
 {
 	GENERATED_BODY()
 
@@ -291,6 +293,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	//Other
 	float OriginalGravityScale = 2.0;
 
+
+	AManaCameraModificationVolume* CurrentCameraModificationVolume;
+
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -354,29 +360,10 @@ public:
 
 	UFUNCTION(Category = "CAMERA")
 	void SwitchCamaeraState(ECameraState NewState);
-	/*
-	UFUNCTION(Category = "Camera")
-	void SetDefaultCameraState();
 
-	UFUNCTION(Category = "Camera")
-	void SetWallRunCameraState(UAC_WallRun* WallRun);
-
-	UFUNCTION(Category = "Camera")
-	void SetZipToPointCameraState();
-
-	UFUNCTION(Category = "Camera")
-	void SetSwingCameraState();
-
-	UFUNCTION(Category = "Camera")
-	void SetRollCameraState();
-
-	UFUNCTION(Category = "Camera")
-	void SetWallJumpCameraState(UAC_WallRun* WallRun);
-
-	UFUNCTION(Category = "Camera")
-	void SetShieldCameraState();
-
-	*/
+	virtual AManaCameraModificationVolume* GetCurrentCameraModificationVolume() const override;
+	virtual void SetCurrentCameraModificationVolume(AManaCameraModificationVolume* InCurrentCameraModificationVolume) override;
+	virtual bool GotMovementInput() const override;
 
 	//////////////////////////////////////
 	//Getters

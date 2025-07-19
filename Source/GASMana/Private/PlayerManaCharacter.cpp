@@ -6,7 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/SpringArmComponent.h"
+#include "Camera/ManaSpringArmComponent.h"
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -48,7 +48,7 @@ APlayerManaCharacter::APlayerManaCharacter()
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	CameraBoom = CreateDefaultSubobject<UManaSpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
@@ -321,131 +321,21 @@ void APlayerManaCharacter::SwitchCamaeraState(ECameraState NewState)
 	AdvancedCameraComponent->CamState = NewState;
 }
 
-/*
-void APlayerManaCharacter::SetDefaultCameraState()
+AManaCameraModificationVolume* APlayerManaCharacter::GetCurrentCameraModificationVolume() const
 {
-
-	// Restore normal camera control
-	//CameraBoom->bUsePawnControlRotation = true;
-	//CameraBoom->SetRelativeRotation(FRotator::ZeroRotator);
-	CameraBoom->bDoCollisionTest = true;
-
-	// In PlayerManaCharacter.cpp, when wall run ends:
-	FCameraState DefaultState;
-	DefaultState.TargetArmLength = 400.f;
-	DefaultState.CameraRotation = FRotator(GetControlRotation().Pitch, GetControlRotation().Yaw, 0.f);
-	DefaultState.CameraFOV = 90.f;
-
-	AdvancedCameraComponent->SetCameraState(DefaultState, 5.f);
+	return CurrentCameraModificationVolume;
 }
 
-void APlayerManaCharacter::SetZipToPointCameraState()
+void APlayerManaCharacter::SetCurrentCameraModificationVolume(AManaCameraModificationVolume* InCurrentCameraModificationVolume)
 {
-	//CameraBoom->bUsePawnControlRotation = false;
-	CameraBoom->bDoCollisionTest = false;
-	
-
-	FRotator AngleToTarget = GetActorForwardVector().Rotation();
-
-	if (GetHookShot() && GetHookShot()->GetCurrentTarget())
-	{
-		FVector DirectionToTarget = (GetHookShot()->GetCurrentTarget()->GetActorLocation() - GetActorLocation()).GetSafeNormal();
-		AngleToTarget = DirectionToTarget.Rotation();
-	}
-
-	FRotator ZipToPointCameraRotation = AngleToTarget;
-
-	FCameraState ZipToPointState;
-	ZipToPointState.TargetArmLength = 1.f;
-	ZipToPointState.CameraRotation = ZipToPointCameraRotation;
-	ZipToPointState.CameraFOV = 100.f;
-
-	AdvancedCameraComponent->SetCameraState(ZipToPointState, 4.f);
+	CurrentCameraModificationVolume = InCurrentCameraModificationVolume;
 }
 
-void APlayerManaCharacter::SetSwingCameraState()
+bool APlayerManaCharacter::GotMovementInput() const
 {
-	CameraBoom->bDoCollisionTest = true;
-	FRotator AngleToTarget = GetActorForwardVector().Rotation();
-
-	// In PlayerManaCharacter.cpp, when wall run ends:
-	FCameraState SwingState;
-	SwingState.TargetArmLength = 750.f;
-	SwingState.CameraRotation = AngleToTarget;//FRotator(GetControlRotation().Pitch, GetControlRotation().Yaw, 0.f);
-	SwingState.CameraFOV = 90.f;
-
-	AdvancedCameraComponent->SetCameraState(SwingState, 20.f);
+	return (!CachedInputDirection.IsNearlyZero());
 }
 
-void APlayerManaCharacter::SetWallRunCameraState(UAC_WallRun* WallRun)
-{
-	//CameraBoom->bUsePawnControlRotation = false;
-	CameraBoom->bDoCollisionTest = false;
-
-	float newRoll = (WallRun->GetWallRunSide() == EWallRunSide::Right) ? -15.f : 15.f;
-	float newYaw = (WallRun->GetWallRunSide() == EWallRunSide::Right) ? 10.f : -10.f;
-	float newPitch = 0.f;
-
-	FRotator WallRunCameraRotation = GetActorForwardVector().Rotation();
-
-	WallRunCameraRotation.Pitch += newPitch;
-	WallRunCameraRotation.Yaw += newYaw;
-	WallRunCameraRotation.Roll += newRoll;
-
-	FCameraState WallRunState;
-	WallRunState.TargetArmLength = 125.f;
-	WallRunState.CameraRotation = WallRunCameraRotation;
-	WallRunState.CameraFOV = 110.f; 
-
-	AdvancedCameraComponent->SetCameraState(WallRunState, 5.f);
-}
-
-void APlayerManaCharacter::SetRollCameraState()
-{
-	FRotator RollCameraRotation = GetActorForwardVector().Rotation();
-
-	RollCameraRotation.Pitch -= 15.f;
-	RollCameraRotation.Roll = 0.f;
-
-	FCameraState RollState;
-	RollState.TargetArmLength = 150.f;
-	RollState.CameraRotation = RollCameraRotation;
-	RollState.CameraFOV = 100.f;
-
-	AdvancedCameraComponent->SetCameraState(RollState, 7.f);
-}
-
-void APlayerManaCharacter::SetWallJumpCameraState(UAC_WallRun* WallRun)
-{
-	FRotator JumpCameraRotation = GetActorForwardVector().Rotation();
-
-	JumpCameraRotation.Yaw += (WallRun->GetWallRunSide() == EWallRunSide::Right) ? -90.f : 90.f;
-	JumpCameraRotation.Roll = 0.f;
-
-	FCameraState JumpState;
-	JumpState.TargetArmLength = 10.f;
-	JumpState.CameraRotation = JumpCameraRotation;
-	JumpState.CameraFOV = 120.f;
-
-	AdvancedCameraComponent->SetCameraState(JumpState, 20.f);
-}
-
-void APlayerManaCharacter::SetShieldCameraState()
-{
-	FRotator ShieldCamRot = GetActorForwardVector().Rotation();
-
-	ShieldCamRot.Pitch -= 10.f;
-	ShieldCamRot.Roll = 0.f;
-
-
-	FCameraState ShieldState;
-	ShieldState.TargetArmLength = 250.f;
-	ShieldState.CameraRotation = ShieldCamRot;
-	ShieldState.CameraFOV = 90.f;
-
-	AdvancedCameraComponent->SetCameraState(ShieldState, 10.f);
-}
-*/
 void APlayerManaCharacter::OnBlockingTagChanged(const FGameplayTag Tag, int32 NewCount)
 {
     // Tag was removed if NewCount == 0
