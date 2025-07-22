@@ -31,7 +31,7 @@ bool UManaCameraModifier::ProcessViewRotation(AActor* ViewTarget, float DeltaTim
 		return false;
 	}
 
-	if (PlayerController->RotationInput.IsNearlyZero(THRESH_QUAT_NORMALIZED))
+	if (!PlayerController->RotationInput.IsNearlyZero(THRESH_QUAT_NORMALIZED))
 	{
 		CooldownRemaining = CooldownAfterPlayerInput;
 		return false;
