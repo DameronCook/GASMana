@@ -7,6 +7,7 @@
 #include "../../GameplayTags/Classes/GameplayTagContainer.h"
 #include "Interface/I_ProgressBarInterface.h"
 #include "Interface/CameraActorInterface.h"
+#include "Interface/TargetingActorInterface.h"
 #include "Interface/PlayerCharacterInterface.h"
 #include "Ability/GA_ManaPlayerWallRun.h"
 #include "Ability/GA_ManaPlayerMantle.h"
@@ -27,7 +28,7 @@ struct FInputActionValue;
 struct FGameplayTagContainer;
 
 UCLASS()
-class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_ProgressBarInterface, public ICameraActorInterface, public IPlayerCharacterInterface 
+class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_ProgressBarInterface, public ICameraActorInterface, public IPlayerCharacterInterface , public ITargetingActorInterface
 {
 	GENERATED_BODY()
 
@@ -364,6 +365,10 @@ public:
 	virtual AManaCameraModificationVolume* GetCurrentCameraModificationVolume() const override;
 	virtual void SetCurrentCameraModificationVolume(AManaCameraModificationVolume* InCurrentCameraModificationVolume) override;
 	virtual bool GotMovementInput() const override;
+
+	virtual bool IsSelectingTarget();
+	virtual AActor* GetCurrentTarget();
+	virtual FVector2D GetCurrentTargetSelectionInput();
 
 	//////////////////////////////////////
 	//Getters

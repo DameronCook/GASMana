@@ -39,8 +39,9 @@ bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewI
 	NewLocation = Result.bBlockingHit ? Result.Location : DesiredLocation;
 
 
-	GEngine->AddOnScreenDebugMessage(7, .1f, FColor::Purple, DesiredLocation.ToString());
-	GEngine->AddOnScreenDebugMessage(8, .1f, FColor::Purple, FString::Printf(TEXT("Pitch to Dist: %f"), PitchToDist));
+	//GEngine->AddOnScreenDebugMessage(7, .1f, FColor::Purple, DesiredLocation.ToString());
+	//GEngine->AddOnScreenDebugMessage(8, .1f, FColor::Purple, FString::Printf(TEXT("Desired length based on pitch: %f"), PitchToDist));
+	//GEngine->AddOnScreenDebugMessage(9, .1f, FColor::Purple, FString::Printf(TEXT("Actual Current Length: %f"), CamManager->));
 
 	InOutPOV.Location = NewLocation;
 	InOutPOV.FOV += PitchToFOV;

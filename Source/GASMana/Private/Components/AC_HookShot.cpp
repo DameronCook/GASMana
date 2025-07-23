@@ -92,6 +92,11 @@ void UAC_HookShot::Inactive()
 		FindAndSetBestTarget(OutActors, PlayerCharacter);
 		//GEngine->AddOnScreenDebugMessage(1, .1f, FColor::Green, FString::Printf(TEXT("Calling Find and set best target!!!")));
 
+		if (IsValid(CurrentTarget))
+		{
+			PlayerCharacter->IsSelectingTarget();
+			PlayerCharacter->GetCurrentTarget();
+		}
 	}
 }
 

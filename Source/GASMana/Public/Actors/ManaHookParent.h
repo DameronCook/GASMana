@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
 #include "Materials/MaterialInterface.h"
+#include "Interface/TargetingActorInterface.h"
 #include "ManaHookParent.generated.h"
 
 UENUM(BlueprintType)
@@ -20,7 +21,7 @@ enum class EGrappleType : uint8
 class UWidgetComponent;
 
 UCLASS()
-class GASMANA_API AManaHookParent : public AActor
+class GASMANA_API AManaHookParent : public AActor, public ITargetingActorInterface
 {
 	GENERATED_BODY()
 
@@ -76,6 +77,9 @@ public:
 
 	FORCEINLINE EGrappleType GetGrappleType() { return GrappleType; }
 
+	virtual bool IsSelectingTarget();
+	virtual AActor* GetCurrentTarget();
+	virtual FVector2D GetCurrentTargetSelectionInput();
 
 protected:
 	virtual void BeginPlay() override;
