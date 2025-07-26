@@ -29,4 +29,8 @@ protected:
 	//Curve to convert changes in pitch to changes in FOV
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Custom, meta = (AllowAbstract = "true"))
 	UCurveFloat* PitchToFOVCurve;
+
+private:
+	float CurrentPitchToDist;
+	float CurrentAddFOV;
 };

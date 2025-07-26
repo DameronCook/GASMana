@@ -23,7 +23,7 @@ UAC_HookShot::UAC_HookShot()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	GrappleState = EGrappleState::E_Inactive;
-	MaxGrappleDistance = 2000.f;
+	MaxGrappleDistance = 2500.f;
 	PrimaryComponentTick.TickGroup = ETickingGroup::TG_PrePhysics;
 }
 
@@ -94,8 +94,13 @@ void UAC_HookShot::Inactive()
 
 		if (IsValid(CurrentTarget))
 		{
-			PlayerCharacter->IsSelectingTarget();
-			PlayerCharacter->GetCurrentTarget();
+			PlayerCharacter->SelectTarget(true);
+			PlayerCharacter->SetCurrentTarget(CurrentTarget);
+		}
+		else
+		{
+			PlayerCharacter->SelectTarget(false);
+			PlayerCharacter->SetCurrentTarget(nullptr);
 		}
 	}
 }
@@ -142,7 +147,7 @@ void UAC_HookShot::SetCurrentTarget(AManaHookParent* Hook)
 {
 	if (IsValid(Hook))
 	{
-		GEngine->AddOnScreenDebugMessage(3, .1f, FColor::Green, FString::Printf(TEXT("Current target should be set")));
+		//GEngine->AddOnScreenDebugMessage(3, .1f, FColor::Green, FString::Printf(TEXT("Current target should be set")));
 		if (IsValid(CurrentTarget))
 		{
 			CurrentTarget->SetActive(false);
@@ -152,7 +157,7 @@ void UAC_HookShot::SetCurrentTarget(AManaHookParent* Hook)
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(3, .1f, FColor::Green, FString::Printf(TEXT("Current hook must be null then")));
+		//GEngine->AddOnScreenDebugMessage(3, .1f, FColor::Green, FString::Printf(TEXT("Current hook must be null then")));
 
 		if (IsValid(CurrentTarget))
 		{

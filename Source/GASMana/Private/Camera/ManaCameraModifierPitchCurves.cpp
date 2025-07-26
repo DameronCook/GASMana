@@ -25,26 +25,56 @@ bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewI
 	const FRotator CamRotation = InOutPOV.Rotation;
 
 	//Apply curves
-	const float PitchToDist = IsValid(PitchToDistanceCurve) ? PitchToDistanceCurve->GetFloatValue(CamRotation.Pitch) : 0.f;
-	const float PitchToFOV = IsValid(PitchToFOVCurve) ? PitchToFOVCurve->GetFloatValue(CamRotation.Pitch) : 0.f;
+	float TargetPitchToDist = IsValid(PitchToDistanceCurve) ? PitchToDistanceCurve->GetFloatValue(CamRotation.Pitch) : 0.f;
+	float AddFOV = IsValid(PitchToFOVCurve) ? PitchToFOVCurve->GetFloatValue(CamRotation.Pitch) : 0.f;
 
-	const FVector DesiredLocation = CamLocation - CamRotation.RotateVector(FVector::ForwardVector) * PitchToDist;
+	float InterpSpeed = 5.f;
 
-	FVector NewLocation;
+	if (WallRunning)
+	{
+		TargetPitchToDist = 50.f;
+	}
+
+	if (IsZipToPoint)
+	{
+		TargetPitchToDist = 10.f;
+		InterpSpeed = 10.f;
+		AddFOV = 10.f;
+	}
+
+	if (IsRoll)
+	{
+		TargetPitchToDist = 150.f;
+		InterpSpeed = 5.f;
+		AddFOV = 10.f;
+	}
+
+	if (IsBlocking)
+	{
+		TargetPitchToDist = 250.f;
+		InterpSpeed = 5.f;
+		AddFOV = 10.f;
+	}
+
+	CurrentPitchToDist = FMath::FInterpTo(CurrentPitchToDist, TargetPitchToDist, DeltaTime, InterpSpeed);
+	CurrentAddFOV = FMath::FInterpTo(CurrentAddFOV, AddFOV, DeltaTime, InterpSpeed);
+
+	FVector DesiredLocation = CamLocation - CamRotation.RotateVector(FVector::ForwardVector) * CurrentPitchToDist;
+
 	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(SpringArm), false, GetViewTarget());
 	FHitResult Result;
 
 	GetWorld()->SweepSingleByChannel(Result, GetViewTarget()->GetActorLocation(), DesiredLocation, FQuat::Identity, CamManager->LineOfSightProbeChannel, FCollisionShape::MakeSphere(CamManager->LineOfSightProbeSize), QueryParams);
 
-	NewLocation = Result.bBlockingHit ? Result.Location : DesiredLocation;
+	DesiredLocation = Result.bBlockingHit ? Result.Location : DesiredLocation;
 
 
 	//GEngine->AddOnScreenDebugMessage(7, .1f, FColor::Purple, DesiredLocation.ToString());
-	//GEngine->AddOnScreenDebugMessage(8, .1f, FColor::Purple, FString::Printf(TEXT("Desired length based on pitch: %f"), PitchToDist));
+	GEngine->AddOnScreenDebugMessage(8, .1f, FColor::Purple, FString::Printf(TEXT("Desired length based on pitch: %f"), TargetPitchToDist));
 	//GEngine->AddOnScreenDebugMessage(9, .1f, FColor::Purple, FString::Printf(TEXT("Actual Current Length: %f"), CamManager->));
 
-	InOutPOV.Location = NewLocation;
-	InOutPOV.FOV += PitchToFOV;
+	InOutPOV.Location = DesiredLocation;
+	InOutPOV.FOV += CurrentAddFOV;
 
 	return false;
 }

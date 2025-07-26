@@ -14,13 +14,12 @@
 #include "Ability/GA_ManaPlayerZipToPoint.h"
 #include "Ability/GA_ManaPlayerSwing.h"
 #include "Ability/GA_ManaPlayerHook.h"
-#include "Components/AdvancedCameraComponent.h"
 #include "Components/AC_HookShot.h"
 #include "Components/AC_WallRun.h"
 #include "PlayerManaCharacter.generated.h"
 
 
-class USpringArmComponent;
+class UManaSpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
@@ -37,15 +36,11 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	USpringArmComponent* CameraBoom;
+	UManaSpringArmComponent* CameraBoom;
 
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
-
-	/** Camera Controller Component */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	UAdvancedCameraComponent* AdvancedCameraComponent;
 
 	/** Hook Shot Component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hooks, meta = (AllowPrivateAccess = "true"))
@@ -294,8 +289,11 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	//Other
 	float OriginalGravityScale = 2.0;
 
-
+	//Cam stuff....
 	AManaCameraModificationVolume* CurrentCameraModificationVolume;
+
+	bool bShouldAddCameraTarget = false;
+	AActor* CurrentCamTarget = nullptr;
 
 
 protected:
@@ -357,24 +355,23 @@ public:
 	virtual float GetManaAsRatio_Implementation() const override;
 
 	//////////////////////////////////////
-	//Camera States
-
-	UFUNCTION(Category = "CAMERA")
-	void SwitchCamaeraState(ECameraState NewState);
+	//Camera Functions
 
 	virtual AManaCameraModificationVolume* GetCurrentCameraModificationVolume() const override;
 	virtual void SetCurrentCameraModificationVolume(AManaCameraModificationVolume* InCurrentCameraModificationVolume) override;
 	virtual bool GotMovementInput() const override;
 
-	virtual bool IsSelectingTarget();
-	virtual AActor* GetCurrentTarget();
-	virtual FVector2D GetCurrentTargetSelectionInput();
+	virtual bool SelectTarget(bool SelectTarget) override;
+	virtual AActor* SetCurrentTarget(AActor* CurrentTarget) override;
+	virtual AActor* GetCurrentTarget() const override;
+	virtual bool IsSelectingTarget() const override;
+
 
 	//////////////////////////////////////
 	//Getters
 	// 
 	//Components
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	FORCEINLINE class UManaSpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE class UAC_HookShot* GetHookShot() const { return HookShotComponent; }
 	FORCEINLINE class UAC_WallRun* GetWallRun() const { return WallRunComponent; }

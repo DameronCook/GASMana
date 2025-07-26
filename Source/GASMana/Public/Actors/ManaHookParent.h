@@ -21,7 +21,7 @@ enum class EGrappleType : uint8
 class UWidgetComponent;
 
 UCLASS()
-class GASMANA_API AManaHookParent : public AActor, public ITargetingActorInterface
+class GASMANA_API AManaHookParent : public AActor
 {
 	GENERATED_BODY()
 
@@ -76,10 +76,6 @@ public:
 	TObjectPtr<UWidgetComponent> TargetTypeWidget;
 
 	FORCEINLINE EGrappleType GetGrappleType() { return GrappleType; }
-
-	virtual bool IsSelectingTarget();
-	virtual AActor* GetCurrentTarget();
-	virtual FVector2D GetCurrentTargetSelectionInput();
 
 protected:
 	virtual void BeginPlay() override;

@@ -3,7 +3,7 @@
 
 #include "Components/AdvancedCameraComponent.h"
 #include "Camera/CameraComponent.h"
-#include "GameFramework/SpringArmComponent.h"
+#include "Camera/ManaSpringArmComponent.h"
 #include "GameFramework/Controller.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "PlayerManaCharacter.h"

@@ -33,4 +33,7 @@ private:
 
 	/** Desired rotation for focusing the target actor. */
 	FRotator DesiredRotation;
+
+	float CooldownRemaining;
+
 };

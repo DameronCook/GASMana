@@ -59,8 +59,6 @@ void UAC_WallRun::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 		{
 			UpdateWallRunVertical(DeltaTime, PlayerCharacter, WallRunAbility, CharMove);
 
-			PlayerCharacter->SwitchCamaeraState(ECameraState::E_WallRun);
-
 			bool bForwardHit = ForwardWallRunCheck(PlayerCharacter);
 
 			FVector NewWallRunHorizontalDirection = UpdateWallRunHorizontal(PlayerCharacter, WallRunAbility, CharMove);

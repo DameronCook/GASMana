@@ -30,7 +30,7 @@ bool UManaCameraModifierFocusNewActor::ProcessViewRotation(AActor* ViewTarget, f
 
 		return false;
 	}
-
+			
 	if (!TargetingActor->IsSelectingTarget())
 	{
 		GEngine->AddOnScreenDebugMessage(1, .1f, FColor::Orange, "Not selecting target");
@@ -68,6 +68,9 @@ bool UManaCameraModifierFocusNewActor::ProcessViewRotation(AActor* ViewTarget, f
 			FRotator TowardsDesired = DesiredRotation - CurrentRotation;
 			FRotator TowardsDesiredNormalized = TowardsDesired.GetNormalized();
 
+			float CurrentRotationSimilarity = FVector::DotProduct(CurrentRotation.Vector(), DesiredRotation.Vector());
+
+			GEngine->AddOnScreenDebugMessage(2, .1f, FColor::Red, FString::Printf(TEXT("Angle Towards Desired: %f"), CurrentRotationSimilarity));
 			//Are we nearly the same?
 			if (TowardsDesiredNormalized.IsNearlyZero())
 			{
@@ -76,9 +79,12 @@ bool UManaCameraModifierFocusNewActor::ProcessViewRotation(AActor* ViewTarget, f
 			}
 			else
 			{
-				//Otherwise, Apply the rot speed
-				FRotator DeltaRot = TowardsDesiredNormalized * SnapSpeed * DeltaTime;
-				OutDeltaRot += DeltaRot;
+				if (CurrentRotationSimilarity < .95f)
+				{
+					//Otherwise, Apply the rot speed
+					FRotator DeltaRot = TowardsDesiredNormalized * SnapSpeed * DeltaTime;
+					OutDeltaRot += DeltaRot;
+				}
 			}
 		}
 	}
@@ -88,6 +94,7 @@ bool UManaCameraModifierFocusNewActor::ProcessViewRotation(AActor* ViewTarget, f
 
 		LastTarget = nullptr;
 
+		/*
 		//No new target applied, Smoothly apply player input
 		FVector2D TargetSelectionInput = TargetingActor->GetCurrentTargetSelectionInput();
 
@@ -95,8 +102,9 @@ bool UManaCameraModifierFocusNewActor::ProcessViewRotation(AActor* ViewTarget, f
 		DeltaRot.Yaw = TargetSelectionInput.X * RotationSpeed * DeltaTime;
 		DeltaRot.Pitch = TargetSelectionInput.Y * RotationSpeed * DeltaTime;
 		DeltaRot.Roll = 0.0f;
+		*/
 	}
 
 	//This will prevent further modifiers from being applied... careful
-	return true;
+	return false;
 }
