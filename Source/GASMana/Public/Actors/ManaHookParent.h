@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
 #include "Materials/MaterialInterface.h"
+#include "Interface/TargetingActorInterface.h"
 #include "ManaHookParent.generated.h"
 
 UENUM(BlueprintType)
@@ -75,7 +76,6 @@ public:
 	TObjectPtr<UWidgetComponent> TargetTypeWidget;
 
 	FORCEINLINE EGrappleType GetGrappleType() { return GrappleType; }
-
 
 protected:
 	virtual void BeginPlay() override;

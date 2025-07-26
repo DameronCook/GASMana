@@ -20,6 +20,9 @@ class GASMANA_API UManaCameraModifier : public UCameraModifier
 public:
 	virtual bool ProcessViewRotation(class AActor* ViewTarget, float DeltaTime, FRotator& OutViewRotation, FRotator& OutDeltaRot) override;
 
+	virtual bool ModifyCamera(float DeltaTime, struct FMinimalViewInfo& InOutPOV) override;
+
+
 	/* Gets the current camera modifiers that are being applied */
 	FManaCameraInfo GetCurrentModifiers();
 
@@ -36,6 +39,12 @@ protected:
 
 	/* Call this to check if the player has recently inputted to change the camera */
 	bool PlayerHasRecentlyChangedCamera() const;
+
+	bool WallRunning;
+	bool IsBlocking; 
+	bool IsZipToPoint;
+	bool IsSwing;
+	bool IsRoll;
 
 private: 
 	void ApplyCameraInfo(const FManaCameraInfo& CamInfo, const float Factor, struct FMinimalViewInfo& MinimalViewInfo) const;

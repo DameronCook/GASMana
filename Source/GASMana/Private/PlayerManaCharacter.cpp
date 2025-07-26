@@ -19,7 +19,6 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Actors/BaseManaEnemy.h"
 #include "Actors/ManaHookParent.h"
-#include "Components/AdvancedCameraComponent.h"
 #include "Components/AC_HookShot.h"
 #include "Components/AC_WallRun.h"
 
@@ -64,9 +63,6 @@ APlayerManaCharacter::APlayerManaCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	//Create an advanced camera controller
-	AdvancedCameraComponent = CreateDefaultSubobject<UAdvancedCameraComponent>(TEXT("AdvancedCameraComponent"));
-
 	//Create a hook shot component
 	HookShotComponent = CreateDefaultSubobject<UAC_HookShot>(TEXT("HookShotComponent"));
 
@@ -109,9 +105,6 @@ void APlayerManaCharacter::BeginPlay()
 	}
 
 	UpdateStaminaRegen();
-
-
-	SwitchCamaeraState(ECameraState::E_Default);
 }
 
 void APlayerManaCharacter::Tick(float DeltaTime)
@@ -314,12 +307,7 @@ float APlayerManaCharacter::GetManaAsRatio_Implementation() const
 	return GetMana_Implementation()/ GetAbilitySystemComponent()->GetNumericAttribute(UManaAttributeSet::GetMaxManaAttribute());
 }
 
-//////////////////// -- Camera States -- \\\\\\\\\\\\\\\\\\\\\\\
-
-void APlayerManaCharacter::SwitchCamaeraState(ECameraState NewState)
-{
-	AdvancedCameraComponent->CamState = NewState;
-}
+//////////////////// -- Camera Stuff -- \\\\\\\\\\\\\\\\\\\\\\\
 
 AManaCameraModificationVolume* APlayerManaCharacter::GetCurrentCameraModificationVolume() const
 {
@@ -334,6 +322,28 @@ void APlayerManaCharacter::SetCurrentCameraModificationVolume(AManaCameraModific
 bool APlayerManaCharacter::GotMovementInput() const
 {
 	return (!CachedInputDirection.IsNearlyZero());
+}
+
+bool APlayerManaCharacter::SelectTarget(bool SelectTarget)
+{
+	bShouldAddCameraTarget = SelectTarget;
+	return bShouldAddCameraTarget;
+}
+
+AActor* APlayerManaCharacter::SetCurrentTarget(AActor* CurrentTarget)
+{
+	CurrentCamTarget = CurrentTarget;
+	return CurrentTarget;
+}
+
+AActor* APlayerManaCharacter::GetCurrentTarget() const
+{
+	return CurrentCamTarget;
+}
+
+bool APlayerManaCharacter::IsSelectingTarget() const
+{
+	return bShouldAddCameraTarget;
 }
 
 void APlayerManaCharacter::OnBlockingTagChanged(const FGameplayTag Tag, int32 NewCount)

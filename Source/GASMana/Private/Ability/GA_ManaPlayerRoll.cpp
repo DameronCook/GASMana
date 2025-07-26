@@ -40,7 +40,6 @@ void UGA_ManaPlayerRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 
 	if (PlayerCharacter && PlayerCharacter->GetRollingEffectClass() && PlayerCharacter->GetBlockMovementEffectClass() && AbilitySystemComponent)
 	{
-		PlayerCharacter->SwitchCamaeraState(ECameraState::E_Roll);		
 		//Cancel all abilities with the Player.IsAttacking tag
 		FGameplayTag AttackTag = FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking"));
 		FGameplayTagContainer AttackTags;
@@ -120,7 +119,6 @@ void UGA_ManaPlayerRoll::EndAbility(const FGameplayAbilitySpecHandle Handle, con
 
 		if (PlayerCharacter)
 		{
-			PlayerCharacter->SwitchCamaeraState(ECameraState::E_Default);
 			PlayerCharacter->UpdateStaminaRegen();
 			ActorInfo->AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ActorInfo->AbilitySystemComponent->MakeEffectContext());
 		}

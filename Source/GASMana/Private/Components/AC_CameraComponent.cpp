@@ -3,7 +3,7 @@
 
 #include "Components/AdvancedCameraComponent.h"
 #include "Camera/CameraComponent.h"
-#include "GameFramework/SpringArmComponent.h"
+#include "Camera/ManaSpringArmComponent.h"
 #include "GameFramework/Controller.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "PlayerManaCharacter.h"
@@ -96,36 +96,14 @@ void UAdvancedCameraComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 		break;
 	}
 
-
-
-
-
-
-
-
-
-
 	//This should be the LAST Step after we set our target arm length, rotation, and field of view
 	UpdateCameraLengthRotationFOV(DeltaTime, PlayerCharacter);
-
-	/* This didn't work as expected. Definitely worth exploring the idea in the future tho
-	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(GetOwner());
-	if (PlayerCharacter)
-	{
-		UCameraComponent* Cam = PlayerCharacter->GetFollowCamera();
-		if (Cam)
-		{
-			PushForceAwayFromWalls(Cam->GetForwardVector(), PlayerCharacter, Cam);
-			PushForceAwayFromWalls(Cam->GetRightVector(), PlayerCharacter, Cam);
-			PushForceAwayFromWalls(Cam->GetRightVector() * -1, PlayerCharacter, Cam);
-		}
-	}
-	*/
 	
 }
 
 void UAdvancedCameraComponent::UpdateCameraLengthRotationFOV(float DeltaTime, APlayerManaCharacter* PlayerCharacter)
 {
+	/*
 	UCameraComponent* PlayerCamera = PlayerCharacter->GetFollowCamera();
 	USpringArmComponent* CamSpringArm = PlayerCharacter->GetCameraBoom();
 	AController* Controller = PlayerCharacter->GetController();
@@ -133,7 +111,7 @@ void UAdvancedCameraComponent::UpdateCameraLengthRotationFOV(float DeltaTime, AP
 
 	// Interpolate arm length
 	float NewArmLength = FMath::FInterpTo(CamSpringArm->TargetArmLength, TargetCameraState.TargetArmLength, DeltaTime, CameraInterpSpeed);
-	CamSpringArm->TargetArmLength = NewArmLength;
+	//CamSpringArm->TargetArmLength = NewArmLength;
 
 	// Interpolate FOV
 	float NewFOV = FMath::FInterpTo(PlayerCamera->FieldOfView, TargetCameraState.CameraFOV, DeltaTime, CameraInterpSpeed);
@@ -150,6 +128,7 @@ void UAdvancedCameraComponent::UpdateCameraLengthRotationFOV(float DeltaTime, AP
 	//{
 	//	GEngine->AddOnScreenDebugMessage(1, 0.1f, FColor::Blue, FString("Updating Camera Pos"));
 	//}
+	*/
 }
 
 void UAdvancedCameraComponent::SetCameraState(const FCameraState& NewCameraState, float InterpSpeed)

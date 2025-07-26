@@ -8,6 +8,8 @@
 
 #include "Camera/ManaSpringArmComponent.h"
 
+#include "PlayerManaCharacter.h"
+
 bool UManaCameraModifier::ProcessViewRotation(AActor* ViewTarget, float DeltaTime, FRotator& OutViewRotation, FRotator& OutDeltaRot)
 {
 	Super::ProcessViewRotation(ViewTarget, DeltaTime, OutViewRotation, OutDeltaRot);
@@ -31,7 +33,7 @@ bool UManaCameraModifier::ProcessViewRotation(AActor* ViewTarget, float DeltaTim
 		return false;
 	}
 
-	if (PlayerController->RotationInput.IsNearlyZero(THRESH_QUAT_NORMALIZED))
+	if (!PlayerController->RotationInput.IsNearlyZero(THRESH_QUAT_NORMALIZED))
 	{
 		CooldownRemaining = CooldownAfterPlayerInput;
 		return false;
@@ -43,7 +45,43 @@ bool UManaCameraModifier::ProcessViewRotation(AActor* ViewTarget, float DeltaTim
 		return false;
 	}
 
+    //Finally check if the view target is the player and set the following variables so that all of the modifiers can access them
+    APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(ViewTarget);
+    if (PlayerChar)
+    {
+        if (UAbilitySystemComponent* AbilitySystem = PlayerChar->GetAbilitySystemComponent())
+        {
+            //We need to check for: Rolling, Blocking, Zip To Pointing, Swinging(?), WallRunning
+            WallRunning = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
+            IsBlocking = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsBlocking")));
+            IsZipToPoint = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsZipToPoint")));
+            IsSwing = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwing")));
+            IsRoll = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling")));
+        }
+    }
+
 	return false;
+}
+
+bool UManaCameraModifier::ModifyCamera(float DeltaTime, FMinimalViewInfo& InOutPOV)
+{
+    Super::ModifyCamera(DeltaTime, InOutPOV);
+
+    //Finally check if the view target is the player and set the following variables so that all of the modifiers can access them
+    APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(CameraOwner->GetViewTarget());
+    if (PlayerChar)
+    {
+        if (UAbilitySystemComponent* AbilitySystem = PlayerChar->GetAbilitySystemComponent())
+        {
+            //We need to check for: Rolling, Blocking, Zip To Pointing, Swinging(?), WallRunning
+            WallRunning = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
+            IsBlocking = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsBlocking")));
+            IsZipToPoint = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsZipToPoint")));
+            IsSwing = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwing")));
+            IsRoll = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling")));
+        }
+    }
+    return false;
 }
 
 FManaCameraInfo UManaCameraModifier::GetCurrentModifiers()
@@ -143,15 +181,15 @@ bool UManaCameraModifier::PlayerHasRecentlyChangedCamera() const
 
 void UManaCameraModifier::ApplyCameraInfo(const FManaCameraInfo& CamInfo, const float Factor, FMinimalViewInfo& MinimalViewInfo) const
 {
-    AActor* viewTarget = GetViewTarget();
+    AActor* ViewTarget = GetViewTarget();
 
-    if (!IsValid(viewTarget))
+    if (!IsValid(ViewTarget))
     {
         return;
     }
 
     TArray<USceneComponent*> children;
-    viewTarget->GetRootComponent()->GetChildrenComponents(true, children);
+    ViewTarget->GetRootComponent()->GetChildrenComponents(true, children);
 
     // Apply FOV.
     float appliedFOV = CamInfo.FOV * Factor;

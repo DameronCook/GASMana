@@ -20,7 +20,10 @@ class GASMANA_API ITargetingActorInterface
 {
 	GENERATED_BODY()
 
-	virtual bool IsSelectingTarget() const = 0;
-	virtual AActor* GetCurrentTarget() const = 0;
-	virtual FVector2D GetCurrentTargetSelectionInput() const = 0;
+public:
+	virtual bool IsSelectingTarget() const;
+	virtual bool SelectTarget(bool SelectTarget);
+	virtual AActor* GetCurrentTarget() const;
+	virtual AActor* SetCurrentTarget(AActor* CurrentTarget);
+	virtual FVector2D GetCurrentTargetSelectionInput() const;
 };

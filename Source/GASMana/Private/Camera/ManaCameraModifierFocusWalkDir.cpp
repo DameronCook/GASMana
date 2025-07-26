@@ -19,9 +19,9 @@ bool UManaCameraModifierFocusWalkDir::ProcessViewRotation(AActor* ViewTarget, fl
 {
 	Super::ProcessViewRotation(ViewTarget, DeltaTime, OutViewRotation, OutDeltaRot);
 
-	if (DirectionChangeCooldown > 0.f)
+	if (DirectionChangeCooldownRemaining > 0.f)
 	{
-		DirectionChangeCooldown -= DeltaTime;
+		DirectionChangeCooldownRemaining -= DeltaTime;
 	}
 
 	IPlayerCharacterInterface* PlayerChar = Cast<IPlayerCharacterInterface>(ViewTarget);
@@ -31,7 +31,7 @@ bool UManaCameraModifierFocusWalkDir::ProcessViewRotation(AActor* ViewTarget, fl
 		return false;
 	}
 
-	if (RotateOnlyWhileCharacterIsMoving && PlayerChar->GotMovementInput())
+	if (RotateOnlyWhileCharacterIsMoving && !PlayerChar->GotMovementInput())
 	{
 		return false;
 	}
