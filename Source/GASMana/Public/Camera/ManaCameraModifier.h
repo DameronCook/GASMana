@@ -42,6 +42,7 @@ protected:
 
 	bool WallRunning;
 	bool IsBlocking; 
+	bool IsRunning; 
 	bool IsZipToPoint;
 	bool IsSwing;
 	bool IsRoll;

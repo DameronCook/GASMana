@@ -93,8 +93,10 @@ void APlayerManaCharacter::BeginPlay()
 		).AddUObject(this, &APlayerManaCharacter::OnBlockingTagChanged);
 	}
 
-	AddEquipment(FName("hand_rSocket"), GetRightHandEquipment());
-	AddEquipment(FName("hand_lSocket"), GetLeftHandEquipment());
+	EquipmentState = EEquipmentState::EES_Unequipped;
+
+	RightHandEquipment = AddEquipment(FName("WeaponSocket"), GetRightHandEquipment());
+	LeftHandEquipment = AddEquipment(FName("hand_lSocket"), GetLeftHandEquipment());
 
 	if (PlayerHUDClass)
 	{
@@ -401,6 +403,9 @@ void APlayerManaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 		// Hooking
 		EnhancedInputComponent->BindAction(HookAction, ETriggerEvent::Triggered, this, &APlayerManaCharacter::Hook);
+
+		// Hooking
+		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &APlayerManaCharacter::Equip);
 	}
 	else
 	{
@@ -560,6 +565,12 @@ void APlayerManaCharacter::Hook(const FInputActionValue& Value)
 		GetAbilitySystemComponent()->TryActivateAbilitiesByTag(HookTagContainer, true);
 		PlayFlashEffect(FVector(0.f, 0.f, 1.f), .5f);
 	}
+}
+
+void APlayerManaCharacter::Equip(const FInputActionValue& Value)
+{
+	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(EquipTagContainer, true);
+
 }
 
 //////////////////// -- Ability Regen -- \\\\\\\\\\\\\\\\\\\\\\\

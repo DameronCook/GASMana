@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "Character/CharacterTypes.h"
 #include "ManaPlayerAnimInstance.generated.h"
 
 /**
@@ -14,7 +15,13 @@ class GASMANA_API UManaPlayerAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 
+	UFUNCTION(BlueprintCallable, Category = "Lean")
+	FVector CalculateRelativeAccelerationAmount();
 
+	UFUNCTION(BlueprintCallable, Category = "Velocity")
+	FVector GetVelocityAccel();
+
+	FVector VelocityLastFrame;
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Blocking")
 	bool bIsBlocking = false;
@@ -30,6 +37,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Blocking")
 	bool isFalling = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Blocking")
+	float LeanAmount = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Blocking")
+	EEquipmentState EES;
 
 public:
 	virtual void NativeInitializeAnimation() override;
@@ -50,5 +63,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Blocking")
 	void SetIsRunning(bool bRunning);
+	
+	UFUNCTION(BlueprintCallable, Category = "Lean")
+	float Get_LeanAmount();
 	
 };

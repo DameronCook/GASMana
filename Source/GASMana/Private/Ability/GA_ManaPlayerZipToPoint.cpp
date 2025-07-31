@@ -3,6 +3,7 @@
 
 #include "Ability/GA_ManaPlayerZipToPoint.h"
 #include "Abilities/Tasks/AbilityTask_ApplyRootMotionMoveToActorForce.h"
+#include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "PlayerManaCharacter.h"
 #include "Components/AC_HookShot.h"
 #include "Actors/ManaHookParent.h"
@@ -48,6 +49,7 @@ void UGA_ManaPlayerZipToPoint::ActivateAbility(const FGameplayAbilitySpecHandle 
 
 		//UAbilityTask_ApplyRootMotionConstantForce* RootMotionTask = UAbilityTask_ApplyRootMotionConstantForce::ApplyRootMotionConstantForce(this, NAME_None, Direction, Strength, Duration, false, StrengthOverTime, VelocityOnFinishMode, SetVelocityOnFinish, false, true);
 
+		//Apply the root motion task
 		UAC_HookShot* HookShot = PlayerCharacter->GetHookShot();
 		AManaHookParent* Hook = HookShot->GetCurrentTarget();
 		FVector OffsetAlignment = FVector::ZeroVector;
@@ -71,6 +73,17 @@ void UGA_ManaPlayerZipToPoint::ActivateAbility(const FGameplayAbilitySpecHandle 
 		{
 			RootMotionTask->OnFinished.AddDynamic(this, &UGA_ManaPlayerZipToPoint::ReachedDestination);//, <bool, bool, FVector>);
 			RootMotionTask->ReadyForActivation();
+		}
+
+		//Apply the Anim Montage
+		UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, PlayerCharacter->GetZipToPointMontage(), 1.0f, NAME_None, true, 0.0f);
+
+		if (MontageTask)
+		{
+			//MontageTask->OnCompleted.AddDynamic(this, &UGA_ManaPlayerWallRun::OnWallRunFinished);
+			//MontageTask->OnInterrupted.AddDynamic(this, &UGA_ManaPlayerWallRun::OnWallRunFinished);
+			//MontageTask->OnCancelled.AddDynamic(this, &UGA_ManaPlayerWallRun::OnWallRunFinished);
+			MontageTask->ReadyForActivation();
 		}
 	}
 

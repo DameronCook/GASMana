@@ -13,3 +13,9 @@ AManaEquipmentParent::AManaEquipmentParent()
 	SkeletalMesh->SetupAttachment(RootComponent);
 }
 
+void AManaEquipmentParent::AttachMeshToSocket(USceneComponent* InParent, const FName& InSocketName)
+{
+	FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
+	SkeletalMesh->AttachToComponent(InParent, TransformRules, InSocketName);
+}
+

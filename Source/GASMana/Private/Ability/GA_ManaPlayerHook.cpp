@@ -47,7 +47,6 @@ void UGA_ManaPlayerHook::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 		if (AbilitySystemComponent)
 		{
 			AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetHookEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
-
 		}
 	}
 }
