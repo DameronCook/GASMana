@@ -95,8 +95,8 @@ void APlayerManaCharacter::BeginPlay()
 
 	EquipmentState = EEquipmentState::EES_Unequipped;
 
-	RightHandEquipment = AddEquipment(FName("WeaponSocket"), GetRightHandEquipment());
-	LeftHandEquipment = AddEquipment(FName("hand_lSocket"), GetLeftHandEquipment());
+	RightHandEquipment = AddEquipment(FName("RightHandEquipSocket"), GetRightHandEquipment());
+	LeftHandEquipment = AddEquipment(FName("LeftHandEquipSocket"), GetLeftHandEquipment());
 
 	if (PlayerHUDClass)
 	{

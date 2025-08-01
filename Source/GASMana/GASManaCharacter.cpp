@@ -66,7 +66,12 @@ void AGASManaCharacter::AttatchWeaponToBack()
 {
 	if (RightHandEquipment)
 	{
-		RightHandEquipment->AttachMeshToSocket(GetMesh(), FName("WeaponSocket"));
+		RightHandEquipment->AttachMeshToSocket(GetMesh(), FName("RightHandEquipSocket"));
+	}
+
+	if (LeftHandEquipment)
+	{
+		RightHandEquipment->AttachMeshToSocket(GetMesh(), FName("LeftHandEquipSocket"));
 	}
 
 	RemoveAnyEquipClass();
@@ -77,6 +82,11 @@ void AGASManaCharacter::AttatchWeaponToHand()
 	if (RightHandEquipment)
 	{
 		RightHandEquipment->AttachMeshToSocket(GetMesh(), FName("hand_rSocket"));
+	}
+
+	if (LeftHandEquipment)
+	{
+		RightHandEquipment->AttachMeshToSocket(GetMesh(), FName("hand_lSocket"));
 	}
 
 	SetEquipment();
