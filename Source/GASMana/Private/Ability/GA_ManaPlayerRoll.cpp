@@ -40,11 +40,12 @@ void UGA_ManaPlayerRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 
 	if (PlayerCharacter && PlayerCharacter->GetRollingEffectClass() && PlayerCharacter->GetBlockMovementEffectClass() && AbilitySystemComponent)
 	{
+		PlayerCharacter->InstantlyUnequipGear();
 		//Cancel all abilities with the Player.IsAttacking tag
 		FGameplayTag AttackTag = FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking"));
-		FGameplayTagContainer AttackTags;
-		AttackTags.AddTag(AttackTag);
-		AbilitySystemComponent->CancelAbilities(&AttackTags, nullptr, this);
+		FGameplayTagContainer CancelTags;
+		CancelTags.AddTag(AttackTag);
+		AbilitySystemComponent->CancelAbilities(&CancelTags, nullptr, this);
 
 		FVector Direction = PlayerCharacter->GetCachedInputDirection();
 		if (Direction.IsNearlyZero())
@@ -115,12 +116,15 @@ void UGA_ManaPlayerRoll::EndAbility(const FGameplayAbilitySpecHandle Handle, con
 		RollingTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking")));
 		ActorInfo->AbilitySystemComponent->RemoveActiveEffectsWithGrantedTags(RollingTags);
 
+		
+
 		APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
 
 		if (PlayerCharacter)
 		{
 			PlayerCharacter->UpdateStaminaRegen();
 			ActorInfo->AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ActorInfo->AbilitySystemComponent->MakeEffectContext());
+			ActorInfo->AbilitySystemComponent->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsEquipping")));
 		}
 	}
 }

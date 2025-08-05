@@ -53,6 +53,8 @@ void UGA_ManaPlayerWallRun::ActivateAbility(const FGameplayAbilitySpecHandle Han
 		PlayerCharacter->SetWallRunAbility(this);
 		//PlayerCharacter->PlayFlashEffect(FVector(0.f, 0.f, 1.f), 2.f); Need to play SOME VFX here when the player is wall running but this ain't it
 
+		PlayerCharacter->InstantlyUnequipGear();
+
 		/*
 		if (GEngine)
 		{

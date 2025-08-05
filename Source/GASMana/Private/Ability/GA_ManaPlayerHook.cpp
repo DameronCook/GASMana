@@ -38,6 +38,7 @@ void UGA_ManaPlayerHook::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 	{
 		PlayerCharacter->GetHookShot()->AttemptGrapple();
 		PlayerCharacter->SetHookAbility(this);
+		PlayerCharacter->InstantlyUnequipGear();
 		/*
 		if (GEngine)
 		{

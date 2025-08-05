@@ -26,7 +26,7 @@ bool UManaCameraModifierInterpPitch::ProcessViewRotation(AActor* ViewTarget, flo
 	PitchDelta = ClampAngle(PitchDelta);
 	OutViewRotation.Pitch = ClampAngle(OutViewRotation.Pitch);
 
-	GEngine->AddOnScreenDebugMessage(1, 0.1f, FColor::Red, FString::Printf(TEXT("Pitch amount is: %f"), OutViewRotation.Pitch));
+	//GEngine->AddOnScreenDebugMessage(1, 0.1f, FColor::Red, FString::Printf(TEXT("Pitch amount is: %f"), OutViewRotation.Pitch));
 
 
 

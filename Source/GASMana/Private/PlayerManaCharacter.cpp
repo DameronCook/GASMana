@@ -569,7 +569,11 @@ void APlayerManaCharacter::Hook(const FInputActionValue& Value)
 
 void APlayerManaCharacter::Equip(const FInputActionValue& Value)
 {
-	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(EquipTagContainer, true);
+	if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(EquipTagContainer, true))
+	{
+		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+		AnimInstance->SetIsEquipping(true);
+	}
 
 }
 

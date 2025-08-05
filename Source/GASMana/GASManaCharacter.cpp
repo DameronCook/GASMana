@@ -42,10 +42,19 @@ AManaEquipmentParent* AGASManaCharacter::AddEquipment(FName SocketName, TSubclas
 void AGASManaCharacter::PlayEquipMontage(const FName& SectionName)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && EquipMontage)
+	if (AnimInstance)
 	{
-		AnimInstance->Montage_Play(EquipMontage);
-		AnimInstance->Montage_JumpToSection(SectionName, EquipMontage);
+		if (EquipMontageRight)
+		{
+			AnimInstance->Montage_Play(EquipMontageRight);
+			AnimInstance->Montage_JumpToSection(SectionName, EquipMontageRight);
+		}
+
+		if (EquipMontageLeft)
+		{
+			AnimInstance->Montage_Play(EquipMontageLeft);
+			AnimInstance->Montage_JumpToSection(SectionName, EquipMontageLeft);
+		}
 	}
 }
 
@@ -71,7 +80,7 @@ void AGASManaCharacter::AttatchWeaponToBack()
 
 	if (LeftHandEquipment)
 	{
-		RightHandEquipment->AttachMeshToSocket(GetMesh(), FName("LeftHandEquipSocket"));
+		LeftHandEquipment->AttachMeshToSocket(GetMesh(), FName("LeftHandEquipSocket"));
 	}
 
 	RemoveAnyEquipClass();
@@ -86,7 +95,7 @@ void AGASManaCharacter::AttatchWeaponToHand()
 
 	if (LeftHandEquipment)
 	{
-		RightHandEquipment->AttachMeshToSocket(GetMesh(), FName("hand_lSocket"));
+		LeftHandEquipment->AttachMeshToSocket(GetMesh(), FName("hand_lSocket"));
 	}
 
 	SetEquipment();
@@ -212,4 +221,11 @@ void AGASManaCharacter::OnRep_PlayerState()
 	}
 
 	InitializeAttributes();
+}
+
+
+void AGASManaCharacter::InstantlyUnequipGear()
+{
+	EquipmentState = EEquipmentState::EES_Unequipped;
+	AttatchWeaponToBack();
 }

@@ -32,6 +32,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Moving")
 	bool bIsRunning = false;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Moving")
+	bool bIsEquipping = false;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Blocking")
 	float GroundSpeed = false;
 
@@ -55,14 +58,17 @@ public:
 	class UCharacterMovementComponent* ManaMovementComponent;
 
 
-	UFUNCTION(BlueprintCallable, Category = "Blocking")
+	UFUNCTION(BlueprintCallable, Category = "Bools")
 	void SetIsBlocking(bool bBlocking);
 	
-	UFUNCTION(BlueprintCallable, Category = "Blocking")
+	UFUNCTION(BlueprintCallable, Category = "Bools")
 	void SetIsAttacking(bool bAttacking);
 	
-	UFUNCTION(BlueprintCallable, Category = "Blocking")
+	UFUNCTION(BlueprintCallable, Category = "Bools")
 	void SetIsRunning(bool bRunning);
+	
+	UFUNCTION(BlueprintCallable, Category = "Bools")
+	void SetIsEquipping(bool bEquipping);
 	
 	UFUNCTION(BlueprintCallable, Category = "Lean")
 	float Get_LeanAmount();

@@ -24,6 +24,7 @@ UGA_ManaPlayerSwing::UGA_ManaPlayerSwing()
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsZipToPoint")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsMantling")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwinging")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsEquipping")));
 }
 
 void UGA_ManaPlayerSwing::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -43,6 +44,7 @@ void UGA_ManaPlayerSwing::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 
 	if (PlayerCharacter)
 	{
+		PlayerCharacter->InstantlyUnequipGear();
 		if (AbilitySystemComponent)
 		{
 			PlayerCharacter->SetSwingAbility(this);

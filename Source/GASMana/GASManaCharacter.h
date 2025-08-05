@@ -82,15 +82,15 @@ protected:
 	//Equipment
 	/** Equip Montage To Play */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equipment", meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* EquipMontage;
+	UAnimMontage* EquipMontageRight;
+
+	/** Equip Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equipment", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* EquipMontageLeft;
 
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
 	void PlayEquipMontage(const FName& SectionName);
 	void SetEquipment();
-	UFUNCTION(BlueprintCallable, Category = "Equipment")
-	void AttatchWeaponToBack();
-	UFUNCTION(BlueprintCallable, Category = "Equipment")
-	void AttatchWeaponToHand();
 
 	void RemoveAnyEquipClass();
 
@@ -98,6 +98,7 @@ protected:
 public:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
+	void InstantlyUnequipGear();
 	virtual void InitializeAttributes();
 	virtual void GiveDefaultAbilities();
 	
@@ -123,12 +124,18 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Abilities")
 	TArray<TSubclassOf<class UGameplayAbility>> DefaultAbilities;
 
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
+	void AttatchWeaponToBack();
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
+	void AttatchWeaponToHand();
+
 	FORCEINLINE class UAbilitySystemComponent* GetAbilitySystemComponent() const { return AbilitySystemComponent; }
 	FORCEINLINE TSubclassOf<AManaEquipmentParent> GetRightHandEquipment() const { return RightHandEquipmentClass; }
 	FORCEINLINE TSubclassOf<AManaEquipmentParent> GetLeftHandEquipment() const { return LeftHandEquipmentClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetDamageEffectClass() const { return DamageEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetEquipEffectClass() const { return EquipClass; }
 	FORCEINLINE UAnimMontage* GetHitReactMontage() const { return HitReactMontage; }
-	FORCEINLINE UAnimMontage* GetEquipMontage() const { return EquipMontage; }
+	FORCEINLINE UAnimMontage* GetEquipRightMontage() const { return EquipMontageRight; }
+	FORCEINLINE UAnimMontage* GetEquipLeftMontage() const { return EquipMontageLeft; }
 	FORCEINLINE EEquipmentState GetEquipmentState() const { return EquipmentState; }
 };

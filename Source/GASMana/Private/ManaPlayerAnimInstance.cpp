@@ -28,7 +28,7 @@ void UManaPlayerAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		isFalling = ManaMovementComponent->IsFalling();
 		LeanAmount = Get_LeanAmount();
 		EES = ManaCharacter->GetEquipmentState();
-		//GEngine->AddOnScreenDebugMessage(5, 0.1f, FColor::Orange, FString::Printf(TEXT("Lean Amount: % f"), LeanAmount));
+		//GEngine->AddOnScreenDebugMessage(101, 0.1f, FColor::Orange, FString::Printf(TEXT("Equipping: %s"), bIsEquipping ? TEXT("true") : TEXT("false")));
 
 		//Do this AFTER lean
 		//VelocityLastFrame = ManaMovementComponent->GetLastUpdateVelocity();
@@ -62,6 +62,11 @@ void UManaPlayerAnimInstance::SetIsRunning(bool bRunning)
 	//if (GEngine) {
 	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("bIsRunning: %s"), bIsRunning ? TEXT("true") : TEXT("false")));
 	//}
+}
+
+void UManaPlayerAnimInstance::SetIsEquipping(bool bEquipping)
+{
+	bIsEquipping = bEquipping;
 }
 
 float UManaPlayerAnimInstance::Get_LeanAmount()

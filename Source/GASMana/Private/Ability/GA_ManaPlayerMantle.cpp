@@ -21,6 +21,7 @@ UGA_ManaPlayerMantle::UGA_ManaPlayerMantle()
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsMantling")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsZipToPoint")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsHooked")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsEquipping")));
 }
 
 void UGA_ManaPlayerMantle::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -33,6 +34,7 @@ void UGA_ManaPlayerMantle::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 	if (PlayerCharacter)
 	{
 		PlayerCharacter->SetMantleAbility(this);
+		PlayerCharacter->InstantlyUnequipGear();
 
 		if (PlayerCharacter->GetZipAbility())
 		{

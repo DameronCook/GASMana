@@ -4,6 +4,7 @@
 #include "Ability/GA_ManaPlayerEquip.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "../GASManaCharacter.h"
+#include "ManaPlayerAnimInstance.h"
 
 UGA_ManaPlayerEquip::UGA_ManaPlayerEquip()
 {
@@ -19,6 +20,7 @@ UGA_ManaPlayerEquip::UGA_ManaPlayerEquip()
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsMantling")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsZipToPoint")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne")));
 }
 
 void UGA_ManaPlayerEquip::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -28,7 +30,7 @@ void UGA_ManaPlayerEquip::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 	if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
 	{
 		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Couldn't Commit Roll!"));
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Couldn't Commit Equip!"));
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		return;
 	}
@@ -58,19 +60,27 @@ void UGA_ManaPlayerEquip::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 		}
 
 		// Play the montage and bind delegates
-		if (GASCharacter->GetEquipMontage() && ActorInfo->AvatarActor.IsValid())
+		if (ActorInfo->AvatarActor.IsValid())
 		{
-
-			UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, GASCharacter->GetEquipMontage(), 1.0f, MontageSectionName, false, 0.0f);
-
-			if (MontageTask)
+			if (GASCharacter->GetEquipRightMontage())
 			{
-				MontageTask->OnCompleted.AddDynamic(this, &UGA_ManaPlayerEquip::OnMontageEnded);
-				MontageTask->OnInterrupted.AddDynamic(this, &UGA_ManaPlayerEquip::OnMontageEnded);
-				MontageTask->OnCancelled.AddDynamic(this, &UGA_ManaPlayerEquip::OnMontageEnded);
-				MontageTask->OnBlendOut.AddDynamic(this, &UGA_ManaPlayerEquip::OnMontageEnded); 
-				MontageTask->OnBlendedIn.AddDynamic(this, &UGA_ManaPlayerEquip::OnMontageEnded); 
-				MontageTask->ReadyForActivation();
+				UAbilityTask_PlayMontageAndWait* MontageRightTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, GASCharacter->GetEquipRightMontage(), 1.0f, MontageSectionName, false, 0.0f);
+
+				if (MontageRightTask)
+				{
+					MontageRightTask->ReadyForActivation();
+				}
+			}
+
+			if (GASCharacter->GetEquipLeftMontage())
+			{
+				UAbilityTask_PlayMontageAndWait* MontageLeftTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, GASCharacter->GetEquipLeftMontage(), 1.0f, MontageSectionName, false, 0.0f);
+
+				GASCharacter->GetMesh()->GetAnimInstance()->Montage_Play(GASCharacter->GetEquipLeftMontage());
+				if (MontageLeftTask)
+				{
+					MontageLeftTask->ReadyForActivation();
+				}
 			}
 		}
 	}
@@ -86,9 +96,17 @@ void UGA_ManaPlayerEquip::EndAbility(const FGameplayAbilitySpecHandle Handle, co
 
 	if (AGASManaCharacter* GASCharacter = Cast<AGASManaCharacter>(ActorInfo->AvatarActor.Get()))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Purple, FString("End Ability Called!"));
-
 		UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
+
+
+		//Update the anim instance
+		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GASCharacter->GetMesh()->GetAnimInstance());
+		if (AnimInstance)
+		{
+			AnimInstance->SetIsEquipping(false);
+			//AnimInstance->Montage_Stop(0.1f, GASCharacter->GetEquipMontage());
+
+		}
 
 		if (GASCharacter && AbilitySystemComponent)
 		{
