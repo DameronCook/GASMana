@@ -3,6 +3,7 @@
 
 #include "Ability/GA_ManaPlayerSwing.h"
 #include "PlayerManaCharacter.h"
+#include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Components/AC_HookShot.h"
 #include "Actors/ManaHookParent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -23,6 +24,7 @@ UGA_ManaPlayerSwing::UGA_ManaPlayerSwing()
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsZipToPoint")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsMantling")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwinging")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsEquipping")));
 }
 
 void UGA_ManaPlayerSwing::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -40,12 +42,27 @@ void UGA_ManaPlayerSwing::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
 	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
 
-	if (PlayerCharacter && AbilitySystemComponent)
+	if (PlayerCharacter)
 	{
-		PlayerCharacter->SetSwingAbility(this);
-		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetSwingEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
-	
-		//PlayerCharacter->GetCameraBoom()->bEnableCameraLag = false;
+		PlayerCharacter->InstantlyUnequipGear();
+		if (AbilitySystemComponent)
+		{
+			PlayerCharacter->SetSwingAbility(this);
+			AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetSwingEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+
+			//PlayerCharacter->GetCameraBoom()->bEnableCameraLag = false;
+		}
+
+		//Apply the Anim Montage
+		UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, PlayerCharacter->GetSwingMontage(), 1.0f, NAME_None, true, 0.0f);
+
+		if (MontageTask)
+		{
+			//MontageTask->OnCompleted.AddDynamic(this, &UGA_ManaPlayerWallRun::OnWallRunFinished);
+			//MontageTask->OnInterrupted.AddDynamic(this, &UGA_ManaPlayerWallRun::OnWallRunFinished);
+			//MontageTask->OnCancelled.AddDynamic(this, &UGA_ManaPlayerWallRun::OnWallRunFinished);
+			MontageTask->ReadyForActivation();
+		}
 	}
 }
 
@@ -55,6 +72,9 @@ void UGA_ManaPlayerSwing::EndAbility(const FGameplayAbilitySpecHandle Handle, co
 
 	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
 	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
+
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, "End Swing!");
+
 
 	if (PlayerCharacter && AbilitySystemComponent)
 	{

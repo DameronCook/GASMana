@@ -94,6 +94,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* HookAction;
 
+	/** Hook Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* EquipAction;
+
 	/* Cached direction of input (always calculated) */
 	FVector CachedInputDirection;
 
@@ -222,9 +226,37 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* RollMontage;
 
+	/** Zip To Point Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* ZipToPointMontage;
+
+	/** Swing Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* SwingMontage;
+
 	/** Atack Montage To Play */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AttackMontage;
+
+	/** Equip Atack Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* EquipAttackMontage;
+
+	/** Atack Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* AttackMontageNoMovement;
+
+	/** Equip Atack Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* EquipAttackMontageNoMovement;
+
+	UAnimMontage* CurrentAttackMontage;
+
+	/** Shield Block Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* ShieldBlockMontage;
+
+	UAnimMontage* CurrentBlockingMontage;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Curve Floats
@@ -295,7 +327,6 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	bool bShouldAddCameraTarget = false;
 	AActor* CurrentCamTarget = nullptr;
 
-
 protected:
 
 	virtual void BeginPlay() override;
@@ -336,6 +367,9 @@ protected:
 	/**Called for hook input */
 	void Hook(const FInputActionValue& Value);
 
+	/**Called for Equip input */
+	void Equip(const FInputActionValue& Value);
+
 public:
 	APlayerManaCharacter();
 
@@ -366,6 +400,11 @@ public:
 	virtual AActor* GetCurrentTarget() const override;
 	virtual bool IsSelectingTarget() const override;
 
+
+	//////////////////////////////////////
+	//Convenience functions
+	/* Remove the free tag from the player */
+	void RemoveFreeTag();
 
 	//////////////////////////////////////
 	//Getters
@@ -402,6 +441,12 @@ public:
 	//Montages
 	FORCEINLINE UAnimMontage* GetRollMontage() const { return RollMontage; }
 	FORCEINLINE UAnimMontage* GetAttackMontage() const { return AttackMontage; }
+	FORCEINLINE UAnimMontage* GetAttackMontageNoMovement() const { return AttackMontageNoMovement; }
+	FORCEINLINE UAnimMontage* GetEquipAttackMontage() const { return EquipAttackMontage; }
+	FORCEINLINE UAnimMontage* GetEquipAttackMontageNoMovement() const { return EquipAttackMontageNoMovement; }
+	FORCEINLINE UAnimMontage* GetCurrentAttackMontage() const { return CurrentAttackMontage; }
+	FORCEINLINE UAnimMontage* GetZipToPointMontage() const { return ZipToPointMontage; }
+	FORCEINLINE UAnimMontage* GetSwingMontage() const { return SwingMontage; }
 	FORCEINLINE UCurveFloat* GetDiveRollCurveFloat() const { return DiveRollCurveFloat; }
 	FORCEINLINE UCurveFloat* GetZipToPointCurveFloat() const { return ZipToPointCurveFloat; }
 	FORCEINLINE UCurveFloat* GetJumpCurve() const { return JumpCurveFloat; }
@@ -427,4 +472,6 @@ public:
 	FORCEINLINE UGA_ManaPlayerHook* SetHookAbility(UGA_ManaPlayerHook* HookAbility) { return ActiveHookAbility = HookAbility; }
 	FORCEINLINE UGA_ManaPlayerZipToPoint* SetZipToPointAbility(UGA_ManaPlayerZipToPoint* ZipAbility) { return ActiveZipAbility = ZipAbility; }
 	FORCEINLINE UGA_ManaPlayerSwing* SetSwingAbility(UGA_ManaPlayerSwing* SwingAbility) { return ActiveSwingAbility = SwingAbility; }
+	FORCEINLINE UAnimMontage* SetAttackMontage(UAnimMontage* UAttackMontage) { return CurrentAttackMontage = AttackMontage; }
+
 };

@@ -14,8 +14,12 @@ class GASMANA_API AManaEquipmentParent : public AActor
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* SkeletalMesh;
+
+
 	
 public:	
 	AManaEquipmentParent();
+
+	void AttachMeshToSocket(USceneComponent* InParent, const FName& InSocketName);
 
 };

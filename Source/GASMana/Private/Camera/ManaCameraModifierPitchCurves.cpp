@@ -70,7 +70,7 @@ bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewI
 
 
 	//GEngine->AddOnScreenDebugMessage(7, .1f, FColor::Purple, DesiredLocation.ToString());
-	GEngine->AddOnScreenDebugMessage(8, .1f, FColor::Purple, FString::Printf(TEXT("Desired length based on pitch: %f"), TargetPitchToDist));
+	//GEngine->AddOnScreenDebugMessage(8, .1f, FColor::Purple, FString::Printf(TEXT("Desired length based on pitch: %f"), TargetPitchToDist));
 	//GEngine->AddOnScreenDebugMessage(9, .1f, FColor::Purple, FString::Printf(TEXT("Actual Current Length: %f"), CamManager->));
 
 	InOutPOV.Location = DesiredLocation;

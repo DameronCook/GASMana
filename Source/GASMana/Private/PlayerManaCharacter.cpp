@@ -93,8 +93,10 @@ void APlayerManaCharacter::BeginPlay()
 		).AddUObject(this, &APlayerManaCharacter::OnBlockingTagChanged);
 	}
 
-	AddEquipment(FName("hand_rSocket"), GetRightHandEquipment());
-	AddEquipment(FName("hand_lSocket"), GetLeftHandEquipment());
+	EquipmentState = EEquipmentState::EES_Unequipped;
+
+	RightHandEquipment = AddEquipment(FName("RightHandEquipSocket"), GetRightHandEquipment());
+	LeftHandEquipment = AddEquipment(FName("LeftHandEquipSocket"), GetLeftHandEquipment());
 
 	if (PlayerHUDClass)
 	{
@@ -221,6 +223,12 @@ void APlayerManaCharacter::Blocking()
 	if (UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
 		AnimInstance->SetIsBlocking(true);
+		CurrentBlockingMontage = ShieldBlockMontage; //In the future, set this based on cur equipment
+		if (!AnimInstance->Montage_IsPlaying(CurrentBlockingMontage)) {
+			//do something here, maybe it's overwriting itself above???
+			//AnimInstance->Montage_Play(CurrentBlockingMontage);
+			PlayAnimMontage(CurrentBlockingMontage);
+		}
 	}
 }
 
@@ -231,6 +239,7 @@ void APlayerManaCharacter::FinishedBlocking()
 	if (UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
 		AnimInstance->SetIsBlocking(false);
+		AnimInstance->Montage_Stop(.2f, CurrentBlockingMontage);
 	}
 }
 
@@ -401,6 +410,9 @@ void APlayerManaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 		// Hooking
 		EnhancedInputComponent->BindAction(HookAction, ETriggerEvent::Triggered, this, &APlayerManaCharacter::Hook);
+
+		// Hooking
+		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &APlayerManaCharacter::Equip);
 	}
 	else
 	{
@@ -531,7 +543,10 @@ void APlayerManaCharacter::Block(const FInputActionValue& Value)
 	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Block");
 	//}
 
-	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(BlockTagContainer, true);
+	if (EquipmentState == EEquipmentState::EES_EquippedOneHandedWeapon)
+	{
+		GetAbilitySystemComponent()->TryActivateAbilitiesByTag(BlockTagContainer, true);
+	}
 }
 
 void APlayerManaCharacter::StopBlock(const FInputActionValue& Value)
@@ -560,6 +575,16 @@ void APlayerManaCharacter::Hook(const FInputActionValue& Value)
 		GetAbilitySystemComponent()->TryActivateAbilitiesByTag(HookTagContainer, true);
 		PlayFlashEffect(FVector(0.f, 0.f, 1.f), .5f);
 	}
+}
+
+void APlayerManaCharacter::Equip(const FInputActionValue& Value)
+{
+	if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(EquipTagContainer, true))
+	{
+		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+		AnimInstance->SetIsEquipping(true);
+	}
+
 }
 
 //////////////////// -- Ability Regen -- \\\\\\\\\\\\\\\\\\\\\\\
@@ -594,4 +619,11 @@ void APlayerManaCharacter::UpdateStaminaRegen()
 	{
 		AbilitySystem->ApplyGameplayEffectToSelf(StaminaRegenEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
 	}
+}
+
+void APlayerManaCharacter::RemoveFreeTag()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Black, "RemoveFreeTag called!");
+	FGameplayTag FreeTag = FGameplayTag::RequestGameplayTag(FName("Character.IsFree"));
+	GetAbilitySystemComponent()->RemoveLooseGameplayTag(FreeTag);
 }

@@ -10,6 +10,7 @@
 #include "Public/ManaAttributeSet.h"
 #include "Public/Actors/Equipment/ManaEquipmentParent.h"
 #include "Logging/LogMacros.h"
+#include "Character/CharacterTypes.h"
 #include "GASManaCharacter.generated.h"
 
 class USpringArmComponent;
@@ -26,14 +27,6 @@ class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface
 	/* Ability Component*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	class UAbilitySystemComponent* AbilitySystemComponent;
-
-	/* Right Hand Equipment*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
-	class TSubclassOf<AManaEquipmentParent> RightHandEquipment;
-
-	/* Left Hand Equipment*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
-	class TSubclassOf<AManaEquipmentParent> LeftHandEquipment;
 
 	/* Hit React Montage*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage, meta = (AllowPrivateAccess = "true"))
@@ -54,9 +47,25 @@ public:
 	virtual void HandleMelee();
 
 protected:
+
+	/* Right Hand Equipment*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
+	class TSubclassOf<AManaEquipmentParent> RightHandEquipmentClass;
+
+	/* Left Hand Equipment*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
+	class TSubclassOf<AManaEquipmentParent> LeftHandEquipmentClass;
+
+	AManaEquipmentParent* RightHandEquipment;
+	AManaEquipmentParent* LeftHandEquipment;
+
 	/* Adds Equipment to socket*/
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
-	void AddEquipment(FName SocketName, TSubclassOf<AManaEquipmentParent> EquipmentClass);
+	AManaEquipmentParent* AddEquipment(FName SocketName, TSubclassOf<AManaEquipmentParent> EquipmentClass);
+
+	/* Type of Equipment that the player is equipping*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equipment", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> EquipmentTypeClass;
 
 	UFUNCTION(BlueprintCallable, Category = "Blocking")
 	virtual void Blocking();
@@ -67,11 +76,29 @@ protected:
 	/* Runs on begin overlap */
 	UFUNCTION(BlueprintCallable, Category = "Overlap")
 	virtual void OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+
+	//////////////////////////////////////
+	//Equipment
+	/** Equip Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equipment", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* EquipMontageRight;
+
+	/** Equip Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equipment", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* EquipMontageLeft;
+
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
+	void PlayEquipMontage(const FName& SectionName);
+	void SetEquipment();
+
+	void RemoveAnyEquipClass();
+
+
 public:
-
-
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
+	void InstantlyUnequipGear();
 	virtual void InitializeAttributes();
 	virtual void GiveDefaultAbilities();
 	
@@ -81,13 +108,34 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Abilities")
 	TSubclassOf<class UGameplayEffect> DefaultAttributeEffect;
 
+	/** Equip Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Equip", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> EquipClass;
+
+
+	/** Equip Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer EquipTagContainer;
+
+	//What Equipment the character has
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	EEquipmentState EquipmentState;
+
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Abilities")
 	TArray<TSubclassOf<class UGameplayAbility>> DefaultAbilities;
 
-	FORCEINLINE class UAbilitySystemComponent* GetAbilitySystemComponent() const { return AbilitySystemComponent; }
-	FORCEINLINE TSubclassOf<AManaEquipmentParent> GetRightHandEquipment() const { return RightHandEquipment; }
-	FORCEINLINE TSubclassOf<AManaEquipmentParent> GetLeftHandEquipment() const { return LeftHandEquipment; }
-	FORCEINLINE TSubclassOf<UGameplayEffect> GetDamageEffectClass() const { return DamageEffectClass; }
-	FORCEINLINE UAnimMontage* GetHitReactMontage() const { return HitReactMontage; }
-};
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
+	void AttatchWeaponToBack();
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
+	void AttatchWeaponToHand();
 
+	FORCEINLINE class UAbilitySystemComponent* GetAbilitySystemComponent() const { return AbilitySystemComponent; }
+	FORCEINLINE TSubclassOf<AManaEquipmentParent> GetRightHandEquipment() const { return RightHandEquipmentClass; }
+	FORCEINLINE TSubclassOf<AManaEquipmentParent> GetLeftHandEquipment() const { return LeftHandEquipmentClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetDamageEffectClass() const { return DamageEffectClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetEquipEffectClass() const { return EquipClass; }
+	FORCEINLINE UAnimMontage* GetHitReactMontage() const { return HitReactMontage; }
+	FORCEINLINE UAnimMontage* GetEquipRightMontage() const { return EquipMontageRight; }
+	FORCEINLINE UAnimMontage* GetEquipLeftMontage() const { return EquipMontageLeft; }
+	FORCEINLINE EEquipmentState GetEquipmentState() const { return EquipmentState; }
+};
