@@ -41,10 +41,47 @@ void UGA_ManaPlayerSword_Attack_01::ActivateAbility(const FGameplayAbilitySpecHa
 
 	
 	if (PlayerCharacter) {
-		// Play the montage and bind delegates
-		if (PlayerCharacter->GetAttackMontage() && ActorInfo->AvatarActor.IsValid())
+
+		UAnimMontage* MontageToPlay;
+
+		if (PlayerCharacter->EquipmentState == EEquipmentState::EES_Unequipped)
 		{
-			UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, PlayerCharacter->GetAttackMontage(), 1.0f, NAME_None, false, 0.0f);
+			//I WILL have a smarter way of getting the attack montages from the WEAPONS rather than just storing all of the montages on the player. I'm just trying to make one system work right now christ.
+			PlayerCharacter->PlayAnimMontage(PlayerCharacter->GetEquipLeftMontage());
+
+			if (PlayerCharacter->GetCachedInputDirection().IsNearlyZero())
+			{
+				PlayerCharacter->SetAttackMontage(PlayerCharacter->GetEquipAttackMontageNoMovement());
+				MontageToPlay = PlayerCharacter->GetEquipAttackMontageNoMovement();
+				PlayerCharacter->RemoveFreeTag();
+			}
+			else
+			{
+				PlayerCharacter->SetAttackMontage(PlayerCharacter->GetEquipAttackMontage());
+				MontageToPlay = PlayerCharacter->GetEquipAttackMontage();
+
+			}
+		}
+		else
+		{
+			if (PlayerCharacter->GetCachedInputDirection().IsNearlyZero())
+			{
+				PlayerCharacter->SetAttackMontage(PlayerCharacter->GetAttackMontageNoMovement());
+				PlayerCharacter->RemoveFreeTag();
+				MontageToPlay = PlayerCharacter->GetAttackMontageNoMovement();
+			}
+			else
+			{
+				PlayerCharacter->SetAttackMontage(PlayerCharacter->GetAttackMontage());
+				MontageToPlay = PlayerCharacter->GetAttackMontage();
+			}
+		}
+
+		// Play the montage and bind delegates
+		if (PlayerCharacter->GetCurrentAttackMontage() && ActorInfo->AvatarActor.IsValid())
+		{
+			PlayerCharacter->EquipmentState == EEquipmentState::EES_Unequipped ? PlayerCharacter->EquipmentState = EEquipmentState::EES_EquippedOneHandedWeapon : PlayerCharacter->EquipmentState = PlayerCharacter->EquipmentState;
+			UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, MontageToPlay, 1.0f, NAME_None, false, 0.0f);
 
 			if (MontageTask)
 			{
@@ -87,6 +124,21 @@ void UGA_ManaPlayerSword_Attack_01::EndAbility(const FGameplayAbilitySpecHandle 
 		FGameplayTagContainer AttackTags;
 		AttackTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking")));
 		ActorInfo->AbilitySystemComponent->RemoveActiveEffectsWithGrantedTags(AttackTags);
+		
+		FGameplayTag FreeTag;
+		FreeTag = FGameplayTag::RequestGameplayTag(FName("Character.IsFree"));
+		
+		FGameplayTag RollingTag;
+		RollingTag = FGameplayTag::RequestGameplayTag(FName("Player.IsRolling"));
+
+		if (!ActorInfo->AbilitySystemComponent->HasMatchingGameplayTag(FreeTag) && !ActorInfo->AbilitySystemComponent->HasMatchingGameplayTag(RollingTag))
+		{
+			//Grant the player a tag so that they can move again in case this was blocked before
+			ActorInfo->AbilitySystemComponent->AddLooseGameplayTag(FreeTag);
+
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Adding Gameplay tag!");
+
+		}
 
 		APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
 

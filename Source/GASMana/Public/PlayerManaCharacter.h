@@ -238,6 +238,26 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AttackMontage;
 
+	/** Equip Atack Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* EquipAttackMontage;
+
+	/** Atack Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* AttackMontageNoMovement;
+
+	/** Equip Atack Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* EquipAttackMontageNoMovement;
+
+	UAnimMontage* CurrentAttackMontage;
+
+	/** Shield Block Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* ShieldBlockMontage;
+
+	UAnimMontage* CurrentBlockingMontage;
+
 	//////////////////////////////////////////////////////////////////////////
 	// Curve Floats
 
@@ -382,6 +402,11 @@ public:
 
 
 	//////////////////////////////////////
+	//Convenience functions
+	/* Remove the free tag from the player */
+	void RemoveFreeTag();
+
+	//////////////////////////////////////
 	//Getters
 	// 
 	//Components
@@ -416,6 +441,10 @@ public:
 	//Montages
 	FORCEINLINE UAnimMontage* GetRollMontage() const { return RollMontage; }
 	FORCEINLINE UAnimMontage* GetAttackMontage() const { return AttackMontage; }
+	FORCEINLINE UAnimMontage* GetAttackMontageNoMovement() const { return AttackMontageNoMovement; }
+	FORCEINLINE UAnimMontage* GetEquipAttackMontage() const { return EquipAttackMontage; }
+	FORCEINLINE UAnimMontage* GetEquipAttackMontageNoMovement() const { return EquipAttackMontageNoMovement; }
+	FORCEINLINE UAnimMontage* GetCurrentAttackMontage() const { return CurrentAttackMontage; }
 	FORCEINLINE UAnimMontage* GetZipToPointMontage() const { return ZipToPointMontage; }
 	FORCEINLINE UAnimMontage* GetSwingMontage() const { return SwingMontage; }
 	FORCEINLINE UCurveFloat* GetDiveRollCurveFloat() const { return DiveRollCurveFloat; }
@@ -443,5 +472,6 @@ public:
 	FORCEINLINE UGA_ManaPlayerHook* SetHookAbility(UGA_ManaPlayerHook* HookAbility) { return ActiveHookAbility = HookAbility; }
 	FORCEINLINE UGA_ManaPlayerZipToPoint* SetZipToPointAbility(UGA_ManaPlayerZipToPoint* ZipAbility) { return ActiveZipAbility = ZipAbility; }
 	FORCEINLINE UGA_ManaPlayerSwing* SetSwingAbility(UGA_ManaPlayerSwing* SwingAbility) { return ActiveSwingAbility = SwingAbility; }
+	FORCEINLINE UAnimMontage* SetAttackMontage(UAnimMontage* UAttackMontage) { return CurrentAttackMontage = AttackMontage; }
 
 };

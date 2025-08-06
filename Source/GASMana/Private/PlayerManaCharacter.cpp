@@ -223,6 +223,12 @@ void APlayerManaCharacter::Blocking()
 	if (UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
 		AnimInstance->SetIsBlocking(true);
+		CurrentBlockingMontage = ShieldBlockMontage; //In the future, set this based on cur equipment
+		if (!AnimInstance->Montage_IsPlaying(CurrentBlockingMontage)) {
+			//do something here, maybe it's overwriting itself above???
+			//AnimInstance->Montage_Play(CurrentBlockingMontage);
+			PlayAnimMontage(CurrentBlockingMontage);
+		}
 	}
 }
 
@@ -233,6 +239,7 @@ void APlayerManaCharacter::FinishedBlocking()
 	if (UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
 		AnimInstance->SetIsBlocking(false);
+		AnimInstance->Montage_Stop(.2f, CurrentBlockingMontage);
 	}
 }
 
@@ -536,7 +543,10 @@ void APlayerManaCharacter::Block(const FInputActionValue& Value)
 	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Block");
 	//}
 
-	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(BlockTagContainer, true);
+	if (EquipmentState == EEquipmentState::EES_EquippedOneHandedWeapon)
+	{
+		GetAbilitySystemComponent()->TryActivateAbilitiesByTag(BlockTagContainer, true);
+	}
 }
 
 void APlayerManaCharacter::StopBlock(const FInputActionValue& Value)
@@ -609,4 +619,11 @@ void APlayerManaCharacter::UpdateStaminaRegen()
 	{
 		AbilitySystem->ApplyGameplayEffectToSelf(StaminaRegenEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
 	}
+}
+
+void APlayerManaCharacter::RemoveFreeTag()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Black, "RemoveFreeTag called!");
+	FGameplayTag FreeTag = FGameplayTag::RequestGameplayTag(FName("Character.IsFree"));
+	GetAbilitySystemComponent()->RemoveLooseGameplayTag(FreeTag);
 }

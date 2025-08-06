@@ -43,9 +43,23 @@ void UGA_ManaPlayerRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 		PlayerCharacter->InstantlyUnequipGear();
 		//Cancel all abilities with the Player.IsAttacking tag
 		FGameplayTag AttackTag = FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking"));
+		FGameplayTag EquipTag = FGameplayTag::RequestGameplayTag(FName("Character.IsEquipping"));
+		FGameplayTag FreeTagCancel = FGameplayTag::RequestGameplayTag(FName("Character.IsFree"));
 		FGameplayTagContainer CancelTags;
 		CancelTags.AddTag(AttackTag);
+		CancelTags.AddTag(EquipTag);
+		CancelTags.AddTag(FreeTagCancel);
 		AbilitySystemComponent->CancelAbilities(&CancelTags, nullptr, this);
+
+		FGameplayTag FreeTag;
+		FreeTag = FGameplayTag::RequestGameplayTag(FName("Character.IsFree"));
+
+		while (ActorInfo->AbilitySystemComponent->HasMatchingGameplayTag(FreeTag))
+		{
+			//Grant the player a tag so that they can move again in case this was blocked before
+			PlayerCharacter->RemoveFreeTag();
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Removing Gameplay tag!");
+		}
 
 		FVector Direction = PlayerCharacter->GetCachedInputDirection();
 		if (Direction.IsNearlyZero())
@@ -113,6 +127,7 @@ void UGA_ManaPlayerRoll::EndAbility(const FGameplayAbilitySpecHandle Handle, con
 	{
 		FGameplayTagContainer RollingTags;
 		RollingTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling")));
+		RollingTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking")));
 		RollingTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking")));
 		ActorInfo->AbilitySystemComponent->RemoveActiveEffectsWithGrantedTags(RollingTags);
 

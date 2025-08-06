@@ -123,7 +123,7 @@ bool UManaCameraModifierLineOfSight::IsInLineOfSight(const FVector& From, const 
 
 	if (Result.bBlockingHit)
 	{
-		GEngine->AddOnScreenDebugMessage(7, 0.1f, FColor::Red, "Collision Detected!!!");
+		//GEngine->AddOnScreenDebugMessage(7, 0.1f, FColor::Red, "Collision Detected!!!");
 	}
 	return !Result.bBlockingHit;
 }

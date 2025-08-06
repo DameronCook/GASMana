@@ -70,7 +70,7 @@ bool UManaCameraModifierFocusNewActor::ProcessViewRotation(AActor* ViewTarget, f
 
 			float CurrentRotationSimilarity = FVector::DotProduct(CurrentRotation.Vector(), DesiredRotation.Vector());
 
-			GEngine->AddOnScreenDebugMessage(2, .1f, FColor::Red, FString::Printf(TEXT("Angle Towards Desired: %f"), CurrentRotationSimilarity));
+			//GEngine->AddOnScreenDebugMessage(2, .1f, FColor::Red, FString::Printf(TEXT("Angle Towards Desired: %f"), CurrentRotationSimilarity));
 			//Are we nearly the same?
 			if (TowardsDesiredNormalized.IsNearlyZero())
 			{

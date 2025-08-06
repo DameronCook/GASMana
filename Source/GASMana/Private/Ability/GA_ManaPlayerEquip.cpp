@@ -94,6 +94,8 @@ void UGA_ManaPlayerEquip::EndAbility(const FGameplayAbilitySpecHandle Handle, co
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Purple, FString("End Ability Called!"));
+
 	if (AGASManaCharacter* GASCharacter = Cast<AGASManaCharacter>(ActorInfo->AvatarActor.Get()))
 	{
 		UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
@@ -116,14 +118,19 @@ void UGA_ManaPlayerEquip::EndAbility(const FGameplayAbilitySpecHandle Handle, co
 			AbilitySystemComponent->RemoveActiveEffectsWithGrantedTags(Tags);
 		}
 	}
-
 }
 
+void UGA_ManaPlayerEquip::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
+{
+	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Purple, FString("Cancel Ability Called!"));
+
+}
 
 void UGA_ManaPlayerEquip::OnMontageEnded()
 {
 	// End the ability (get the current context)
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Purple, FString("Montage Ended Called!"));
+	//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Purple, FString("Montage Ended Called!"));
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
