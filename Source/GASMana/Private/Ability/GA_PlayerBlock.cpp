@@ -2,7 +2,8 @@
 
 
 #include "Ability/GA_ManaPlayerBlock.h"
-#include "../../Public/PlayerManaCharacter.h"
+#include "PlayerManaCharacter.h"
+#include "ManaPlayerAnimInstance.h"
 
 UGA_ManaPlayerBlock::UGA_ManaPlayerBlock()
 {
@@ -39,7 +40,14 @@ void UGA_ManaPlayerBlock::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 			AbilitySystemComponent->MakeEffectContext()
 		);
 
-		PlayerCharacter->Blocking();
+		if (PlayerCharacter->GetLeftHandEquipment())
+		{
+			if (PlayerCharacter->EquipmentState == EEquipmentState::EES_Unequipped)
+			{
+				PlayerCharacter->AttatchWeaponToHand();
+			}
+			PlayerCharacter->Blocking();
+		}
 	}
 
 	//Update Stamina Regen

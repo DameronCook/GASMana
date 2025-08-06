@@ -543,10 +543,7 @@ void APlayerManaCharacter::Block(const FInputActionValue& Value)
 	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Block");
 	//}
 
-	if (EquipmentState == EEquipmentState::EES_EquippedOneHandedWeapon)
-	{
-		GetAbilitySystemComponent()->TryActivateAbilitiesByTag(BlockTagContainer, true);
-	}
+	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(BlockTagContainer, true);
 }
 
 void APlayerManaCharacter::StopBlock(const FInputActionValue& Value)

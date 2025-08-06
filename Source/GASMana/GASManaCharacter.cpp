@@ -73,32 +73,28 @@ void AGASManaCharacter::SetEquipment()
 
 void AGASManaCharacter::AttatchWeaponToBack()
 {
-	if (RightHandEquipment)
-	{
-		RightHandEquipment->AttachMeshToSocket(GetMesh(), FName("RightHandEquipSocket"));
-	}
 
-	if (LeftHandEquipment)
-	{
-		LeftHandEquipment->AttachMeshToSocket(GetMesh(), FName("LeftHandEquipSocket"));
-	}
+	EquipGearToSocket(RightHandEquipment, "RightHandEquipSocket");
+	EquipGearToSocket(LeftHandEquipment, "LeftHandEquipSocket");
 
 	RemoveAnyEquipClass();
 }
 
 void AGASManaCharacter::AttatchWeaponToHand()
 {
-	if (RightHandEquipment)
-	{
-		RightHandEquipment->AttachMeshToSocket(GetMesh(), FName("hand_rSocket"));
-	}
+	EquipGearToSocket(RightHandEquipment, "hand_rSocket");
 
-	if (LeftHandEquipment)
-	{
-		LeftHandEquipment->AttachMeshToSocket(GetMesh(), FName("hand_lSocket"));
-	}
+	EquipGearToSocket(LeftHandEquipment, "hand_lSocket");
 
 	SetEquipment();
+}
+
+void AGASManaCharacter::EquipGearToSocket(AManaEquipmentParent* GearToEquip, FName SocketName)
+{
+	if (GearToEquip)
+	{
+		GearToEquip->AttachMeshToSocket(GetMesh(), SocketName);
+	}
 }
 
 void AGASManaCharacter::RemoveAnyEquipClass()
@@ -177,23 +173,27 @@ void AGASManaCharacter::GiveDefaultAbilities()
 	}
 
 	//Uncomment below to see what abilities and specs the player is given
-	/*
-	if (GEngine && AbilitySystemComponent)
-	{
-		int32 Key = 1; // Unique key for each message
-		for (const FGameplayAbilitySpec& Spec : AbilitySystemComponent->GetActivatableAbilities())
-		{
-			if (Spec.Ability)
-			{
-				FString AbilityName = Spec.Ability->GetClass()->GetName();
-				GEngine->AddOnScreenDebugMessage(Key++, 5.0f, FColor::Yellow, FString::Printf(TEXT("Granted Ability: %s"), *AbilityName));
+	//
+	//if (GEngine && AbilitySystemComponent)
+	//{
+	//	int32 Key = 1; // Unique key for each message
+	//	for (const FGameplayAbilitySpec& Spec : AbilitySystemComponent->GetActivatableAbilities())
+	//	{
+	//		if (Spec.Ability)
+	//		{
+	//			FString AbilityName = Spec.Ability->GetClass()->GetName();
+	//			GEngine->AddOnScreenDebugMessage(Key++, 5.0f, FColor::Yellow, FString::Printf(TEXT("Granted Ability: %s"), *AbilityName));
 
-				// Optionally, show asset tags
-				GEngine->AddOnScreenDebugMessage(Key++, 5.0f, FColor::Cyan, FString::Printf(TEXT("Ability Asset Tags: %s"), *Spec.Ability->GetAssetTags().ToString()));
-			}
-		}
-	}
-	*/
+	//			// Optionally, show asset tags
+	//			GEngine->AddOnScreenDebugMessage(Key++, 5.0f, FColor::Cyan, FString::Printf(TEXT("Ability Asset Tags: %s"), *Spec.Ability->GetAssetTags().ToString()));
+	//		}
+	//	}
+	//}
+}
+
+void AGASManaCharacter::EquipLeftHandGear()
+{
+	EquipGearToSocket(LeftHandEquipment, "hand_lSocket");
 }
 
 void AGASManaCharacter::InitializeAttributes()

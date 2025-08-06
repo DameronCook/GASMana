@@ -357,11 +357,11 @@ protected:
 	/**Called for attack input */
 	void Attack(const FInputActionValue& Value);
 
-	/**Called for attack input */
+	/**Called for block input */
 	void Block(const FInputActionValue& Value);
 	void StopBlock(const FInputActionValue& Value);
 
-	/**Called for attack input */
+	/**Called for roll input */
 	void Roll(const FInputActionValue& Value);
 
 	/**Called for hook input */
@@ -437,6 +437,7 @@ public:
 	FORCEINLINE FGameplayTagContainer GetZipToPointTag() const { return ZipToPointTagContainer; }
 	FORCEINLINE FGameplayTagContainer GetSwingTag() const { return SwingTagContainer; }
 	FORCEINLINE FGameplayTagContainer GetWallRunTag() const { return WallRunTagContainer; }
+	FORCEINLINE FGameplayTagContainer GetBlockTag() const { return BlockTagContainer; }
 
 	//Montages
 	FORCEINLINE UAnimMontage* GetRollMontage() const { return RollMontage; }
