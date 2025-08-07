@@ -99,6 +99,8 @@ public:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
 	void InstantlyUnequipGear();
+	/* Instantly Equips Gear to left hand*/
+	void EquipLeftHandGear();
 	virtual void InitializeAttributes();
 	virtual void GiveDefaultAbilities();
 	
@@ -129,6 +131,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
 	void AttatchWeaponToHand();
 
+	void EquipGearToSocket(AManaEquipmentParent* GearToEquip, FName SocketName);
+
 	FORCEINLINE class UAbilitySystemComponent* GetAbilitySystemComponent() const { return AbilitySystemComponent; }
 	FORCEINLINE TSubclassOf<AManaEquipmentParent> GetRightHandEquipment() const { return RightHandEquipmentClass; }
 	FORCEINLINE TSubclassOf<AManaEquipmentParent> GetLeftHandEquipment() const { return LeftHandEquipmentClass; }
@@ -138,4 +142,6 @@ public:
 	FORCEINLINE UAnimMontage* GetEquipRightMontage() const { return EquipMontageRight; }
 	FORCEINLINE UAnimMontage* GetEquipLeftMontage() const { return EquipMontageLeft; }
 	FORCEINLINE EEquipmentState GetEquipmentState() const { return EquipmentState; }
+	FORCEINLINE FGameplayTagContainer GetEquipTag() const { return EquipTagContainer; }
+
 };

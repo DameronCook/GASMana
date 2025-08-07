@@ -80,9 +80,6 @@ void UGA_ManaPlayerZipToPoint::ActivateAbility(const FGameplayAbilitySpecHandle 
 
 		if (MontageTask)
 		{
-			//MontageTask->OnCompleted.AddDynamic(this, &UGA_ManaPlayerWallRun::OnWallRunFinished);
-			//MontageTask->OnInterrupted.AddDynamic(this, &UGA_ManaPlayerWallRun::OnWallRunFinished);
-			//MontageTask->OnCancelled.AddDynamic(this, &UGA_ManaPlayerWallRun::OnWallRunFinished);
 			MontageTask->ReadyForActivation();
 		}
 	}

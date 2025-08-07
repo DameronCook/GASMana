@@ -21,6 +21,7 @@
 #include "Actors/ManaHookParent.h"
 #include "Components/AC_HookShot.h"
 #include "Components/AC_WallRun.h"
+#include "Ability/GA_ManaPlayerAirAttack.h"
 
 APlayerManaCharacter::APlayerManaCharacter()
 {
@@ -135,6 +136,10 @@ void APlayerManaCharacter::Landed(const FHitResult& Hit)
 	AirborneTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
 	AbilitySystem->RemoveActiveEffectsWithGrantedTags(AirborneTags);
 
+	if (ActiveAirAttackAbility)
+	{
+		ActiveAirAttackAbility->OnJumpLanded();
+	}
 	//if (GEngine) {
 	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, "Landed");
 	//}
@@ -530,10 +535,22 @@ void APlayerManaCharacter::Look(const FInputActionValue& Value)
 
 void APlayerManaCharacter::Attack(const FInputActionValue& Value)
 {
-	if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackTagContainer, true))
+	FGameplayTag AirTag = FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne"));
+	if (GetAbilitySystemComponent()->HasMatchingGameplayTag(AirTag))
 	{
-		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-		AnimInstance->SetIsAttacking(true);
+		if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AirAttackTagContainer, true))
+		{
+			UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+			AnimInstance->SetIsAttacking(true);
+		}
+	}
+	else
+	{
+		if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackTagContainer, true))
+		{
+			UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+			AnimInstance->SetIsAttacking(true);
+		}
 	}
 }
 
@@ -543,10 +560,7 @@ void APlayerManaCharacter::Block(const FInputActionValue& Value)
 	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Block");
 	//}
 
-	if (EquipmentState == EEquipmentState::EES_EquippedOneHandedWeapon)
-	{
-		GetAbilitySystemComponent()->TryActivateAbilitiesByTag(BlockTagContainer, true);
-	}
+	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(BlockTagContainer, true);
 }
 
 void APlayerManaCharacter::StopBlock(const FInputActionValue& Value)

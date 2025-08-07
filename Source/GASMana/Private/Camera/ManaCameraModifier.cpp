@@ -2,12 +2,9 @@
 
 
 #include "Camera/ManaCameraModifier.h"
-
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
-
 #include "Camera/ManaSpringArmComponent.h"
-
 #include "PlayerManaCharacter.h"
 
 bool UManaCameraModifier::ProcessViewRotation(AActor* ViewTarget, float DeltaTime, FRotator& OutViewRotation, FRotator& OutDeltaRot)
@@ -58,6 +55,7 @@ bool UManaCameraModifier::ProcessViewRotation(AActor* ViewTarget, float DeltaTim
             IsZipToPoint = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsZipToPoint")));
             IsSwing = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwing")));
             IsRoll = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling")));
+            IsAirAttack = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirAttacking")));
         }
     }
 
@@ -81,6 +79,7 @@ bool UManaCameraModifier::ModifyCamera(float DeltaTime, FMinimalViewInfo& InOutP
             IsZipToPoint = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsZipToPoint")));
             IsSwing = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwing")));
             IsRoll = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling")));
+            IsAirAttack = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirAttacking")));
         }
     }
     return false;
