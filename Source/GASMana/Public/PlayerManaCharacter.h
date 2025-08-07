@@ -23,6 +23,7 @@ class UManaSpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
+class UGA_ManaPlayerAirAttack;
 struct FInputActionValue;
 struct FGameplayTagContainer;
 
@@ -120,6 +121,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer AttackTagContainer;
 
+	/** Air Attack Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer AirAttackTagContainer;
+
 	/** Wall Run Tag Container */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer WallRunTagContainer;
@@ -167,9 +172,13 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Roll", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> RollingEffectClass;
 
-	/** Rolling Effect Class */
+	/** Attacking Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Attack", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> AttackingEffectClass;
+
+	/** Air Attacking Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Attack", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> AirAttackEffectClass;
 
 	/** Free to Move Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Movement", meta = (AllowPrivateAccess = "true"))
@@ -250,6 +259,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* EquipAttackMontageNoMovement;
 
+	/** Equip Atack Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* AirAttackMontage;
+
 	UAnimMontage* CurrentAttackMontage;
 
 	/** Shield Block Montage To Play */
@@ -316,6 +329,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/**Active mantle ability*/
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UGA_ManaPlayerSwing* ActiveSwingAbility = nullptr;
+
+	/**Active mantle ability*/
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UGA_ManaPlayerAirAttack* ActiveAirAttackAbility = nullptr;
 
 	/////////////////////////////////////////////////////////////////////////
 	//Other
@@ -419,6 +436,7 @@ public:
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetBlockingEffectClass() const { return BlockingEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetRollingEffectClass() const { return RollingEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetAttackingEffectClass() const { return AttackingEffectClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetAirAttackEffectClass() const { return AirAttackEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetFreeEffectClass() const { return FreeEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetBlockMovementEffectClass() const { return BlockMovementEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetWallRunEffectClass() const { return WallRunEffectClass; }
@@ -445,6 +463,7 @@ public:
 	FORCEINLINE UAnimMontage* GetAttackMontageNoMovement() const { return AttackMontageNoMovement; }
 	FORCEINLINE UAnimMontage* GetEquipAttackMontage() const { return EquipAttackMontage; }
 	FORCEINLINE UAnimMontage* GetEquipAttackMontageNoMovement() const { return EquipAttackMontageNoMovement; }
+	FORCEINLINE UAnimMontage* GetAirAttackMontage() const { return AirAttackMontage; }
 	FORCEINLINE UAnimMontage* GetCurrentAttackMontage() const { return CurrentAttackMontage; }
 	FORCEINLINE UAnimMontage* GetZipToPointMontage() const { return ZipToPointMontage; }
 	FORCEINLINE UAnimMontage* GetSwingMontage() const { return SwingMontage; }
@@ -462,6 +481,7 @@ public:
 	FORCEINLINE UGA_ManaPlayerHook* GetHookAbility() { return ActiveHookAbility; }
 	FORCEINLINE UGA_ManaPlayerZipToPoint* GetZipAbility() { return ActiveZipAbility; }
 	FORCEINLINE UGA_ManaPlayerSwing* GetSwingAbility() { return ActiveSwingAbility; }
+	FORCEINLINE UGA_ManaPlayerAirAttack* GetAirAttackAbility() { return ActiveAirAttackAbility; }
 	FORCEINLINE float GetSwingSpeedBalancer() const { return SwingSpeedBalancer; }
 	FORCEINLINE float GetOriginalGravityScale() const { return OriginalGravityScale; }
 
@@ -473,6 +493,7 @@ public:
 	FORCEINLINE UGA_ManaPlayerHook* SetHookAbility(UGA_ManaPlayerHook* HookAbility) { return ActiveHookAbility = HookAbility; }
 	FORCEINLINE UGA_ManaPlayerZipToPoint* SetZipToPointAbility(UGA_ManaPlayerZipToPoint* ZipAbility) { return ActiveZipAbility = ZipAbility; }
 	FORCEINLINE UGA_ManaPlayerSwing* SetSwingAbility(UGA_ManaPlayerSwing* SwingAbility) { return ActiveSwingAbility = SwingAbility; }
+	FORCEINLINE UGA_ManaPlayerAirAttack* SetAirAttackAbility(UGA_ManaPlayerAirAttack* AirAttack) { return ActiveAirAttackAbility = AirAttack; }
 	FORCEINLINE UAnimMontage* SetAttackMontage(UAnimMontage* UAttackMontage) { return CurrentAttackMontage = AttackMontage; }
 
 };

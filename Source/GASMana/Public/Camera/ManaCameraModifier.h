@@ -46,6 +46,7 @@ protected:
 	bool IsZipToPoint;
 	bool IsSwing;
 	bool IsRoll;
+	bool IsAirAttack;
 
 private: 
 	void ApplyCameraInfo(const FManaCameraInfo& CamInfo, const float Factor, struct FMinimalViewInfo& MinimalViewInfo) const;

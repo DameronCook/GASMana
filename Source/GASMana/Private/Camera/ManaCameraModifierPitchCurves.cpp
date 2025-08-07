@@ -56,6 +56,13 @@ bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewI
 		AddFOV = 10.f;
 	}
 
+	if (IsAirAttack)
+	{
+		TargetPitchToDist = 100.f;
+		InterpSpeed = 5.f;
+		AddFOV = 10.f;
+	}
+
 	CurrentPitchToDist = FMath::FInterpTo(CurrentPitchToDist, TargetPitchToDist, DeltaTime, InterpSpeed);
 	CurrentAddFOV = FMath::FInterpTo(CurrentAddFOV, AddFOV, DeltaTime, InterpSpeed);
 

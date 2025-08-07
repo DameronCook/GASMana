@@ -79,6 +79,16 @@ bool UManaCameraModifierPlayerActions::ProcessViewRotation(AActor* ViewTarget, f
 			NewCameraRotation.Pitch -= 15.f;
 		}
 
+		if (IsAirAttack)
+		{
+			InterpRotationSpeed = 7.f;
+			NewCameraRotation = PlayerChar->GetActorForwardVector().Rotation();
+			NewCameraRotation.Pitch -= 25.f;
+
+			TargetCamSocketOffset = FVector(0.f, 150.f, 0.f);
+
+		}
+
 		UManaSpringArmComponent* PlayerSpringArm = PlayerChar->GetCameraBoom();
 		PlayerSpringArm->SocketOffset = FMath::VInterpTo(PlayerSpringArm->SocketOffset, TargetCamSocketOffset, DeltaTime, InterpRotationSpeed);
 
