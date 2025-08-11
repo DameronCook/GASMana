@@ -22,6 +22,7 @@
 #include "Components/AC_HookShot.h"
 #include "Components/AC_WallRun.h"
 #include "Ability/GA_ManaPlayerAirAttack.h"
+#include "Ability/GA_ManaPlayerAttack.h"
 
 APlayerManaCharacter::APlayerManaCharacter()
 {
@@ -53,7 +54,7 @@ APlayerManaCharacter::APlayerManaCharacter()
 	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
-	// Using the camera boom, add lag to creatae a more reactive camera
+	// Using the camera boom, add lag to create a more reactive camera
 	CameraBoom->bEnableCameraRotationLag = true;
 	CameraBoom->bEnableCameraLag = true;
 	CameraBoom->CameraRotationLagSpeed = 8.f;
@@ -321,6 +322,37 @@ float APlayerManaCharacter::GetManaAsRatio_Implementation() const
 	return GetMana_Implementation()/ GetAbilitySystemComponent()->GetNumericAttribute(UManaAttributeSet::GetMaxManaAttribute());
 }
 
+void APlayerManaCharacter::SetDefaultCombos()
+{
+	Super::SetDefaultCombos();
+
+	NextAttackMontageSection = "Attack01";
+
+
+	if (ActiveAttackAbility)
+	{
+		//So this really shouldn't run here sense there shouldn't be an active attack ability at this point
+		// //The fact that this does run sometimes is troublesome af
+		//ActiveAttackAbility->EndAbilityAndListenForCombo();
+		GEngine->AddOnScreenDebugMessage(5, 5.f, FColor::Purple, "Combos Reset to Default.");
+
+	}
+}
+
+void APlayerManaCharacter::SetNextComboSegment(FName NextCombo)
+{
+	Super::SetNextComboSegment(NextCombo);
+
+	if (ActiveAttackAbility)
+	{
+		ActiveAttackAbility->EndAbilityAndListenForCombo();
+		NextAttackMontageSection = NextCombo;
+		GEngine->AddOnScreenDebugMessage(101, 5.f, FColor::Purple, NextAttackMontageSection.ToString());
+
+	}
+}
+
+
 //////////////////// -- Camera Stuff -- \\\\\\\\\\\\\\\\\\\\\\\
 
 AManaCameraModificationVolume* APlayerManaCharacter::GetCurrentCameraModificationVolume() const
@@ -535,23 +567,72 @@ void APlayerManaCharacter::Look(const FInputActionValue& Value)
 
 void APlayerManaCharacter::Attack(const FInputActionValue& Value)
 {
+	GetMontageToPlay();
+
+	FGameplayTagContainer AttackType = GetAttackType();
+
+	//SetNextAttackMontageSection();
+	
+	if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackType, true))
+	{
+		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+		AnimInstance->SetIsAttacking(true);
+	}
+}
+
+FGameplayTagContainer APlayerManaCharacter::GetAttackType() const
+{
+	FGameplayTagContainer fAttackType;
 	FGameplayTag AirTag = FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne"));
 	if (GetAbilitySystemComponent()->HasMatchingGameplayTag(AirTag))
 	{
-		if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AirAttackTagContainer, true))
+		fAttackType = AirAttackTagContainer;
+	}
+	else
+	{
+		fAttackType = AttackTagContainer;
+	}
+
+	return fAttackType;
+}
+
+void APlayerManaCharacter::GetMontageToPlay()
+{
+	UAnimMontage* MontageToPlay;
+
+	if (EquipmentState == EEquipmentState::EES_Unequipped)
+	{
+		//I WILL have a smarter way of getting the attack montages from the WEAPONS rather than just storing all of the montages on the player. I'm just trying to make one system work right now christ.
+		//TODO: Get current attack montage from the weapon we have.
+		
+
+		//This maybe should get put somewhere else at some point, but the equip left montage DOES need to be called
+		PlayAnimMontage(GetEquipLeftMontage());
+
+		if (GetCachedInputDirection().IsNearlyZero())
 		{
-			UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-			AnimInstance->SetIsAttacking(true);
+			MontageToPlay = GetEquipAttackMontageNoMovement();
+			RemoveFreeTag();
+		}
+		else
+		{
+			MontageToPlay = GetEquipAttackMontage();
 		}
 	}
 	else
 	{
-		if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackTagContainer, true))
+		if (GetCachedInputDirection().IsNearlyZero())
 		{
-			UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-			AnimInstance->SetIsAttacking(true);
+			RemoveFreeTag();
+			MontageToPlay = GetAttackMontageNoMovement();
+		}
+		else
+		{
+			MontageToPlay = GetAttackMontage();
 		}
 	}
+
+	SetAttackMontage(MontageToPlay);
 }
 
 void APlayerManaCharacter::Block(const FInputActionValue& Value)
@@ -637,7 +718,7 @@ void APlayerManaCharacter::UpdateStaminaRegen()
 
 void APlayerManaCharacter::RemoveFreeTag()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Black, "RemoveFreeTag called!");
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Black, "RemoveFreeTag called!");
 	FGameplayTag FreeTag = FGameplayTag::RequestGameplayTag(FName("Character.IsFree"));
 	GetAbilitySystemComponent()->RemoveLooseGameplayTag(FreeTag);
 }

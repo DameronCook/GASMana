@@ -1,16 +1,12 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "Ability/GA_ManaPlayerSword_Attack_01.h"
+#include "Ability/GA_ManaPlayerAttack.h"
 #include "../../Public/PlayerManaCharacter.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "AbilitySystemBlueprintLibrary.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "ManaPlayerAnimInstance.h"
 #include "../../GASManaCharacter.h"
 
-UGA_ManaPlayerSword_Attack_01::UGA_ManaPlayerSword_Attack_01()
+UGA_ManaPlayerAttack::UGA_ManaPlayerAttack()
 {
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 	FGameplayTagContainer Tags;
@@ -22,11 +18,12 @@ UGA_ManaPlayerSword_Attack_01::UGA_ManaPlayerSword_Attack_01()
 	//Blocked Tags
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirAttacking")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
 }
 
-void UGA_ManaPlayerSword_Attack_01::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
+void UGA_ManaPlayerAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	//Next, Commit the ability
 	if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
@@ -42,53 +39,23 @@ void UGA_ManaPlayerSword_Attack_01::ActivateAbility(const FGameplayAbilitySpecHa
 	
 	if (PlayerCharacter) {
 
-		UAnimMontage* MontageToPlay;
-
-		if (PlayerCharacter->EquipmentState == EEquipmentState::EES_Unequipped)
-		{
-			//I WILL have a smarter way of getting the attack montages from the WEAPONS rather than just storing all of the montages on the player. I'm just trying to make one system work right now christ.
-			PlayerCharacter->PlayAnimMontage(PlayerCharacter->GetEquipLeftMontage());
-
-			if (PlayerCharacter->GetCachedInputDirection().IsNearlyZero())
-			{
-				PlayerCharacter->SetAttackMontage(PlayerCharacter->GetEquipAttackMontageNoMovement());
-				MontageToPlay = PlayerCharacter->GetEquipAttackMontageNoMovement();
-				PlayerCharacter->RemoveFreeTag();
-			}
-			else
-			{
-				PlayerCharacter->SetAttackMontage(PlayerCharacter->GetEquipAttackMontage());
-				MontageToPlay = PlayerCharacter->GetEquipAttackMontage();
-
-			}
-		}
-		else
-		{
-			if (PlayerCharacter->GetCachedInputDirection().IsNearlyZero())
-			{
-				PlayerCharacter->SetAttackMontage(PlayerCharacter->GetAttackMontageNoMovement());
-				PlayerCharacter->RemoveFreeTag();
-				MontageToPlay = PlayerCharacter->GetAttackMontageNoMovement();
-			}
-			else
-			{
-				PlayerCharacter->SetAttackMontage(PlayerCharacter->GetAttackMontage());
-				MontageToPlay = PlayerCharacter->GetAttackMontage();
-			}
-		}
+		PlayerCharacter->SetAttackAbility(this);
 
 		// Play the montage and bind delegates
 		if (PlayerCharacter->GetCurrentAttackMontage() && ActorInfo->AvatarActor.IsValid())
 		{
 			PlayerCharacter->EquipmentState == EEquipmentState::EES_Unequipped ? PlayerCharacter->EquipmentState = EEquipmentState::EES_EquippedOneHandedWeapon : PlayerCharacter->EquipmentState = PlayerCharacter->EquipmentState;
-			UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, MontageToPlay, 1.0f, NAME_None, false, 0.0f);
+
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("Next Combo Section: %s"), *PlayerCharacter->GetNextAttackMontageSection().ToString()));
+
+			UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, PlayerCharacter->GetCurrentAttackMontage(), 1.0f, PlayerCharacter->GetNextAttackMontageSection(), false, 0.0f);
 
 			if (MontageTask)
 			{
-				MontageTask->OnCompleted.AddDynamic(this, &UGA_ManaPlayerSword_Attack_01::OnMontageEnded);
-				MontageTask->OnInterrupted.AddDynamic(this, &UGA_ManaPlayerSword_Attack_01::OnMontageEnded);
-				MontageTask->OnCancelled.AddDynamic(this, &UGA_ManaPlayerSword_Attack_01::OnMontageEnded);
-				MontageTask->OnBlendOut.AddDynamic(this, &UGA_ManaPlayerSword_Attack_01::OnMontageEnded);
+				MontageTask->OnCompleted.AddDynamic(this, &UGA_ManaPlayerAttack::OnMontageEnded);
+				MontageTask->OnInterrupted.AddDynamic(this, &UGA_ManaPlayerAttack::OnMontageEnded);
+				MontageTask->OnCancelled.AddDynamic(this, &UGA_ManaPlayerAttack::OnMontageEnded);
+				MontageTask->OnBlendOut.AddDynamic(this, &UGA_ManaPlayerAttack::OnMontageEnded);
 				MontageTask->ReadyForActivation();
 			}
 		}
@@ -98,15 +65,17 @@ void UGA_ManaPlayerSword_Attack_01::ActivateAbility(const FGameplayAbilitySpecHa
 			EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		}
 
+		
 		FGameplayTag EventTag = FGameplayTag::RequestGameplayTag(FName("Character.Damaged"));
 
 		UAbilityTask_WaitGameplayEvent* WaitTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, EventTag, nullptr, true, true);
 
 		if (WaitTask)
 		{
-			WaitTask->EventReceived.AddDynamic(this, &UGA_ManaPlayerSword_Attack_01::OnGameplayEventReceived);
+			WaitTask->EventReceived.AddDynamic(this, &UGA_ManaPlayerAttack::OnGameplayEventReceived);
 			WaitTask->ReadyForActivation();
 		}
+		
 
 		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetAttackingEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 
@@ -115,9 +84,11 @@ void UGA_ManaPlayerSword_Attack_01::ActivateAbility(const FGameplayAbilitySpecHa
 	}
 }
 
-void UGA_ManaPlayerSword_Attack_01::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+void UGA_ManaPlayerAttack::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+
+	GEngine->AddOnScreenDebugMessage(4, 3.f, FColor::Purple, "EndAbility Called!");
 
 	if (ActorInfo && ActorInfo->AbilitySystemComponent.IsValid())
 	{
@@ -136,26 +107,16 @@ void UGA_ManaPlayerSword_Attack_01::EndAbility(const FGameplayAbilitySpecHandle 
 			//Grant the player a tag so that they can move again in case this was blocked before
 			ActorInfo->AbilitySystemComponent->AddLooseGameplayTag(FreeTag);
 
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Adding Gameplay tag!");
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Adding Gameplay tag!");
 
 		}
-
-		APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
-
-		if (PlayerCharacter)
+		
+		if (APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get()))
 		{
-			//Update Gameplay Effects
-			/*
-			if (!ActorInfo->AbilitySystemComponent->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling"))))
-			{
-				ActorInfo->AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ActorInfo->AbilitySystemComponent->MakeEffectContext());
-
-			}
-			*/
+			PlayerCharacter->SetAttackAbility(nullptr);
 
 			//Update the anim instance
-			UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(PlayerCharacter->GetMesh()->GetAnimInstance());
-			if (AnimInstance)
+			if (UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(PlayerCharacter->GetMesh()->GetAnimInstance()))
 			{
 				AnimInstance->SetIsAttacking(false);
 				AnimInstance->Montage_Stop(0.1f, PlayerCharacter->GetAttackMontage());
@@ -168,7 +129,7 @@ void UGA_ManaPlayerSword_Attack_01::EndAbility(const FGameplayAbilitySpecHandle 
 	}
 }
 
-void UGA_ManaPlayerSword_Attack_01::OnGameplayEventReceived(FGameplayEventData Payload)
+void UGA_ManaPlayerAttack::OnGameplayEventReceived(FGameplayEventData const Payload)
 {
 	if (DamageEffectClass && Payload.Target)
 	{
@@ -176,8 +137,7 @@ void UGA_ManaPlayerSword_Attack_01::OnGameplayEventReceived(FGameplayEventData P
 		AGASManaCharacter* MutableTargetGASCharacter = const_cast<AGASManaCharacter*>(TargetGASCharacter);
 		if (TargetGASCharacter)
 		{
-			UAbilitySystemComponent* TargetASC = TargetGASCharacter->GetAbilitySystemComponent();
-			if (TargetASC)
+			if (UAbilitySystemComponent* TargetASC = TargetGASCharacter->GetAbilitySystemComponent())
 			{
 				//Create a gameplay effect spec
 				FGameplayEffectContextHandle EffectContext = TargetASC->MakeEffectContext();
@@ -204,7 +164,13 @@ void UGA_ManaPlayerSword_Attack_01::OnGameplayEventReceived(FGameplayEventData P
 	}
 }
 
-void UGA_ManaPlayerSword_Attack_01::OnMontageEnded()
+void UGA_ManaPlayerAttack::EndAbilityAndListenForCombo()
+{
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+	GEngine->AddOnScreenDebugMessage(1, 2.f, FColor::Purple, "EndAbilityAndListenForCombo Called!");
+}
+
+void UGA_ManaPlayerAttack::OnMontageEnded()
 {
 	// End the ability (get the current context)
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);

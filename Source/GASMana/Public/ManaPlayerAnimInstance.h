@@ -71,6 +71,5 @@ public:
 	void SetIsEquipping(bool bEquipping);
 	
 	UFUNCTION(BlueprintCallable, Category = "Lean")
-	float Get_LeanAmount();
-	
+	float Get_LeanAmount();	
 };
