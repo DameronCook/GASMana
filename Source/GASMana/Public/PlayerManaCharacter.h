@@ -302,9 +302,9 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	////////////////////////////////////////////
 	//Swing Variables
 	UFUNCTION()
-	FVector GamepadRightSwingForce(float MovementInput);
+	FVector GamepadRightSwingForce(float MovementInput) const;
 	UFUNCTION()
-	FVector GamepadForwardSwingForce(float MovementInput);
+	FVector GamepadForwardSwingForce(float MovementInput) const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Swing", meta = (AllowPrivateAccess = "true"))
 	float SwingSpeedBalancer = 20.f;
@@ -359,7 +359,7 @@ protected:
 
 	virtual void Landed(const FHitResult& Hit) override;
 
-	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviouisCustomMode) override;
+	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode) override;
 
 	virtual void NotifyControllerChanged() override;
 

@@ -6,9 +6,9 @@
 #include "../GASManaCharacter.h"
 
 
-void UAN_SetFree::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
+void UAN_SetFree::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	Super::Notify(MeshComp, Animation);
+	Super::Notify(MeshComp, Animation, EventReference);
 
 	if (!MeshComp) return;
 
@@ -20,16 +20,5 @@ void UAN_SetFree::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* An
 		static const FGameplayTag FreeTag = FGameplayTag::RequestGameplayTag(FName("Character.IsFree"));
 
 		Character->GetAbilitySystemComponent()->AddLooseGameplayTag(FreeTag);
-
-		FGameplayTagContainer AirAttackTags;
-			
-		static const FGameplayTag AttackTag = FGameplayTag::RequestGameplayTag(FName("Player.IsAirAttacking"));
-
-		AirAttackTags.AddTag(AttackTag);
-
-		if (Character->GetAbilitySystemComponent()->HasMatchingGameplayTag(AttackTag))
-		{
-			Character->GetAbilitySystemComponent()->RemoveActiveEffectsWithGrantedTags(AirAttackTags);
-		}
 	}
 }

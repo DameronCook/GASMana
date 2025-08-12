@@ -65,7 +65,7 @@ void UGA_ManaPlayerAttack::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 			EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		}
 
-		
+		/*
 		FGameplayTag EventTag = FGameplayTag::RequestGameplayTag(FName("Character.Damaged"));
 
 		UAbilityTask_WaitGameplayEvent* WaitTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, EventTag, nullptr, true, true);
@@ -75,7 +75,7 @@ void UGA_ManaPlayerAttack::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 			WaitTask->EventReceived.AddDynamic(this, &UGA_ManaPlayerAttack::OnGameplayEventReceived);
 			WaitTask->ReadyForActivation();
 		}
-		
+		*/
 
 		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetAttackingEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 
@@ -88,7 +88,7 @@ void UGA_ManaPlayerAttack::EndAbility(const FGameplayAbilitySpecHandle Handle, c
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
-	GEngine->AddOnScreenDebugMessage(4, 3.f, FColor::Purple, "EndAbility Called!");
+	//GEngine->AddOnScreenDebugMessage(4, 3.f, FColor::Purple, "EndAbility Called!");
 
 	if (ActorInfo && ActorInfo->AbilitySystemComponent.IsValid())
 	{
@@ -96,20 +96,21 @@ void UGA_ManaPlayerAttack::EndAbility(const FGameplayAbilitySpecHandle Handle, c
 		AttackTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking")));
 		ActorInfo->AbilitySystemComponent->RemoveActiveEffectsWithGrantedTags(AttackTags);
 		
-		FGameplayTag FreeTag;
-		FreeTag = FGameplayTag::RequestGameplayTag(FName("Character.IsFree"));
+		FGameplayTag FreeTag = FGameplayTag::RequestGameplayTag(FName("Character.IsFree"));
 		
-		FGameplayTag RollingTag;
-		RollingTag = FGameplayTag::RequestGameplayTag(FName("Player.IsRolling"));
+		FGameplayTag RollingTag = FGameplayTag::RequestGameplayTag(FName("Player.IsRolling"));
 
-		if (!ActorInfo->AbilitySystemComponent->HasMatchingGameplayTag(FreeTag) && !ActorInfo->AbilitySystemComponent->HasMatchingGameplayTag(RollingTag))
+		/*
+		if (!ActorInfo->AbilitySystemComponent->HasMatchingGameplayTag(FreeTag))
 		{
-			//Grant the player a tag so that they can move again in case this was blocked before
-			ActorInfo->AbilitySystemComponent->AddLooseGameplayTag(FreeTag);
-
-			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Adding Gameplay tag!");
-
+			if (!ActorInfo->AbilitySystemComponent->HasMatchingGameplayTag(RollingTag))
+			{
+				//Grant the player a tag so that they can move again in case this was blocked before
+				ActorInfo->AbilitySystemComponent->AddLooseGameplayTag(FreeTag);
+				//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Adding Gameplay tag!");
+			}
 		}
+		*/
 		
 		if (APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get()))
 		{
@@ -118,9 +119,8 @@ void UGA_ManaPlayerAttack::EndAbility(const FGameplayAbilitySpecHandle Handle, c
 			//Update the anim instance
 			if (UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(PlayerCharacter->GetMesh()->GetAnimInstance()))
 			{
-				AnimInstance->SetIsAttacking(false);
-				AnimInstance->Montage_Stop(0.1f, PlayerCharacter->GetAttackMontage());
-
+				//TODO: Need to set IsAttacking to false whenever the montage has completely ended... haven't used the IsAttacking variable yet though
+				//AnimInstance->SetIsAttacking(false);
 			}
 
 			//Update Stamina Regen
@@ -129,6 +129,7 @@ void UGA_ManaPlayerAttack::EndAbility(const FGameplayAbilitySpecHandle Handle, c
 	}
 }
 
+/*
 void UGA_ManaPlayerAttack::OnGameplayEventReceived(FGameplayEventData const Payload)
 {
 	if (DamageEffectClass && Payload.Target)
@@ -152,22 +153,23 @@ void UGA_ManaPlayerAttack::OnGameplayEventReceived(FGameplayEventData const Payl
 			MutableTargetGASCharacter->PlayAnimMontage(TargetGASCharacter->GetHitReactMontage());
 
 			//Uncomment if debug strings are needed
-			/*
+			
 			if (GEngine)
 			{
 				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Cyan, FString::Printf(TEXT("Payload.Target: %s"), *Payload.Target->GetName()));
 				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Cyan, FString::Printf(TEXT("Damage Class: %s"), *DamageEffectClass->GetName()));
 				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("Gameplay Effect Applied!"));
 			}
-			*/
+			
 		}
 	}
 }
+*/
 
 void UGA_ManaPlayerAttack::EndAbilityAndListenForCombo()
 {
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
-	GEngine->AddOnScreenDebugMessage(1, 2.f, FColor::Purple, "EndAbilityAndListenForCombo Called!");
+	//GEngine->AddOnScreenDebugMessage(1, 2.f, FColor::Purple, "EndAbilityAndListenForCombo Called!");
 }
 
 void UGA_ManaPlayerAttack::OnMontageEnded()

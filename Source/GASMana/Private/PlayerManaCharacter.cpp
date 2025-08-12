@@ -146,9 +146,9 @@ void APlayerManaCharacter::Landed(const FHitResult& Hit)
 	//}
 }
 
-void APlayerManaCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PrevCustomMode)
+void APlayerManaCharacter::OnMovementModeChanged(const EMovementMode PrevMovementMode, const uint8 PreviousCustomMode)
 {
-	Super::OnMovementModeChanged(PrevMovementMode, PrevCustomMode);
+	Super::OnMovementModeChanged(PrevMovementMode, PreviousCustomMode);
 
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
 
@@ -175,29 +175,27 @@ void APlayerManaCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode,
 }
 
 
-FVector APlayerManaCharacter::GamepadRightSwingForce(float MovementInput)
+FVector APlayerManaCharacter::GamepadRightSwingForce(const float MovementInput) const
 {
 	float VelocitySize = GetVelocity().Size();
 	VelocitySize = UKismetMathLibrary::FClamp(VelocitySize, 0.f, 1000.f);
 
-	float ReduceSwingForceVelocity = 50.f / SwingSpeedBalancer;
+	const float ReduceSwingForceVelocity = 50.f / SwingSpeedBalancer;
 
-	float FinalVelocity = VelocitySize * ReduceSwingForceVelocity;
+	const float FinalVelocity = VelocitySize * ReduceSwingForceVelocity;
 
-	float Input = MovementInput * FinalVelocity;
-
-	FVector FinalPlayerRightVector;
-
-	FVector PlayerRightVector = GetActorRightVector();
+	const float Input = MovementInput * FinalVelocity;
 	
-	FinalPlayerRightVector = FVector(PlayerRightVector.X, PlayerRightVector.Y, 0.f).GetSafeNormal();
+	const FVector PlayerRightVector = GetActorRightVector();
+	
+	const FVector FinalPlayerRightVector = FVector(PlayerRightVector.X, PlayerRightVector.Y, 0.f).GetSafeNormal();
 
-	FVector FinalForce = UKismetMathLibrary::Multiply_VectorFloat(FinalPlayerRightVector, Input);
+	const FVector FinalForce = UKismetMathLibrary::Multiply_VectorFloat(FinalPlayerRightVector, Input);
 
 	return FinalForce;
 }
 
-FVector APlayerManaCharacter::GamepadForwardSwingForce(float MovementInput)
+FVector APlayerManaCharacter::GamepadForwardSwingForce(const float MovementInput) const
 {
 	float VelocitySize = GetVelocity().Size();
 	VelocitySize = UKismetMathLibrary::FClamp(VelocitySize, 0.f, 1000.f);
@@ -327,19 +325,11 @@ void APlayerManaCharacter::SetDefaultCombos()
 	Super::SetDefaultCombos();
 
 	NextAttackMontageSection = "Attack01";
+	//GEngine->AddOnScreenDebugMessage(5, 5.f, FColor::Purple, "Combos Reset to Default.");
 
-
-	if (ActiveAttackAbility)
-	{
-		//So this really shouldn't run here sense there shouldn't be an active attack ability at this point
-		// //The fact that this does run sometimes is troublesome af
-		//ActiveAttackAbility->EndAbilityAndListenForCombo();
-		GEngine->AddOnScreenDebugMessage(5, 5.f, FColor::Purple, "Combos Reset to Default.");
-
-	}
 }
 
-void APlayerManaCharacter::SetNextComboSegment(FName NextCombo)
+void APlayerManaCharacter::SetNextComboSegment(const FName NextCombo)
 {
 	Super::SetNextComboSegment(NextCombo);
 
@@ -347,8 +337,7 @@ void APlayerManaCharacter::SetNextComboSegment(FName NextCombo)
 	{
 		ActiveAttackAbility->EndAbilityAndListenForCombo();
 		NextAttackMontageSection = NextCombo;
-		GEngine->AddOnScreenDebugMessage(101, 5.f, FColor::Purple, NextAttackMontageSection.ToString());
-
+		//GEngine->AddOnScreenDebugMessage(101, 5.f, FColor::Purple, "Setting Next Combo Segment NOW!");
 	}
 }
 
@@ -569,11 +558,7 @@ void APlayerManaCharacter::Attack(const FInputActionValue& Value)
 {
 	GetMontageToPlay();
 
-	FGameplayTagContainer AttackType = GetAttackType();
-
-	//SetNextAttackMontageSection();
-	
-	if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackType, true))
+	if (const FGameplayTagContainer AttackType = GetAttackType(); GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackType, true))
 	{
 		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 		AnimInstance->SetIsAttacking(true);
@@ -604,12 +589,10 @@ void APlayerManaCharacter::GetMontageToPlay()
 	{
 		//I WILL have a smarter way of getting the attack montages from the WEAPONS rather than just storing all of the montages on the player. I'm just trying to make one system work right now christ.
 		//TODO: Get current attack montage from the weapon we have.
-		
-
 		//This maybe should get put somewhere else at some point, but the equip left montage DOES need to be called
 		PlayAnimMontage(GetEquipLeftMontage());
 
-		if (GetCachedInputDirection().IsNearlyZero())
+		if (GetCharacterMovement()->Velocity.IsNearlyZero())
 		{
 			MontageToPlay = GetEquipAttackMontageNoMovement();
 			RemoveFreeTag();
@@ -621,7 +604,7 @@ void APlayerManaCharacter::GetMontageToPlay()
 	}
 	else
 	{
-		if (GetCachedInputDirection().IsNearlyZero())
+		if (GetCharacterMovement()->Velocity.IsNearlyZero())
 		{
 			RemoveFreeTag();
 			MontageToPlay = GetAttackMontageNoMovement();
@@ -635,7 +618,7 @@ void APlayerManaCharacter::GetMontageToPlay()
 	SetAttackMontage(MontageToPlay);
 }
 
-void APlayerManaCharacter::Block(const FInputActionValue& Value)
+void APlayerManaCharacter::Block(const FInputActionValue& Value) 
 {
 	//if (GEngine && GetCharacterMovement()->IsFalling() == false) {
 	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Block");
@@ -657,7 +640,7 @@ void APlayerManaCharacter::StopBlock(const FInputActionValue& Value)
 	UpdateStaminaRegen();
 }
 
-void APlayerManaCharacter::Roll(const FInputActionValue& Value)
+void APlayerManaCharacter::Roll(const FInputActionValue& Value) 
 {
 	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(RollTagContainer, true);
 }

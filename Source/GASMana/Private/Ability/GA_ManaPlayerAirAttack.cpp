@@ -42,9 +42,8 @@ void UGA_ManaPlayerAirAttack::ActivateAbility(const FGameplayAbilitySpecHandle H
 	}
 
 	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
-	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
-
-	if (AbilitySystemComponent)
+	
+	if (UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get())
 	{
 		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetAirAttackEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 		AbilitySystemComponent->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree")));

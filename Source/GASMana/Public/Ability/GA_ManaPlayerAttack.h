@@ -26,8 +26,8 @@ class GASMANA_API UGA_ManaPlayerAttack : public UGameplayAbility
 	UFUNCTION()
 	void OnMontageEnded();
 
-	UFUNCTION()
-	void OnGameplayEventReceived(FGameplayEventData const Payload);
+	//UFUNCTION()
+	//void OnGameplayEventReceived(FGameplayEventData const Payload);
 
 public:
 	void EndAbilityAndListenForCombo();
