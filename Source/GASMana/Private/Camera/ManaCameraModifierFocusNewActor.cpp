@@ -26,14 +26,14 @@ bool UManaCameraModifierFocusNewActor::ProcessViewRotation(AActor* ViewTarget, f
 	
 	if (!TargetingActor)
 	{
-		GEngine->AddOnScreenDebugMessage(1, .1f, FColor::Orange, "No Target Actor");
+		//GEngine->AddOnScreenDebugMessage(1, .1f, FColor::Orange, "No Target Actor");
 
 		return false;
 	}
 			
 	if (!TargetingActor->IsSelectingTarget())
 	{
-		GEngine->AddOnScreenDebugMessage(1, .1f, FColor::Orange, "Not selecting target");
+		//GEngine->AddOnScreenDebugMessage(1, .1f, FColor::Orange, "Not selecting target");
 		return false;
 	}
 

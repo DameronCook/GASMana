@@ -4,17 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
-#include "GA_ManaPlayerSword_Attack_01.generated.h"
+#include "GA_ManaPlayerAttack.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class GASMANA_API UGA_ManaPlayerSword_Attack_01 : public UGameplayAbility
+class GASMANA_API UGA_ManaPlayerAttack : public UGameplayAbility
 {
 	GENERATED_BODY()
 
-	UGA_ManaPlayerSword_Attack_01();
+	UGA_ManaPlayerAttack();
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
@@ -26,7 +26,10 @@ class GASMANA_API UGA_ManaPlayerSword_Attack_01 : public UGameplayAbility
 	UFUNCTION()
 	void OnMontageEnded();
 
-	UFUNCTION()
-	void OnGameplayEventReceived(FGameplayEventData Payload);
+	//UFUNCTION()
+	//void OnGameplayEventReceived(FGameplayEventData const Payload);
+
+public:
+	void EndAbilityAndListenForCombo();
 	
 };

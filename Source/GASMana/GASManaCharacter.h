@@ -11,6 +11,7 @@
 #include "Public/Actors/Equipment/ManaEquipmentParent.h"
 #include "Logging/LogMacros.h"
 #include "Character/CharacterTypes.h"
+#include "Interface/ComboInterface.h"
 #include "GASManaCharacter.generated.h"
 
 class USpringArmComponent;
@@ -20,7 +21,7 @@ class UInputAction;
 struct FInputActionValue;
 
 UCLASS()
-class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface
+class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, public IComboInterface
 {
 	GENERATED_BODY()
 
@@ -94,6 +95,10 @@ protected:
 
 	void RemoveAnyEquipClass();
 
+	const FName DefaultComboName = "Attack01";
+	FName ComboAttackName = DefaultComboName;
+	bool bIsAttackWindowOpen;
+
 
 public:
 	virtual void PossessedBy(AController* NewController) override;
@@ -143,5 +148,11 @@ public:
 	FORCEINLINE UAnimMontage* GetEquipLeftMontage() const { return EquipMontageLeft; }
 	FORCEINLINE EEquipmentState GetEquipmentState() const { return EquipmentState; }
 	FORCEINLINE FGameplayTagContainer GetEquipTag() const { return EquipTagContainer; }
+	FORCEINLINE FName GetComboAttackName() const { return ComboAttackName; }
+
+
+
+	virtual void SetDefaultCombos() override;
+	virtual void SetNextComboSegment(FName NextCombo) override;
 
 };

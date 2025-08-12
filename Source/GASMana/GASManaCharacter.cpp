@@ -229,3 +229,15 @@ void AGASManaCharacter::InstantlyUnequipGear()
 	EquipmentState = EEquipmentState::EES_Unequipped;
 	AttatchWeaponToBack();
 }
+
+void AGASManaCharacter::SetDefaultCombos()
+{
+	ComboAttackName = DefaultComboName;
+	bIsAttackWindowOpen = false;
+}
+
+void AGASManaCharacter::SetNextComboSegment(FName NextCombo)
+{
+	ComboAttackName = NextCombo;
+	bIsAttackWindowOpen = true;
+}

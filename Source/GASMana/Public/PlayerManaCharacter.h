@@ -24,6 +24,7 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 class UGA_ManaPlayerAirAttack;
+class UGA_ManaPlayerAttack;
 struct FInputActionValue;
 struct FGameplayTagContainer;
 
@@ -243,23 +244,23 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* SwingMontage;
 
-	/** Atack Montage To Play */
+	/** Attack Montage To Play */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AttackMontage;
 
-	/** Equip Atack Montage To Play */
+	/** Equip Attack Montage To Play */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* EquipAttackMontage;
 
-	/** Atack Montage To Play */
+	/** Attack Montage To Play when player isn't moving */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AttackMontageNoMovement;
 
-	/** Equip Atack Montage To Play */
+	/** Equip Attack Montage To Play when player isn't moving */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* EquipAttackMontageNoMovement;
 
-	/** Equip Atack Montage To Play */
+	/** Equip Attack Montage To Play */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AirAttackMontage;
 
@@ -270,6 +271,8 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UAnimMontage* ShieldBlockMontage;
 
 	UAnimMontage* CurrentBlockingMontage;
+
+	FName NextAttackMontageSection = "Attack01";
 
 	//////////////////////////////////////////////////////////////////////////
 	// Curve Floats
@@ -299,9 +302,9 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	////////////////////////////////////////////
 	//Swing Variables
 	UFUNCTION()
-	FVector GamepadRightSwingForce(float MovementInput);
+	FVector GamepadRightSwingForce(float MovementInput) const;
 	UFUNCTION()
-	FVector GamepadForwardSwingForce(float MovementInput);
+	FVector GamepadForwardSwingForce(float MovementInput) const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Swing", meta = (AllowPrivateAccess = "true"))
 	float SwingSpeedBalancer = 20.f;
@@ -330,9 +333,13 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UGA_ManaPlayerSwing* ActiveSwingAbility = nullptr;
 
-	/**Active mantle ability*/
+	/**Active Air Attack ability*/
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UGA_ManaPlayerAirAttack* ActiveAirAttackAbility = nullptr;
+
+	/**Active attack ability*/
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UGA_ManaPlayerAttack* ActiveAttackAbility = nullptr;
 
 	/////////////////////////////////////////////////////////////////////////
 	//Other
@@ -352,7 +359,7 @@ protected:
 
 	virtual void Landed(const FHitResult& Hit) override;
 
-	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviouisCustomMode) override;
+	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode) override;
 
 	virtual void NotifyControllerChanged() override;
 
@@ -374,6 +381,10 @@ protected:
 	/**Called for attack input */
 	void Attack(const FInputActionValue& Value);
 
+	FGameplayTagContainer GetAttackType() const;
+
+	void GetMontageToPlay();
+	
 	/**Called for block input */
 	void Block(const FInputActionValue& Value);
 	void StopBlock(const FInputActionValue& Value);
@@ -404,6 +415,11 @@ public:
 	virtual float GetStaminaAsRatio_Implementation() const override;
 	virtual float GetMana_Implementation() const override;
 	virtual float GetManaAsRatio_Implementation() const override;
+
+
+	//Attack Interface
+	virtual void SetDefaultCombos() override;
+	virtual void SetNextComboSegment(FName NextCombo) override;
 
 	//////////////////////////////////////
 	//Camera Functions
@@ -471,17 +487,20 @@ public:
 	FORCEINLINE UCurveFloat* GetZipToPointCurveFloat() const { return ZipToPointCurveFloat; }
 	FORCEINLINE UCurveFloat* GetJumpCurve() const { return JumpCurveFloat; }
 
+	FORCEINLINE FName GetNextAttackMontageSection() const { return NextAttackMontageSection; }
+
 	//Input Actions
 	FORCEINLINE UInputAction* GetMoveAction() const { return MoveAction; }
 	FORCEINLINE FVector GetCachedInputDirection() const { return CachedInputDirection; }
 
 	//Movement
-	FORCEINLINE UGA_ManaPlayerWallRun* GetWallRunAbility() { return ActiveWallRunAbility; }
-	FORCEINLINE UGA_ManaPlayerMantle* GetMantleAbility() { return ActiveMantleAbility; }
-	FORCEINLINE UGA_ManaPlayerHook* GetHookAbility() { return ActiveHookAbility; }
-	FORCEINLINE UGA_ManaPlayerZipToPoint* GetZipAbility() { return ActiveZipAbility; }
-	FORCEINLINE UGA_ManaPlayerSwing* GetSwingAbility() { return ActiveSwingAbility; }
-	FORCEINLINE UGA_ManaPlayerAirAttack* GetAirAttackAbility() { return ActiveAirAttackAbility; }
+	FORCEINLINE UGA_ManaPlayerWallRun* GetWallRunAbility() const { return ActiveWallRunAbility; }
+	FORCEINLINE UGA_ManaPlayerMantle* GetMantleAbility() const { return ActiveMantleAbility; }
+	FORCEINLINE UGA_ManaPlayerHook* GetHookAbility() const { return ActiveHookAbility; }
+	FORCEINLINE UGA_ManaPlayerZipToPoint* GetZipAbility() const { return ActiveZipAbility; }
+	FORCEINLINE UGA_ManaPlayerSwing* GetSwingAbility() const { return ActiveSwingAbility; }
+	FORCEINLINE UGA_ManaPlayerAirAttack* GetAirAttackAbility() const { return ActiveAirAttackAbility; }
+	FORCEINLINE UGA_ManaPlayerAttack* GetAttackAbility() const { return ActiveAttackAbility; }
 	FORCEINLINE float GetSwingSpeedBalancer() const { return SwingSpeedBalancer; }
 	FORCEINLINE float GetOriginalGravityScale() const { return OriginalGravityScale; }
 
@@ -494,6 +513,7 @@ public:
 	FORCEINLINE UGA_ManaPlayerZipToPoint* SetZipToPointAbility(UGA_ManaPlayerZipToPoint* ZipAbility) { return ActiveZipAbility = ZipAbility; }
 	FORCEINLINE UGA_ManaPlayerSwing* SetSwingAbility(UGA_ManaPlayerSwing* SwingAbility) { return ActiveSwingAbility = SwingAbility; }
 	FORCEINLINE UGA_ManaPlayerAirAttack* SetAirAttackAbility(UGA_ManaPlayerAirAttack* AirAttack) { return ActiveAirAttackAbility = AirAttack; }
-	FORCEINLINE UAnimMontage* SetAttackMontage(UAnimMontage* UAttackMontage) { return CurrentAttackMontage = AttackMontage; }
+	FORCEINLINE UGA_ManaPlayerAttack* SetAttackAbility(UGA_ManaPlayerAttack* Attack) { return ActiveAttackAbility = Attack; }
+	FORCEINLINE UAnimMontage* SetAttackMontage(UAnimMontage* UAttackMontage) { return CurrentAttackMontage = UAttackMontage; }
 
 };
