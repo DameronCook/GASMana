@@ -23,6 +23,7 @@
 #include "Components/AC_WallRun.h"
 #include "Ability/GA_ManaPlayerAirAttack.h"
 #include "Ability/GA_ManaPlayerAttack.h"
+#include "Item/Item.h"
 
 APlayerManaCharacter::APlayerManaCharacter()
 {
@@ -338,6 +339,17 @@ void APlayerManaCharacter::SetNextComboSegment(const FName NextCombo)
 		ActiveAttackAbility->EndAbilityAndListenForCombo();
 		NextAttackMontageSection = NextCombo;
 		//GEngine->AddOnScreenDebugMessage(101, 5.f, FColor::Purple, "Setting Next Combo Segment NOW!");
+	}
+}
+
+void APlayerManaCharacter::SetOverlappingItem(class AItem* Item)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "OverlappingItem");
+
+	OverlappingItem = Item;
+	if (OverlappingItem)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Overlapping Item: %s"), *OverlappingItem->GetName()));
 	}
 }
 

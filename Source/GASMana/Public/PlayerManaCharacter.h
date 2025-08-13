@@ -351,6 +351,9 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	bool bShouldAddCameraTarget = false;
 	AActor* CurrentCamTarget = nullptr;
 
+	UPROPERTY(VisibleDefaultsOnly)
+	AItem* OverlappingItem = nullptr;
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -420,6 +423,8 @@ public:
 	//Attack Interface
 	virtual void SetDefaultCombos() override;
 	virtual void SetNextComboSegment(FName NextCombo) override;
+
+	virtual void SetOverlappingItem(class AItem* Item) override;
 
 	//////////////////////////////////////
 	//Camera Functions
