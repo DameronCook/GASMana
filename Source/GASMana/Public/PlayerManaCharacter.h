@@ -243,33 +243,19 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Swing Montage To Play */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* SwingMontage;
-
-	/** Attack Montage To Play */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* AttackMontage;
-
-	/** Equip Attack Montage To Play */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* EquipAttackMontage;
-
-	/** Attack Montage To Play when player isn't moving */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* AttackMontageNoMovement;
-
-	/** Equip Attack Montage To Play when player isn't moving */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* EquipAttackMontageNoMovement;
-
+	
 	/** Equip Attack Montage To Play */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AirAttackMontage;
-
+	
+	UPROPERTY()
 	UAnimMontage* CurrentAttackMontage;
 
 	/** Shield Block Montage To Play */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* ShieldBlockMontage;
-
+	
+	UPROPERTY()
 	UAnimMontage* CurrentBlockingMontage;
 
 	FName NextAttackMontageSection = "Attack01";
@@ -408,7 +394,7 @@ public:
 
 	virtual void HandleMelee() override;
 
-	void UpdateStaminaRegen();
+	void UpdateStaminaRegen() const;
 
 	//Interface overrides
 	///////////////////////////////////////
@@ -442,7 +428,7 @@ public:
 	//////////////////////////////////////
 	//Convenience functions
 	/* Remove the free tag from the player */
-	void RemoveFreeTag();
+	void RemoveFreeTag() const;
 
 	//////////////////////////////////////
 	//Getters
@@ -480,10 +466,6 @@ public:
 
 	//Montages
 	FORCEINLINE UAnimMontage* GetRollMontage() const { return RollMontage; }
-	FORCEINLINE UAnimMontage* GetAttackMontage() const { return AttackMontage; }
-	FORCEINLINE UAnimMontage* GetAttackMontageNoMovement() const { return AttackMontageNoMovement; }
-	FORCEINLINE UAnimMontage* GetEquipAttackMontage() const { return EquipAttackMontage; }
-	FORCEINLINE UAnimMontage* GetEquipAttackMontageNoMovement() const { return EquipAttackMontageNoMovement; }
 	FORCEINLINE UAnimMontage* GetAirAttackMontage() const { return AirAttackMontage; }
 	FORCEINLINE UAnimMontage* GetCurrentAttackMontage() const { return CurrentAttackMontage; }
 	FORCEINLINE UAnimMontage* GetZipToPointMontage() const { return ZipToPointMontage; }

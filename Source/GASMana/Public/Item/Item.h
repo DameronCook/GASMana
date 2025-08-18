@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Character/CharacterTypes.h"
 #include "GameFramework/Actor.h"
 #include "Engine/DataTable.h"
 #include "Item.generated.h"
@@ -13,8 +14,8 @@ class USphereComponent;
 UENUM(BlueprintType)
 enum class EItemType : uint8
 {
-	EIT_Sword UMETA(DisplayName = "Sword"),
-	EIT_Shield UMETA(DisplayName = "Shield"),
+	EIT_RightHandedEquipment UMETA(DisplayName = "Right Handed Equipment"),
+	EIT_LeftHandedEquipment UMETA(DisplayName = "Left Handed Equipment"),
 	EIT_Money UMETA(DisplayName = "Money"),
 	EIT_Consumable UMETA(DisplayName = "Consumable")
 };
@@ -59,8 +60,15 @@ struct FPickUpItems : public FTableRowBase
 	/** Mesh **/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMesh* ItemMesh;
+
+	/** Data table and row for the specific Item we are. This could store things like montages for weapons when
+	 * that isn't really needed for consumables. Might switch this to data assets? **/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FDataTableRowHandle ItemTypeData;
 	
 };
+
+
 
 UCLASS()
 class GASMANA_API AItem : public AActor
@@ -87,7 +95,12 @@ public:
 	float RotationRate = 90.f;
 	
 	UFUNCTION(BlueprintCallable)
-	void SetItem() const;
+	virtual void SetItem();
+
+	UFUNCTION()
+	void DisablePickUpCollision() const;
+
+	FORCEINLINE EItemType GetItemType() const { return ItemData.ItemType; }
 
 	
 protected:

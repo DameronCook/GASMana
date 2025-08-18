@@ -11,6 +11,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputActionValue.h"
 #include "Effect/GE_ManaPlayerGrounded.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -24,6 +27,9 @@
 #include "Ability/GA_ManaPlayerAirAttack.h"
 #include "Ability/GA_ManaPlayerAttack.h"
 #include "Item/Item.h"
+#include "Item/LeftHandEquipment.h"
+#include "Item/RightHandEquipment.h"
+
 
 APlayerManaCharacter::APlayerManaCharacter()
 {
@@ -98,9 +104,11 @@ void APlayerManaCharacter::BeginPlay()
 
 	EquipmentState = EEquipmentState::EES_Unequipped;
 
+	/*
 	RightHandEquipment = AddEquipment(FName("RightHandEquipSocket"), GetRightHandEquipment());
 	LeftHandEquipment = AddEquipment(FName("LeftHandEquipSocket"), GetLeftHandEquipment());
-
+	*/
+	
 	if (PlayerHUDClass)
 	{
 		//Configure Player HUD
@@ -568,12 +576,15 @@ void APlayerManaCharacter::Look(const FInputActionValue& Value)
 
 void APlayerManaCharacter::Attack(const FInputActionValue& Value)
 {
-	GetMontageToPlay();
-
-	if (const FGameplayTagContainer AttackType = GetAttackType(); GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackType, true))
+	if (RightHandEquipment)
 	{
-		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-		AnimInstance->SetIsAttacking(true);
+		GetMontageToPlay();
+		const FGameplayTagContainer AttackType = GetAttackType(); 
+		if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackType, true))
+		{
+			UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+			AnimInstance->SetIsAttacking(true);
+		}
 	}
 }
 
@@ -599,35 +610,36 @@ void APlayerManaCharacter::GetMontageToPlay()
 
 	if (EquipmentState == EEquipmentState::EES_Unequipped)
 	{
-		//I WILL have a smarter way of getting the attack montages from the WEAPONS rather than just storing all of the montages on the player. I'm just trying to make one system work right now christ.
+		if (LeftHandEquipment) PlayAnimMontage(LeftHandEquipment->GetEquipMontage());
 		//TODO: Get current attack montage from the weapon we have.
 		//This maybe should get put somewhere else at some point, but the equip left montage DOES need to be called
-		PlayAnimMontage(GetEquipLeftMontage());
-
 		if (GetCharacterMovement()->Velocity.IsNearlyZero())
 		{
-			MontageToPlay = GetEquipAttackMontageNoMovement();
+			GEngine->AddOnScreenDebugMessage(-1,5.f, FColor::Purple, "Getting Equip Attack!");
+			MontageToPlay = RightHandEquipment->GetEquipAttack();
 			RemoveFreeTag();
 		}
 		else
 		{
-			MontageToPlay = GetEquipAttackMontage();
+			MontageToPlay = RightHandEquipment->GetEquipAttackMovement();
 		}
 	}
 	else
 	{
 		if (GetCharacterMovement()->Velocity.IsNearlyZero())
 		{
+			//If we're not moving
 			RemoveFreeTag();
-			MontageToPlay = GetAttackMontageNoMovement();
+			MontageToPlay = RightHandEquipment->GetAttackCombo();
 		}
 		else
 		{
-			MontageToPlay = GetAttackMontage();
+			//If we're moving
+			MontageToPlay = RightHandEquipment->GetAttackComboMovement();
 		}
 	}
 
-	SetAttackMontage(MontageToPlay);
+	if (MontageToPlay) SetAttackMontage(MontageToPlay);
 }
 
 void APlayerManaCharacter::Block(const FInputActionValue& Value) 
@@ -635,8 +647,11 @@ void APlayerManaCharacter::Block(const FInputActionValue& Value)
 	//if (GEngine && GetCharacterMovement()->IsFalling() == false) {
 	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Block");
 	//}
-
-	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(BlockTagContainer, true);
+	if (LeftHandEquipment)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Left Hand Equipment found!");
+		GetAbilitySystemComponent()->TryActivateAbilitiesByTag(BlockTagContainer, true);
+	}
 }
 
 void APlayerManaCharacter::StopBlock(const FInputActionValue& Value)
@@ -669,17 +684,44 @@ void APlayerManaCharacter::Hook(const FInputActionValue& Value)
 
 void APlayerManaCharacter::Equip(const FInputActionValue& Value)
 {
-	if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(EquipTagContainer, true))
+	if (OverlappingItem)
 	{
-		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-		AnimInstance->SetIsEquipping(true);
+		if (AEquipment* Equipment = Cast<AEquipment>(OverlappingItem))
+		{
+			ALeftHandEquipment* LEquipment;
+			ARightHandEquipment* REquipment;
+			//Usually, we'd play activate an ability and play a montage here, but I'm just testing things for now
+			switch (Equipment->GetItemType())
+			{
+				case EItemType::EIT_RightHandedEquipment:
+					REquipment = Cast<ARightHandEquipment>(Equipment);
+					if (REquipment) RightHandEquipment = REquipment;
+					break;
+				case EItemType::EIT_LeftHandedEquipment:
+					LEquipment = Cast<ALeftHandEquipment>(Equipment);
+					LeftHandEquipment = LEquipment;
+					break;
+				default:
+					break;
+			}
+			SetEquipment(Equipment);
+			OverlappingItem = nullptr;
+		}
 	}
 
+	if (RightHandEquipment || LeftHandEquipment)
+	{
+		if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(EquipTagContainer, true))
+		{
+			UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+			AnimInstance->SetIsEquipping(true);
+		}
+	}
 }
 
 //////////////////// -- Ability Regen -- \\\\\\\\\\\\\\\\\\\\\\\
 
-void APlayerManaCharacter::UpdateStaminaRegen()
+void APlayerManaCharacter::UpdateStaminaRegen() const
 {
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
 	if (!AbilitySystem|| !StaminaRegenBlockEffectClass || !StaminaRegenEffectClass)
@@ -711,7 +753,7 @@ void APlayerManaCharacter::UpdateStaminaRegen()
 	}
 }
 
-void APlayerManaCharacter::RemoveFreeTag()
+void APlayerManaCharacter::RemoveFreeTag() const
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Black, "RemoveFreeTag called!");
 	FGameplayTag FreeTag = FGameplayTag::RequestGameplayTag(FName("Character.IsFree"));

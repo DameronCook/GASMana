@@ -12,11 +12,18 @@ AItem::AItem()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
-	ItemMesh->SetupAttachment(GetRootComponent());
+	ItemMesh->SetupAttachment(RootComponent);
 
 	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCol"));
-	SphereComponent->SetupAttachment(GetRootComponent());
+	SphereComponent->SetupAttachment(RootComponent);
+
+	SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	SphereComponent->SetCollisionObjectType(ECC_WorldDynamic);
+	SphereComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+	SphereComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 }
 
 void AItem::OnConstruction(const FTransform& Transform)
@@ -26,7 +33,7 @@ void AItem::OnConstruction(const FTransform& Transform)
 	SetItem();
 }
 
-void AItem::SetItem() const
+void AItem::SetItem()
 {
 	if (ItemData.ItemID.DataTable)
 	{
@@ -36,6 +43,11 @@ void AItem::SetItem() const
 			ItemMesh->SetStaticMesh(ItemRow->ItemMesh);
 		}
 	}
+}
+
+void AItem::DisablePickUpCollision() const
+{
+	SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called when the game starts or when spawned

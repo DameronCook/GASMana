@@ -8,12 +8,14 @@
 #include <GameplayEffectTypes.h>
 #include "AbilitySystemInterface.h"
 #include "Public/ManaAttributeSet.h"
-#include "Public/Actors/Equipment/ManaEquipmentParent.h"
 #include "Logging/LogMacros.h"
 #include "Character/CharacterTypes.h"
 #include "Interface/ComboInterface.h"
+#include "Item/Equipment.h"
 #include "GASManaCharacter.generated.h"
 
+class ALeftHandEquipment;
+class ARightHandEquipment;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -48,21 +50,10 @@ public:
 	virtual void HandleMelee();
 
 protected:
-
-	/* Right Hand Equipment*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
-	class TSubclassOf<AManaEquipmentParent> RightHandEquipmentClass;
-
-	/* Left Hand Equipment*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
-	class TSubclassOf<AManaEquipmentParent> LeftHandEquipmentClass;
-
-	AManaEquipmentParent* RightHandEquipment;
-	AManaEquipmentParent* LeftHandEquipment;
-
-	/* Adds Equipment to socket*/
-	UFUNCTION(BlueprintCallable, Category = "Equipment")
-	AManaEquipmentParent* AddEquipment(FName SocketName, TSubclassOf<AManaEquipmentParent> EquipmentClass);
+	UPROPERTY()
+	ARightHandEquipment* RightHandEquipment;
+	UPROPERTY()
+	ALeftHandEquipment* LeftHandEquipment;
 
 	/* Type of Equipment that the player is equipping*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equipment", meta = (AllowPrivateAccess = "true"))
@@ -77,23 +68,15 @@ protected:
 	/* Runs on begin overlap */
 	UFUNCTION(BlueprintCallable, Category = "Overlap")
 	virtual void OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-
+	
 	//////////////////////////////////////
-	//Equipment
-	/** Equip Montage To Play */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equipment", meta = (AllowPrivateAccess = "true"))
+
 	UAnimMontage* EquipMontageRight;
-
-	/** Equip Montage To Play */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equipment", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* EquipMontageLeft;
-
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
-	void PlayEquipMontage(const FName& SectionName);
-	void SetEquipment();
+	void SetEquipment(const AEquipment* Equipment);
 
-	void RemoveAnyEquipClass();
+	void RemoveAnyEquipClass() const;
 
 	const FName DefaultComboName = "Attack01";
 	FName ComboAttackName = DefaultComboName;
@@ -105,12 +88,12 @@ public:
 	virtual void OnRep_PlayerState() override;
 	void InstantlyUnequipGear();
 	/* Instantly Equips Gear to left hand*/
-	void EquipLeftHandGear();
+	void EquipLeftHandGear() const;
 	virtual void InitializeAttributes();
 	virtual void GiveDefaultAbilities();
 	
 	UFUNCTION(BlueprintCallable)
-	void PlayFlashEffect(FVector InColor, float FlashLength);
+	void PlayFlashEffect(FVector InColor, float FlashLength) const;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Abilities")
 	TSubclassOf<class UGameplayEffect> DefaultAttributeEffect;
@@ -132,15 +115,15 @@ public:
 	TArray<TSubclassOf<class UGameplayAbility>> DefaultAbilities;
 
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
-	void AttatchWeaponToBack();
+	void AttachWeaponToBack();
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
-	void AttatchWeaponToHand();
+	void AttachWeaponToHand();
 
-	void EquipGearToSocket(AManaEquipmentParent* GearToEquip, FName SocketName);
+	void EquipGearToSocket(const AEquipment* GearToEquip, FName SocketName) const;
 
 	FORCEINLINE class UAbilitySystemComponent* GetAbilitySystemComponent() const { return AbilitySystemComponent; }
-	FORCEINLINE TSubclassOf<AManaEquipmentParent> GetRightHandEquipment() const { return RightHandEquipmentClass; }
-	FORCEINLINE TSubclassOf<AManaEquipmentParent> GetLeftHandEquipment() const { return LeftHandEquipmentClass; }
+	FORCEINLINE ARightHandEquipment* GetRightHandEquipment() const { return RightHandEquipment; }
+	FORCEINLINE ALeftHandEquipment* GetLeftHandEquipment() const { return LeftHandEquipment; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetDamageEffectClass() const { return DamageEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetEquipEffectClass() const { return EquipClass; }
 	FORCEINLINE UAnimMontage* GetHitReactMontage() const { return HitReactMontage; }
@@ -151,6 +134,8 @@ public:
 	FORCEINLINE FName GetComboAttackName() const { return ComboAttackName; }
 
 
+	FORCEINLINE UAnimMontage* SetEquipMontageRight(UAnimMontage* Montage) { return EquipMontageRight = Montage; }
+	FORCEINLINE UAnimMontage* SetEquipMontageLeft(UAnimMontage* Montage) { return EquipMontageLeft = Montage; }
 
 	virtual void SetDefaultCombos() override;
 	virtual void SetNextComboSegment(FName NextCombo) override;

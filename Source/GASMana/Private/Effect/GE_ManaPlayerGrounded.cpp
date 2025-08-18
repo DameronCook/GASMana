@@ -6,8 +6,4 @@
 
 UGE_ManaPlayerGrounded::UGE_ManaPlayerGrounded()
 {
-	//This will grant the tag to the owner while the effect is active
-	InheritableOwnedTagsContainer.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsGrounded")));
-
-	DurationPolicy = EGameplayEffectDurationType::Infinite;
 }
