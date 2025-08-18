@@ -53,19 +53,18 @@ void AGASManaCharacter::SetEquipment(const AEquipment* Equipment)
 		
 		if (Equipment->GetEquipTypeClass())
 		{
-			if (!GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsEquipped"))))
-			{
-				GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(Equipment->GetEquipTypeClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, GetAbilitySystemComponent()->MakeEffectContext());
-			}
+			GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(
+				Equipment->GetEquipTypeClass()->GetDefaultObject<UGameplayEffect>(), 1.0f,
+				GetAbilitySystemComponent()->MakeEffectContext());
 		}
 	}
 }
 
-void AGASManaCharacter::AttachWeaponToBack()
+void AGASManaCharacter::AttachWeaponToBack() const
 {
 
-	EquipGearToSocket(RightHandEquipment, "RightHandEquipSocket");
-	EquipGearToSocket(LeftHandEquipment, "LeftHandEquipSocket");
+	if (RightHandEquipment) EquipGearToSocket(RightHandEquipment, "RightHandEquipSocket");
+	if (LeftHandEquipment) EquipGearToSocket(LeftHandEquipment, "LeftHandEquipSocket");
 
 	RemoveAnyEquipClass();
 }
@@ -76,8 +75,8 @@ void AGASManaCharacter::AttachWeaponToHand()
 
 	if (LeftHandEquipment) EquipGearToSocket(LeftHandEquipment, "hand_lSocket"); else return;
 
-	SetEquipment(RightHandEquipment);
-	SetEquipment(LeftHandEquipment);
+	if (RightHandEquipment) SetEquipment(RightHandEquipment);
+	if (LeftHandEquipment) SetEquipment(LeftHandEquipment);
 }
 
 void AGASManaCharacter::EquipGearToSocket(const AEquipment* GearToEquip, const FName SocketName) const
@@ -112,7 +111,9 @@ void AGASManaCharacter::FinishedBlocking()
 
 }
 
-void AGASManaCharacter::OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AGASManaCharacter::OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+                                              UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                              const FHitResult& SweepResult)
 {
 	if (OtherActor && OtherActor->Implements<UI_PickUpInterface>())
 	{
@@ -127,7 +128,8 @@ void AGASManaCharacter::PlayFlashEffect(FVector InColor, float FlashLength) cons
 	if (USkeletalMeshComponent* CharMesh = GetMesh())
 	{
 		CharMesh->SetVectorParameterValueOnMaterials("EffectColor", InColor);
-		CharMesh->SetScalarParameterValueOnMaterials("StartTime", GetWorld()->GetTimeSeconds());
+		CharMesh->SetScalarParameterValueOnMaterials("StartTime",
+			GetWorld()->GetTimeSeconds());
 		CharMesh->SetScalarParameterValueOnMaterials("EffectLength", FlashLength);
 	}
 }
@@ -157,7 +159,8 @@ void AGASManaCharacter::GiveDefaultAbilities()
 	{
 		for (TSubclassOf<UGameplayAbility>& StartUpAbility : DefaultAbilities)
 		{
-			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(StartUpAbility.GetDefaultObject(), 1, 0));
+			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(StartUpAbility.GetDefaultObject(), 1,
+				0));
 		}
 	}
 
@@ -191,11 +194,13 @@ void AGASManaCharacter::InitializeAttributes()
 	{
 		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
 		EffectContext.AddSourceObject(this);
-		FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(DefaultAttributeEffect, 1, EffectContext);
+		FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(
+			DefaultAttributeEffect, 1, EffectContext);
 
 		if (SpecHandle.IsValid())
 		{
-			FActiveGameplayEffectHandle GEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+			FActiveGameplayEffectHandle GEHandle =
+				AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 		}
 	}
 }

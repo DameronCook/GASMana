@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Item.h"
 #include "Equipment.generated.h"
 
@@ -17,6 +18,7 @@ protected:
 	/** Skeletal mesh of the equipment **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* SkeletalMesh;
+	
 	/** Type of animation state the character should switch to based on this weapon **/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
 	EEquipmentState EquipmentType;
@@ -32,6 +34,11 @@ protected:
 	/** Name of Socket that the Equipment should attach to **/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
 	FName EquipmentSocket;
+
+	/** Tag to be granted to the character when an item is equipped. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
+	FGameplayTag EquipmentTag;
+	
 public:
 	AEquipment();
 

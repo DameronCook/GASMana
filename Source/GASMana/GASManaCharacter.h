@@ -115,7 +115,7 @@ public:
 	TArray<TSubclassOf<class UGameplayAbility>> DefaultAbilities;
 
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
-	void AttachWeaponToBack();
+	void AttachWeaponToBack() const;
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
 	void AttachWeaponToHand();
 

@@ -682,7 +682,7 @@ void APlayerManaCharacter::Hook(const FInputActionValue& Value)
 	}
 }
 
-void APlayerManaCharacter::Equip(const FInputActionValue& Value)
+void APlayerManaCharacter::GrabOverlappingItem()
 {
 	if (OverlappingItem)
 	{
@@ -690,25 +690,28 @@ void APlayerManaCharacter::Equip(const FInputActionValue& Value)
 		{
 			ALeftHandEquipment* LEquipment;
 			ARightHandEquipment* REquipment;
-			//Usually, we'd play activate an ability and play a montage here, but I'm just testing things for now
 			switch (Equipment->GetItemType())
 			{
-				case EItemType::EIT_RightHandedEquipment:
-					REquipment = Cast<ARightHandEquipment>(Equipment);
-					if (REquipment) RightHandEquipment = REquipment;
-					break;
-				case EItemType::EIT_LeftHandedEquipment:
-					LEquipment = Cast<ALeftHandEquipment>(Equipment);
-					LeftHandEquipment = LEquipment;
-					break;
-				default:
-					break;
+			case EItemType::EIT_RightHandedEquipment:
+				REquipment = Cast<ARightHandEquipment>(Equipment);
+				if (REquipment) RightHandEquipment = REquipment;
+				break;
+			case EItemType::EIT_LeftHandedEquipment:
+				LEquipment = Cast<ALeftHandEquipment>(Equipment);
+				LeftHandEquipment = LEquipment;
+				break;
+			default:
+				break;
 			}
 			SetEquipment(Equipment);
 			OverlappingItem = nullptr;
+			PlayAnimMontage(GetPickUpMontage());
 		}
 	}
+}
 
+void APlayerManaCharacter::Equip(const FInputActionValue& Value)
+{
 	if (RightHandEquipment || LeftHandEquipment)
 	{
 		if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(EquipTagContainer, true))
@@ -717,6 +720,8 @@ void APlayerManaCharacter::Equip(const FInputActionValue& Value)
 			AnimInstance->SetIsEquipping(true);
 		}
 	}
+	
+	GrabOverlappingItem();
 }
 
 //////////////////// -- Ability Regen -- \\\\\\\\\\\\\\\\\\\\\\\
