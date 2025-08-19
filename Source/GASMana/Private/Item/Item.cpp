@@ -85,7 +85,7 @@ void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 {
 	if (IPlayerCharacterInterface* PlayerInterface = Cast<IPlayerCharacterInterface>(OtherActor))
 	{
-		PlayerInterface->SetOverlappingItem(this);
+		PlayerInterface->SetOverlappingItem(nullptr);
 	}
 }
 

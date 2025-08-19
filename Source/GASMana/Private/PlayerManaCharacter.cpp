@@ -443,6 +443,7 @@ void APlayerManaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		EnhancedInputComponent->BindAction(RollAction, ETriggerEvent::Started, this, &APlayerManaCharacter::Roll);
 
 		// Blocking
+		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Triggered, this, &APlayerManaCharacter::Block);
 		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Ongoing, this, &APlayerManaCharacter::Block);
 		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Completed, this, &APlayerManaCharacter::StopBlock);
 
@@ -679,6 +680,7 @@ void APlayerManaCharacter::Hook(const FInputActionValue& Value)
 	{
 		GetAbilitySystemComponent()->TryActivateAbilitiesByTag(HookTagContainer, true);
 		PlayFlashEffect(FVector(0.f, 0.f, 1.f), .5f);
+		GetMesh()->GetAnimInstance()->Montage_Play(GetThrowHookMontage());
 	}
 }
 
@@ -712,16 +714,19 @@ void APlayerManaCharacter::GrabOverlappingItem()
 
 void APlayerManaCharacter::Equip(const FInputActionValue& Value)
 {
-	if (RightHandEquipment || LeftHandEquipment)
+	GrabOverlappingItem();
+
+	if (!OverlappingItem)
 	{
-		if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(EquipTagContainer, true))
+		if (RightHandEquipment || LeftHandEquipment)
 		{
-			UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-			AnimInstance->SetIsEquipping(true);
+			if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(EquipTagContainer, true))
+			{
+				UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+				AnimInstance->SetIsEquipping(true);
+			}
 		}
 	}
-	
-	GrabOverlappingItem();
 }
 
 //////////////////// -- Ability Regen -- \\\\\\\\\\\\\\\\\\\\\\\

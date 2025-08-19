@@ -43,11 +43,11 @@ void UGA_ManaPlayerBlock::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 			AbilitySystemComponent->MakeEffectContext()
 		);
 		
-		GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Orange, "Block Ability Activated");
+		//GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Orange, "Block Ability Activated");
 
 		if (PlayerCharacter->GetLeftHandEquipment())
 		{
-			GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Orange, "Left hand equipment found");
+			//GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Orange, "Left hand equipment found");
 
 			if (PlayerCharacter->EquipmentState == EEquipmentState::EES_Unequipped)
 			{	

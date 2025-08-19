@@ -32,6 +32,11 @@ void AGASManaCharacter::SetEquipment(const AEquipment* Equipment)
 {
 	if (Equipment)
 	{
+		if (AbilitySystemComponent->ComponentHasTag("Character.Equipped"))
+		{
+			AbilitySystemComponent->TryActivateAbilitiesByTag(EquipTagContainer);
+		}
+		
 		EquipmentState = Equipment->GetEquipmentType();
 
 		switch (Equipment->GetItemType())
@@ -49,7 +54,7 @@ void AGASManaCharacter::SetEquipment(const AEquipment* Equipment)
 		Equipment->DisablePickUpCollision();
 
 		const FName& EquipSocket = Equipment->GetEquipmentSocket(); 
-		Equipment->AttachMeshToSocket(GetMesh(), EquipSocket);
+		EquipGearToSocket(Equipment, EquipSocket);
 		
 		if (Equipment->GetEquipTypeClass())
 		{
@@ -71,9 +76,9 @@ void AGASManaCharacter::AttachWeaponToBack() const
 
 void AGASManaCharacter::AttachWeaponToHand()
 {
-	if (RightHandEquipment) EquipGearToSocket(RightHandEquipment, "hand_rSocket"); else return;
+	if (RightHandEquipment && !AbilitySystemComponent->ComponentHasTag("Character.Equipped.OneHanded.Right")) EquipGearToSocket(RightHandEquipment, "hand_rSocket"); 
 
-	if (LeftHandEquipment) EquipGearToSocket(LeftHandEquipment, "hand_lSocket"); else return;
+	if (LeftHandEquipment && !AbilitySystemComponent->ComponentHasTag("Character.Equipped.OneHanded.Left")) EquipGearToSocket(LeftHandEquipment, "hand_lSocket");
 
 	if (RightHandEquipment) SetEquipment(RightHandEquipment);
 	if (LeftHandEquipment) SetEquipment(LeftHandEquipment);
@@ -117,7 +122,7 @@ void AGASManaCharacter::OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedCom
 {
 	if (OtherActor && OtherActor->Implements<UI_PickUpInterface>())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OtherActor: %s"), *GetNameSafe(OtherActor));
+		//UE_LOG(LogTemp, Warning, TEXT("OtherActor: %s"), *GetNameSafe(OtherActor));
 		UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
 		II_PickUpInterface::Execute_OnPickedUp(OtherActor, this, AbilitySystem);
 	}

@@ -41,7 +41,7 @@ void APickUp_Parent::OnPickedUp_Implementation(AActor* Picker, UAbilitySystemCom
 	{
 		if (AGASManaCharacter* Char = Cast<AGASManaCharacter>(Picker))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, "Playing Material Effect");
+			//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, "Playing Material Effect");
 			Char->PlayFlashEffect(FlashColor, FlashLength);
 		}
 	}

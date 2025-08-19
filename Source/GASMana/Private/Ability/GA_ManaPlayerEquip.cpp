@@ -22,7 +22,7 @@ UGA_ManaPlayerEquip::UGA_ManaPlayerEquip()
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsMantling")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsZipToPoint")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne")));
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsJumping")));
 }
 
 void UGA_ManaPlayerEquip::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -127,7 +127,7 @@ void UGA_ManaPlayerEquip::EndAbility(const FGameplayAbilitySpecHandle Handle, co
 void UGA_ManaPlayerEquip::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
 {
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Purple, FString("Cancel Ability Called!"));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Purple, FString("Cancel Ability Called!"));
 
 }
 

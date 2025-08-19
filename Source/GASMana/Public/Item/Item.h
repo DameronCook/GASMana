@@ -17,6 +17,7 @@ enum class EItemType : uint8
 	EIT_RightHandedEquipment UMETA(DisplayName = "Right Handed Equipment"),
 	EIT_LeftHandedEquipment UMETA(DisplayName = "Left Handed Equipment"),
 	EIT_Money UMETA(DisplayName = "Money"),
+	EIT_ManaPickup UMETA(DisplayName = "Mana Pickup"),
 	EIT_Consumable UMETA(DisplayName = "Consumable")
 };
 

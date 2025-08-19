@@ -258,6 +258,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Shield Block Montage To Play */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* ShieldBlockMontage;
+
+	/** Throw Hook Montage to play */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Hooks, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* ThrowHookMontage;
 	
 	UPROPERTY()
 	UAnimMontage* CurrentBlockingMontage;
@@ -476,6 +480,8 @@ public:
 	FORCEINLINE UAnimMontage* GetZipToPointMontage() const { return ZipToPointMontage; }
 	FORCEINLINE UAnimMontage* GetSwingMontage() const { return SwingMontage; }
 	FORCEINLINE UAnimMontage* GetPickUpMontage() const { return PickUpMontage; }
+	FORCEINLINE UAnimMontage* GetThrowHookMontage() const { return ThrowHookMontage; }
+
 	FORCEINLINE UCurveFloat* GetDiveRollCurveFloat() const { return DiveRollCurveFloat; }
 	FORCEINLINE UCurveFloat* GetZipToPointCurveFloat() const { return ZipToPointCurveFloat; }
 	FORCEINLINE UCurveFloat* GetJumpCurve() const { return JumpCurveFloat; }
