@@ -73,7 +73,7 @@ float AItem::TransformedCos() const
 void AItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.F, FColor::Red, "OnSphere Overlap");
+	//GEngine->AddOnScreenDebugMessage(-1, 5.F, FColor::Red, "OnSphere Overlap");
 	if (IPlayerCharacterInterface* PlayerInterface = Cast<IPlayerCharacterInterface>(OtherActor))
 	{
 		PlayerInterface->SetOverlappingItem(this);

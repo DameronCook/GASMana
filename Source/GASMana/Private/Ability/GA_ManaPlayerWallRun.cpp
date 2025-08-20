@@ -110,6 +110,7 @@ void UGA_ManaPlayerWallRun::EndAbility(const FGameplayAbilitySpecHandle Handle, 
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("EndAbility End")));
 	if (ActorInfo && ActorInfo->AbilitySystemComponent.IsValid())
 	{
 		//We should only remove the tag if the player JUMPS out of a wallrun. If we remove the wall run tag here, they'll just start running again and again and again and again and again and again
@@ -143,12 +144,13 @@ void UGA_ManaPlayerWallRun::EndAbility(const FGameplayAbilitySpecHandle Handle, 
 					{
 						AbilitySystem->RemoveActiveGameplayEffect(ManaDrainEffectHandle);
 						AbilitySystem->RemoveActiveGameplayEffect(WallRunEffectHandle);
-
+						if (!AbilitySystem->ComponentHasTag("Character.IsFree"))
+						{
+							AbilitySystem->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ActorInfo->AbilitySystemComponent->MakeEffectContext());
+						}
 					}
-					ActorInfo->AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ActorInfo->AbilitySystemComponent->MakeEffectContext());
 
-					UCharacterMovementComponent* CharacterMovement = PlayerCharacter->GetCharacterMovement();
-					if (CharacterMovement)
+					if (UCharacterMovementComponent* CharacterMovement = PlayerCharacter->GetCharacterMovement())
 					{
 						CharacterMovement->bOrientRotationToMovement = true;
 						CharacterMovement->GravityScale = PlayerCharacter->GetOriginalGravityScale();

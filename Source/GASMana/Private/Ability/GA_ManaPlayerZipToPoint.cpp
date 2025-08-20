@@ -117,11 +117,11 @@ void UGA_ManaPlayerZipToPoint::EndAbility(const FGameplayAbilitySpecHandle Handl
 		//Launch in direction of target for added boost to get over small gaps... Listen it makes the game feel better
 		FVector LaunchDir = PlayerCharacter->GetHookShot()->GetCharacterInitDir();
 		LaunchDir *= 1100.f;
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, LaunchDir.ToString());
+		//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, LaunchDir.ToString());
 
 		CharMove->Launch(FVector(LaunchDir.X, LaunchDir.Y, 950.f));
 
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Orange, "END GRAPPLE CALLED LAUNCH CHARACTER BITCH");
+		//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Orange, "END GRAPPLE CALLED LAUNCH CHARACTER BITCH");
 
 	}
 
