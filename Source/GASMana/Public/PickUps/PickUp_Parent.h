@@ -16,7 +16,7 @@ class GASMANA_API APickUp_Parent : public AActor, public II_PickUpInterface
 public:	
 	APickUp_Parent();
 
-	void OnPickedUp_Implementation(AActor* Picker, UAbilitySystemComponent* AbilitySystem);
+	virtual void OnPickedUp_Implementation(AActor* Picker, UAbilitySystemComponent* AbilitySystem) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
 	TSubclassOf<UGameplayEffect> PickUpEffect;

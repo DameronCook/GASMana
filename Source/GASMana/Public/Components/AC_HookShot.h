@@ -117,8 +117,8 @@ public:
 	UFUNCTION()
 	FVector FindSwingLaunchForce(APlayerManaCharacter* Character, float ForwardSpeed, float UpSpeed);
 
-	FORCEINLINE class AManaHookParent* GetCurrentTarget() { return CurrentTarget; }
-	FORCEINLINE FVector GetCharacterInitDir() { return CharacterInitDirection; }
+	FORCEINLINE class AManaHookParent* GetCurrentTarget() const { return CurrentTarget; }
+	FORCEINLINE FVector GetCharacterInitDir() const { return CharacterInitDirection; }
 
 protected:
 	virtual void BeginPlay() override;

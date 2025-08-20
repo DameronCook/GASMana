@@ -243,33 +243,27 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Swing Montage To Play */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* SwingMontage;
-
-	/** Attack Montage To Play */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* AttackMontage;
-
-	/** Equip Attack Montage To Play */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* EquipAttackMontage;
-
-	/** Attack Montage To Play when player isn't moving */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* AttackMontageNoMovement;
-
-	/** Equip Attack Montage To Play when player isn't moving */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* EquipAttackMontageNoMovement;
-
+	
 	/** Equip Attack Montage To Play */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AirAttackMontage;
 
+	/** Pick Up Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* PickUpMontage;
+	
+	UPROPERTY()
 	UAnimMontage* CurrentAttackMontage;
 
 	/** Shield Block Montage To Play */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* ShieldBlockMontage;
 
+	/** Throw Hook Montage to play */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Hooks, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* ThrowHookMontage;
+	
+	UPROPERTY()
 	UAnimMontage* CurrentBlockingMontage;
 
 	FName NextAttackMontageSection = "Attack01";
@@ -351,6 +345,9 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	bool bShouldAddCameraTarget = false;
 	AActor* CurrentCamTarget = nullptr;
 
+	UPROPERTY(VisibleDefaultsOnly)
+	AItem* OverlappingItem = nullptr;
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -394,6 +391,7 @@ protected:
 
 	/**Called for hook input */
 	void Hook(const FInputActionValue& Value);
+	void GrabOverlappingItem();
 
 	/**Called for Equip input */
 	void Equip(const FInputActionValue& Value);
@@ -405,7 +403,7 @@ public:
 
 	virtual void HandleMelee() override;
 
-	void UpdateStaminaRegen();
+	void UpdateStaminaRegen() const;
 
 	//Interface overrides
 	///////////////////////////////////////
@@ -420,6 +418,8 @@ public:
 	//Attack Interface
 	virtual void SetDefaultCombos() override;
 	virtual void SetNextComboSegment(FName NextCombo) override;
+
+	virtual void SetOverlappingItem(class AItem* Item) override;
 
 	//////////////////////////////////////
 	//Camera Functions
@@ -437,7 +437,7 @@ public:
 	//////////////////////////////////////
 	//Convenience functions
 	/* Remove the free tag from the player */
-	void RemoveFreeTag();
+	void RemoveFreeTag() const;
 
 	//////////////////////////////////////
 	//Getters
@@ -475,14 +475,13 @@ public:
 
 	//Montages
 	FORCEINLINE UAnimMontage* GetRollMontage() const { return RollMontage; }
-	FORCEINLINE UAnimMontage* GetAttackMontage() const { return AttackMontage; }
-	FORCEINLINE UAnimMontage* GetAttackMontageNoMovement() const { return AttackMontageNoMovement; }
-	FORCEINLINE UAnimMontage* GetEquipAttackMontage() const { return EquipAttackMontage; }
-	FORCEINLINE UAnimMontage* GetEquipAttackMontageNoMovement() const { return EquipAttackMontageNoMovement; }
 	FORCEINLINE UAnimMontage* GetAirAttackMontage() const { return AirAttackMontage; }
 	FORCEINLINE UAnimMontage* GetCurrentAttackMontage() const { return CurrentAttackMontage; }
 	FORCEINLINE UAnimMontage* GetZipToPointMontage() const { return ZipToPointMontage; }
 	FORCEINLINE UAnimMontage* GetSwingMontage() const { return SwingMontage; }
+	FORCEINLINE UAnimMontage* GetPickUpMontage() const { return PickUpMontage; }
+	FORCEINLINE UAnimMontage* GetThrowHookMontage() const { return ThrowHookMontage; }
+
 	FORCEINLINE UCurveFloat* GetDiveRollCurveFloat() const { return DiveRollCurveFloat; }
 	FORCEINLINE UCurveFloat* GetZipToPointCurveFloat() const { return ZipToPointCurveFloat; }
 	FORCEINLINE UCurveFloat* GetJumpCurve() const { return JumpCurveFloat; }

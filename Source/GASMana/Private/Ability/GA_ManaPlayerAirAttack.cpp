@@ -25,7 +25,8 @@ UGA_ManaPlayerAirAttack::UGA_ManaPlayerAirAttack()
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwinging")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsZipToPoint")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsHooked")));
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.isWallRunning")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsEquipping")));
 }
 
 void UGA_ManaPlayerAirAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -55,7 +56,7 @@ void UGA_ManaPlayerAirAttack::ActivateAbility(const FGameplayAbilitySpecHandle H
 
 		if (PlayerCharacter->EquipmentState == EEquipmentState::EES_Unequipped)
 		{
-			PlayerCharacter->AttatchWeaponToHand();
+			PlayerCharacter->AttachWeaponToHand();
 		}
 
 		FGameplayTag FreeTag;
