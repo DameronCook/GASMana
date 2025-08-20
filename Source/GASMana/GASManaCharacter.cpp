@@ -10,7 +10,7 @@
 //DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
-// AGASManaCharacter
+/// AGASManaCharacter
 
 AGASManaCharacter::AGASManaCharacter()
 {
@@ -46,15 +46,46 @@ void AGASManaCharacter::PlayEquipMontage(const FName& SectionName)
 	{
 		if (EquipMontageRight)
 		{
+<<<<<<< Updated upstream
 			AnimInstance->Montage_Play(EquipMontageRight);
 			AnimInstance->Montage_JumpToSection(SectionName, EquipMontageRight);
 		}
 
 		if (EquipMontageLeft)
+=======
+			AbilitySystemComponent->TryActivateAbilitiesByTag(EquipTagContainer);
+		}
+		
+		EquipmentState = Equipment->GetEquipmentType();
+
+		FName EquippedTagName;
+
+		switch (Equipment->GetItemType())
+		{
+			case EItemType::EIT_LeftHandedEquipment:
+				SetEquipMontageLeft(Equipment->GetEquipMontage());
+				EquippedTagName = "Character.Equipped.OneHanded.Left";
+				break;
+			case EItemType::EIT_RightHandedEquipment:
+				SetEquipMontageRight(Equipment->GetEquipMontage());
+				EquippedTagName = "Character.Equipped.OneHanded.Right";
+				break;
+			default:
+				break;
+		}
+
+		Equipment->DisablePickUpCollision();
+
+		if (!AbilitySystemComponent->ComponentHasTag(EquippedTagName) && Equipment->GetEquipTypeClass())
+>>>>>>> Stashed changes
 		{
 			AnimInstance->Montage_Play(EquipMontageLeft);
 			AnimInstance->Montage_JumpToSection(SectionName, EquipMontageLeft);
 		}
+		
+		const FName& EquipSocket = Equipment->GetEquipmentSocket(); 
+		EquipGearToSocket(Equipment, EquipSocket);
+		
 	}
 }
 
@@ -82,11 +113,16 @@ void AGASManaCharacter::AttatchWeaponToBack()
 
 void AGASManaCharacter::AttatchWeaponToHand()
 {
+<<<<<<< Updated upstream
 	EquipGearToSocket(RightHandEquipment, "hand_rSocket");
 
 	EquipGearToSocket(LeftHandEquipment, "hand_lSocket");
 
 	SetEquipment();
+=======
+	if (RightHandEquipment) EquipRightHandGear();
+	if (LeftHandEquipment) EquipLeftHandGear();
+>>>>>>> Stashed changes
 }
 
 void AGASManaCharacter::EquipGearToSocket(AManaEquipmentParent* GearToEquip, FName SocketName)
@@ -191,9 +227,20 @@ void AGASManaCharacter::GiveDefaultAbilities()
 	//}
 }
 
+<<<<<<< Updated upstream
 void AGASManaCharacter::EquipLeftHandGear()
+=======
+void AGASManaCharacter::EquipLeftHandGear() 
+>>>>>>> Stashed changes
 {
 	EquipGearToSocket(LeftHandEquipment, "hand_lSocket");
+	SetEquipment(LeftHandEquipment);
+}
+
+void AGASManaCharacter::EquipRightHandGear() 
+{
+	EquipGearToSocket(RightHandEquipment, "hand_rSocket");
+	SetEquipment(RightHandEquipment);
 }
 
 void AGASManaCharacter::InitializeAttributes()

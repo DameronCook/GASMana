@@ -44,9 +44,9 @@ void UGA_ManaPlayerAttack::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 		// Play the montage and bind delegates
 		if (PlayerCharacter->GetCurrentAttackMontage() && ActorInfo->AvatarActor.IsValid())
 		{
-			PlayerCharacter->EquipmentState == EEquipmentState::EES_Unequipped ? PlayerCharacter->EquipmentState = EEquipmentState::EES_EquippedOneHandedWeapon : PlayerCharacter->EquipmentState = PlayerCharacter->EquipmentState;
+			PlayerCharacter->GetEquipmentState() == EEquipmentState::EES_Unequipped ? PlayerCharacter->SetEquipmentState(EEquipmentState::EES_EquippedOneHandedWeapon) : PlayerCharacter->SetEquipmentState(PlayerCharacter->GetEquipmentState());
 
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("Next Combo Section: %s"), *PlayerCharacter->GetNextAttackMontageSection().ToString()));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("Next Combo Section: %s"), *PlayerCharacter->GetNextAttackMontageSection().ToString()));
 
 			UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, PlayerCharacter->GetCurrentAttackMontage(), 1.0f, PlayerCharacter->GetNextAttackMontageSection(), false, 0.0f);
 
@@ -64,18 +64,6 @@ void UGA_ManaPlayerAttack::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 			// If no montage, just end ability immediately
 			EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		}
-
-		/*
-		FGameplayTag EventTag = FGameplayTag::RequestGameplayTag(FName("Character.Damaged"));
-
-		UAbilityTask_WaitGameplayEvent* WaitTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, EventTag, nullptr, true, true);
-
-		if (WaitTask)
-		{
-			WaitTask->EventReceived.AddDynamic(this, &UGA_ManaPlayerAttack::OnGameplayEventReceived);
-			WaitTask->ReadyForActivation();
-		}
-		*/
 
 		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetAttackingEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 

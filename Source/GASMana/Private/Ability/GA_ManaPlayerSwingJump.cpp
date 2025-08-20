@@ -33,7 +33,7 @@ void UGA_ManaPlayerSwingJump::ActivateAbility(const FGameplayAbilitySpecHandle H
 		return;
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Committed Swing Jump!"));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Committed Swing Jump!"));
 
 	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
 	UCharacterMovementComponent* CharacterMovement = PlayerCharacter->GetCharacterMovement();

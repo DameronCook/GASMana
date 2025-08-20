@@ -51,7 +51,7 @@ void UApplyRootMotionDynamicForce::SetForceDirection(FVector NewDirection)
 {
     if (GEngine)
     {
-        GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Cyan, FString::Printf(TEXT("SetForceDirection: %s"), *NewDirection.ToString()));
+        //GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Cyan, FString::Printf(TEXT("SetForceDirection: %s"), *NewDirection.ToString()));
     }
 
     if (ACharacter* Character = Cast<ACharacter>(GetAvatarActor()))

@@ -4,7 +4,6 @@
 #include "Components/AC_WallRun.h"
 #include "PlayerManaCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values for this component's properties
 UAC_WallRun::UAC_WallRun()
@@ -54,14 +53,13 @@ void UAC_WallRun::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 
 	if (PlayerCharacter && CharMove)
 	{
-		UGA_ManaPlayerWallRun* WallRunAbility = PlayerCharacter->GetWallRunAbility();
-		if (WallRunAbility)
+		if (UGA_ManaPlayerWallRun* WallRunAbility = PlayerCharacter->GetWallRunAbility())
 		{
 			UpdateWallRunVertical(DeltaTime, PlayerCharacter, WallRunAbility, CharMove);
 
 			bool bForwardHit = ForwardWallRunCheck(PlayerCharacter);
 
-			FVector NewWallRunHorizontalDirection = UpdateWallRunHorizontal(PlayerCharacter, WallRunAbility, CharMove);
+			const FVector NewWallRunHorizontalDirection = UpdateWallRunHorizontal(PlayerCharacter, WallRunAbility, CharMove);
 			CharMove->Velocity.X = NewWallRunHorizontalDirection.X * WallRunStrength;
 			CharMove->Velocity.Y = NewWallRunHorizontalDirection.Y * WallRunStrength;
 
@@ -244,7 +242,7 @@ FVector UAC_WallRun::UpdateWallRunHorizontal(APlayerManaCharacter* Character, UG
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(Character);
 
-	//DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
+	DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
 	bool bHit = GetWorld()->LineTraceSingleByChannel(OutHit, LineStartLocation, LineEndLocation, ECollisionChannel::ECC_Visibility, QueryParams);
 
 	if (bHit)
@@ -255,10 +253,6 @@ FVector UAC_WallRun::UpdateWallRunHorizontal(APlayerManaCharacter* Character, UG
 	}
 	else
 	{
-		if (WallRunAbility)
-		{
-			WallRunAbility->OnWallRunFinished();
-		}
 		CharMove->Velocity = FVector(WallRunDirection.X * WallRunStrength, WallRunDirection.Y * WallRunStrength, CharMove->Velocity.Z);
 		return WallRunDirection;
 	}

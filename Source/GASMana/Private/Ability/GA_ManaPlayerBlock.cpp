@@ -44,9 +44,17 @@ void UGA_ManaPlayerBlock::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 
 		if (PlayerCharacter->GetLeftHandEquipment())
 		{
+<<<<<<< Updated upstream
 			if (PlayerCharacter->EquipmentState == EEquipmentState::EES_Unequipped)
 			{
 				PlayerCharacter->AttatchWeaponToHand();
+=======
+			//GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Orange, "Left hand equipment found");
+
+			if (PlayerCharacter->GetEquipmentState() == EEquipmentState::EES_Unequipped)
+			{	
+				PlayerCharacter->AttachWeaponToHand();
+>>>>>>> Stashed changes
 			}
 			PlayerCharacter->Blocking();
 		}
