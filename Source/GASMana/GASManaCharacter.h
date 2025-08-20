@@ -16,6 +16,9 @@
 =======
 #include "Item/Equipment.h"
 #include "Item/RightHandEquipment.h"
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 #include "GASManaCharacter.generated.h"
 
@@ -44,6 +47,7 @@ class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, pub
 	UPROPERTY()
 	class UManaAttributeSet* Attributes;
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 
 	/** Damaged Effect Class */
@@ -135,6 +139,21 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void EquipRightHandGear();
 >>>>>>> Stashed changes
+=======
+	////////////////////////////////////////////////////////////////
+	///Equipment
+	UPROPERTY()
+	ARightHandEquipment* RightHandEquipment;
+	UPROPERTY()
+	ALeftHandEquipment* LeftHandEquipment;
+	
+	/* Instantly Equips Gear to left hand*/
+	UFUNCTION(BlueprintCallable)
+	void EquipLeftHandGear();
+	
+	UFUNCTION(BlueprintCallable)
+	void EquipRightHandGear();
+>>>>>>> Stashed changes
 
 	UPROPERTY()
 	UAnimMontage* EquipMontageRight;
@@ -173,6 +192,7 @@ public:
 	const FName DefaultComboName = "Attack01";
 	FName ComboAttackName = DefaultComboName;
 	bool bIsAttackWindowOpen;
+<<<<<<< Updated upstream
 
 protected:
 	
@@ -244,6 +264,71 @@ public:
 	UFUNCTION()
 	void PlayFlashEffect(FVector InColor, float FlashLength) const;
 
+=======
+
+protected:
+	
+	/** Runs on begin overlap */
+	UFUNCTION(BlueprintCallable, Category = "Overlap")
+	virtual void OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	////////////////////////////////////////////////////////////////
+	///Equipment
+	UFUNCTION(Category = "Equipment")
+	void SetEquipment(const AEquipment* Equipment);
+	
+	////////////////////////////////////////////////////////////////
+	///Melee
+	UFUNCTION(BlueprintCallable, Category = "Blocking")
+	virtual void Blocking();
+
+	UFUNCTION(BlueprintCallable, Category = "Blocking")
+	virtual void FinishedBlocking();
+	
+
+public:
+	AGASManaCharacter();
+
+	/** Immediately unequips gear from the player */
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
+	void InstantlyUnequipGear();
+
+	////////////////////////////////////////////////////////////////
+	///Melee
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	virtual void HandleMelee();
+	virtual void SetDefaultCombos() override;
+	virtual void SetNextComboSegment(FName NextCombo) override;
+
+	////////////////////////////////////////////////////////////////
+	///Equipment
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
+	void AttachWeaponToBack() const;
+	
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
+	void AttachWeaponToHand();
+
+	////////////////////////////////////////////////////////////////
+	///Attributes & Abilities
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
+	virtual void InitializeAttributes();
+	virtual void GiveDefaultAbilities();
+
+	/** Default Attributes given to the character */
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Abilities")
+	TSubclassOf<class UGameplayEffect> DefaultAttributeEffect;
+	
+	/** Current Abilities the player has */
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Abilities")
+	TArray<TSubclassOf<class UGameplayAbility>> DefaultAbilities;
+
+	////////////////////////////////////////////////////////////////
+	///Other
+	UFUNCTION()
+	void PlayFlashEffect(FVector InColor, float FlashLength) const;
+
+>>>>>>> Stashed changes
 	////////////////////////////////////////////////////////////////
 	///Getters/Setters
 	/* Getters */
@@ -260,17 +345,23 @@ public:
 	FORCEINLINE FName GetComboAttackName() const { return ComboAttackName; }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
 
 	virtual void SetDefaultCombos() override;
 	virtual void SetNextComboSegment(FName NextCombo) override;
 =======
+=======
+>>>>>>> Stashed changes
 	/* Setters */
 	FORCEINLINE UAnimMontage* SetEquipMontageRight(UAnimMontage* Montage) { return EquipMontageRight = Montage; }
 	FORCEINLINE UAnimMontage* SetEquipMontageLeft(UAnimMontage* Montage) { return EquipMontageLeft = Montage; }
 	FORCEINLINE ARightHandEquipment* SetRightHandEquipment(ARightHandEquipment* RightHandGear) { return RightHandEquipment = RightHandGear; }
 	FORCEINLINE ALeftHandEquipment* SetLeftHandEquipment(ALeftHandEquipment* LeftHandGear) { return LeftHandEquipment = LeftHandGear; }
 	FORCEINLINE EEquipmentState SetEquipmentState(const EEquipmentState EquipState) { return EquipmentState = EquipState; }
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 };

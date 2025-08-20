@@ -571,9 +571,13 @@ void APlayerManaCharacter::Look(const FInputActionValue& Value)
 void APlayerManaCharacter::Attack(const FInputActionValue& Value)
 {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 	GetMontageToPlay();
 
 	if (const FGameplayTagContainer AttackType = GetAttackType(); GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackType, true))
+=======
+	if (GetRightHandEquipment())
+>>>>>>> Stashed changes
 =======
 	if (GetRightHandEquipment())
 >>>>>>> Stashed changes
@@ -606,6 +610,7 @@ void APlayerManaCharacter::GetMontageToPlay()
 	if (GetEquipmentState() == EEquipmentState::EES_Unequipped)
 	{
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 		//I WILL have a smarter way of getting the attack montages from the WEAPONS rather than just storing all of the montages on the player. I'm just trying to make one system work right now christ.
 		//TODO: Get current attack montage from the weapon we have.
 		//This maybe should get put somewhere else at some point, but the equip left montage DOES need to be called
@@ -615,19 +620,28 @@ void APlayerManaCharacter::GetMontageToPlay()
 		{
 			MontageToPlay = GetEquipAttackMontageNoMovement();
 =======
+=======
+>>>>>>> Stashed changes
 		if (GetLeftHandEquipment()) PlayAnimMontage(GetLeftHandEquipment()->GetEquipMontage());
 
 		if (GetCharacterMovement()->Velocity.IsNearlyZero())
 		{
 			GEngine->AddOnScreenDebugMessage(-1,5.f, FColor::Purple, "Getting Equip Attack!");
 			MontageToPlay = GetRightHandEquipment()->GetEquipAttack();
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 			RemoveFreeTag();
 		}
 		else
 		{
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 			MontageToPlay = GetEquipAttackMontage();
+=======
+			MontageToPlay = GetRightHandEquipment()->GetEquipAttackMovement();
+>>>>>>> Stashed changes
 =======
 			MontageToPlay = GetRightHandEquipment()->GetEquipAttackMovement();
 >>>>>>> Stashed changes
@@ -639,18 +653,24 @@ void APlayerManaCharacter::GetMontageToPlay()
 		{
 			RemoveFreeTag();
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 			MontageToPlay = GetAttackMontageNoMovement();
 		}
 		else
 		{
 			MontageToPlay = GetAttackMontage();
 =======
+=======
+>>>>>>> Stashed changes
 			MontageToPlay = GetRightHandEquipment()->GetAttackCombo();
 		}
 		else
 		{
 			//If we're moving
 			MontageToPlay = GetRightHandEquipment()->GetAttackComboMovement();
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 		}
 	}
@@ -664,9 +684,12 @@ void APlayerManaCharacter::Block(const FInputActionValue& Value)
 	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Block");
 	//}
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
 	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(BlockTagContainer, true);
 =======
+=======
+>>>>>>> Stashed changes
 	if (GetLeftHandEquipment())
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Left Hand Equipment found!");
@@ -738,11 +761,14 @@ void APlayerManaCharacter::GrabOverlappingItem()
 void APlayerManaCharacter::Equip(const FInputActionValue& Value)
 {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 	if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(EquipTagContainer, true))
 	{
 		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 		AnimInstance->SetIsEquipping(true);
 =======
+=======
+>>>>>>> Stashed changes
 	FGameplayTag EquipTag = FGameplayTag::RequestGameplayTag("Character.IsEquipping");
 	if (!GetAbilitySystemComponent()->HasMatchingGameplayTag(EquipTag))
 	{

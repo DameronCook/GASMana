@@ -77,10 +77,17 @@ void AGASManaCharacter::PlayEquipMontage(const FName& SectionName)
 		Equipment->DisablePickUpCollision();
 
 		if (!AbilitySystemComponent->ComponentHasTag(EquippedTagName) && Equipment->GetEquipTypeClass())
+<<<<<<< Updated upstream
 >>>>>>> Stashed changes
 		{
 			AnimInstance->Montage_Play(EquipMontageLeft);
 			AnimInstance->Montage_JumpToSection(SectionName, EquipMontageLeft);
+=======
+		{
+			GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(
+				Equipment->GetEquipTypeClass()->GetDefaultObject<UGameplayEffect>(), 1.0f,
+				GetAbilitySystemComponent()->MakeEffectContext());
+>>>>>>> Stashed changes
 		}
 		
 		const FName& EquipSocket = Equipment->GetEquipmentSocket(); 
@@ -114,11 +121,16 @@ void AGASManaCharacter::AttatchWeaponToBack()
 void AGASManaCharacter::AttatchWeaponToHand()
 {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 	EquipGearToSocket(RightHandEquipment, "hand_rSocket");
 
 	EquipGearToSocket(LeftHandEquipment, "hand_lSocket");
 
 	SetEquipment();
+=======
+	if (RightHandEquipment) EquipRightHandGear();
+	if (LeftHandEquipment) EquipLeftHandGear();
+>>>>>>> Stashed changes
 =======
 	if (RightHandEquipment) EquipRightHandGear();
 	if (LeftHandEquipment) EquipLeftHandGear();
@@ -228,7 +240,11 @@ void AGASManaCharacter::GiveDefaultAbilities()
 }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 void AGASManaCharacter::EquipLeftHandGear()
+=======
+void AGASManaCharacter::EquipLeftHandGear() 
+>>>>>>> Stashed changes
 =======
 void AGASManaCharacter::EquipLeftHandGear() 
 >>>>>>> Stashed changes

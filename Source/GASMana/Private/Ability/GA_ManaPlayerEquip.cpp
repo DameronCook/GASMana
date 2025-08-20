@@ -58,6 +58,7 @@ void UGA_ManaPlayerEquip::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 		{
 			AbilitySystemComponent->ApplyGameplayEffectToSelf(GASCharacter->GetEquipEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 		}
 
 		// Play the montage and bind delegates
@@ -94,6 +95,20 @@ void UGA_ManaPlayerEquip::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 				{
 					MontageLeftTask->ReadyForActivation();
 =======
+=======
+			
+				if (GASCharacter->GetRightHandEquipment())
+				{
+					if (GASCharacter->GetEquipRightMontage())
+					{
+						if (UAbilityTask_PlayMontageAndWait* MontageRightTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, GASCharacter->GetEquipRightMontage(), 1.0f, MontageSectionName, false, 0.0f))
+						{
+							MontageRightTask->ReadyForActivation();
+						}
+					}
+				}
+
+>>>>>>> Stashed changes
 				if (GASCharacter->GetLeftHandEquipment())
 				{
 					if (GASCharacter->GetEquipLeftMontage())
