@@ -11,6 +11,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputActionValue.h"
 #include "Effect/GE_ManaPlayerGrounded.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -23,6 +26,10 @@
 #include "Components/AC_WallRun.h"
 #include "Ability/GA_ManaPlayerAirAttack.h"
 #include "Ability/GA_ManaPlayerAttack.h"
+#include "Item/Item.h"
+#include "Item/LeftHandEquipment.h"
+#include "Item/RightHandEquipment.h"
+
 
 APlayerManaCharacter::APlayerManaCharacter()
 {
@@ -95,11 +102,13 @@ void APlayerManaCharacter::BeginPlay()
 		).AddUObject(this, &APlayerManaCharacter::OnBlockingTagChanged);
 	}
 
-	SetEquipmentState(EEquipmentState::EES_Unequipped);
+	EquipmentState = EEquipmentState::EES_Unequipped;
 
+	/*
 	RightHandEquipment = AddEquipment(FName("RightHandEquipSocket"), GetRightHandEquipment());
 	LeftHandEquipment = AddEquipment(FName("LeftHandEquipSocket"), GetLeftHandEquipment());
-
+	*/
+	
 	if (PlayerHUDClass)
 	{
 		//Configure Player HUD
@@ -341,20 +350,17 @@ void APlayerManaCharacter::SetNextComboSegment(const FName NextCombo)
 	}
 }
 
-<<<<<<< Updated upstream
-=======
 void APlayerManaCharacter::SetOverlappingItem(class AItem* Item)
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "OverlappingItem");
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "OverlappingItem");
 
 	OverlappingItem = Item;
 	if (OverlappingItem)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Overlapping Item: %s"), *OverlappingItem->GetName()));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Overlapping Item: %s"), *OverlappingItem->GetName()));
 	}
 }
 
->>>>>>> Stashed changes
 
 //////////////////// -- Camera Stuff -- \\\\\\\\\\\\\\\\\\\\\\\
 
@@ -437,6 +443,7 @@ void APlayerManaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		EnhancedInputComponent->BindAction(RollAction, ETriggerEvent::Started, this, &APlayerManaCharacter::Roll);
 
 		// Blocking
+		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Triggered, this, &APlayerManaCharacter::Block);
 		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Ongoing, this, &APlayerManaCharacter::Block);
 		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Completed, this, &APlayerManaCharacter::StopBlock);
 
@@ -570,20 +577,15 @@ void APlayerManaCharacter::Look(const FInputActionValue& Value)
 
 void APlayerManaCharacter::Attack(const FInputActionValue& Value)
 {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-	GetMontageToPlay();
-
-	if (const FGameplayTagContainer AttackType = GetAttackType(); GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackType, true))
-=======
-	if (GetRightHandEquipment())
->>>>>>> Stashed changes
-=======
-	if (GetRightHandEquipment())
->>>>>>> Stashed changes
+	if (RightHandEquipment)
 	{
-		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-		AnimInstance->SetIsAttacking(true);
+		GetMontageToPlay();
+		const FGameplayTagContainer AttackType = GetAttackType(); 
+		if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackType, true))
+		{
+			UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+			AnimInstance->SetIsAttacking(true);
+		}
 	}
 }
 
@@ -607,75 +609,38 @@ void APlayerManaCharacter::GetMontageToPlay()
 {
 	UAnimMontage* MontageToPlay;
 
-	if (GetEquipmentState() == EEquipmentState::EES_Unequipped)
+	if (EquipmentState == EEquipmentState::EES_Unequipped)
 	{
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-		//I WILL have a smarter way of getting the attack montages from the WEAPONS rather than just storing all of the montages on the player. I'm just trying to make one system work right now christ.
+		if (LeftHandEquipment) PlayAnimMontage(LeftHandEquipment->GetEquipMontage());
 		//TODO: Get current attack montage from the weapon we have.
 		//This maybe should get put somewhere else at some point, but the equip left montage DOES need to be called
-		PlayAnimMontage(GetEquipLeftMontage());
-
-		if (GetCharacterMovement()->Velocity.IsNearlyZero())
-		{
-			MontageToPlay = GetEquipAttackMontageNoMovement();
-=======
-=======
->>>>>>> Stashed changes
-		if (GetLeftHandEquipment()) PlayAnimMontage(GetLeftHandEquipment()->GetEquipMontage());
-
 		if (GetCharacterMovement()->Velocity.IsNearlyZero())
 		{
 			GEngine->AddOnScreenDebugMessage(-1,5.f, FColor::Purple, "Getting Equip Attack!");
-			MontageToPlay = GetRightHandEquipment()->GetEquipAttack();
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+			MontageToPlay = RightHandEquipment->GetEquipAttack();
 			RemoveFreeTag();
 		}
 		else
 		{
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-			MontageToPlay = GetEquipAttackMontage();
-=======
-			MontageToPlay = GetRightHandEquipment()->GetEquipAttackMovement();
->>>>>>> Stashed changes
-=======
-			MontageToPlay = GetRightHandEquipment()->GetEquipAttackMovement();
->>>>>>> Stashed changes
+			MontageToPlay = RightHandEquipment->GetEquipAttackMovement();
 		}
 	}
 	else
 	{
 		if (GetCharacterMovement()->Velocity.IsNearlyZero())
 		{
+			//If we're not moving
 			RemoveFreeTag();
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-			MontageToPlay = GetAttackMontageNoMovement();
-		}
-		else
-		{
-			MontageToPlay = GetAttackMontage();
-=======
-=======
->>>>>>> Stashed changes
-			MontageToPlay = GetRightHandEquipment()->GetAttackCombo();
+			MontageToPlay = RightHandEquipment->GetAttackCombo();
 		}
 		else
 		{
 			//If we're moving
-			MontageToPlay = GetRightHandEquipment()->GetAttackComboMovement();
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+			MontageToPlay = RightHandEquipment->GetAttackComboMovement();
 		}
 	}
 
-	SetAttackMontage(MontageToPlay);
+	if (MontageToPlay) SetAttackMontage(MontageToPlay);
 }
 
 void APlayerManaCharacter::Block(const FInputActionValue& Value) 
@@ -683,19 +648,11 @@ void APlayerManaCharacter::Block(const FInputActionValue& Value)
 	//if (GEngine && GetCharacterMovement()->IsFalling() == false) {
 	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Block");
 	//}
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-
-	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(BlockTagContainer, true);
-=======
-=======
->>>>>>> Stashed changes
-	if (GetLeftHandEquipment())
+	if (LeftHandEquipment)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Left Hand Equipment found!");
 		GetAbilitySystemComponent()->TryActivateAbilitiesByTag(BlockTagContainer, true);
 	}
->>>>>>> Stashed changes
 }
 
 void APlayerManaCharacter::StopBlock(const FInputActionValue& Value)
@@ -723,8 +680,6 @@ void APlayerManaCharacter::Hook(const FInputActionValue& Value)
 	{
 		GetAbilitySystemComponent()->TryActivateAbilitiesByTag(HookTagContainer, true);
 		PlayFlashEffect(FVector(0.f, 0.f, 1.f), .5f);
-<<<<<<< Updated upstream
-=======
 		GetMesh()->GetAnimInstance()->Montage_Play(GetThrowHookMontage());
 	}
 }
@@ -741,11 +696,11 @@ void APlayerManaCharacter::GrabOverlappingItem()
 			{
 			case EItemType::EIT_RightHandedEquipment:
 				REquipment = Cast<ARightHandEquipment>(Equipment);
-				if (REquipment) SetRightHandEquipment(REquipment);
+				if (REquipment) RightHandEquipment = REquipment;
 				break;
 			case EItemType::EIT_LeftHandedEquipment:
 				LEquipment = Cast<ALeftHandEquipment>(Equipment);
-				SetLeftHandEquipment(LEquipment);
+				LeftHandEquipment = LEquipment;
 				break;
 			default:
 				break;
@@ -754,45 +709,32 @@ void APlayerManaCharacter::GrabOverlappingItem()
 			OverlappingItem = nullptr;
 			PlayAnimMontage(GetPickUpMontage());
 		}
->>>>>>> Stashed changes
 	}
 }
 
 void APlayerManaCharacter::Equip(const FInputActionValue& Value)
 {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-	if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(EquipTagContainer, true))
-	{
-		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-		AnimInstance->SetIsEquipping(true);
-=======
-=======
->>>>>>> Stashed changes
-	FGameplayTag EquipTag = FGameplayTag::RequestGameplayTag("Character.IsEquipping");
-	if (!GetAbilitySystemComponent()->HasMatchingGameplayTag(EquipTag))
+	if (const FGameplayTag EquipTag = FGameplayTag::RequestGameplayTag("Character.IsEquipping"); !GetAbilitySystemComponent()->HasMatchingGameplayTag(EquipTag))
 	{
 		GrabOverlappingItem();
 	}
-	
+
 	if (!OverlappingItem)
 	{
-		if (GetRightHandEquipment() || GetLeftHandEquipment())
+		if (RightHandEquipment || LeftHandEquipment)
 		{
-			if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(GetEquipTag(), true))
+			if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(EquipTagContainer, true))
 			{
 				UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 				AnimInstance->SetIsEquipping(true);
 			}
 		}
->>>>>>> Stashed changes
 	}
-
 }
 
 //////////////////// -- Ability Regen -- \\\\\\\\\\\\\\\\\\\\\\\
 
-void APlayerManaCharacter::UpdateStaminaRegen()
+void APlayerManaCharacter::UpdateStaminaRegen() const
 {
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
 	if (!AbilitySystem|| !StaminaRegenBlockEffectClass || !StaminaRegenEffectClass)
@@ -824,7 +766,7 @@ void APlayerManaCharacter::UpdateStaminaRegen()
 	}
 }
 
-void APlayerManaCharacter::RemoveFreeTag()
+void APlayerManaCharacter::RemoveFreeTag() const
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Black, "RemoveFreeTag called!");
 	FGameplayTag FreeTag = FGameplayTag::RequestGameplayTag(FName("Character.IsFree"));

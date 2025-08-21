@@ -5,12 +5,14 @@
 #include "AbilitySystemComponent.h"
 #include "Public/ManaAttributeSet.h"
 #include "Components/CapsuleComponent.h"
+#include "Item/LeftHandEquipment.h"
 #include "Public/Interface/I_PickUpInterface.h"
+#include "Item/RightHandEquipment.h"
 
 //DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
-/// AGASManaCharacter
+// AGASManaCharacter
 
 AGASManaCharacter::AGASManaCharacter()
 {
@@ -25,50 +27,19 @@ AGASManaCharacter::AGASManaCharacter()
 
 }
 
-AManaEquipmentParent* AGASManaCharacter::AddEquipment(FName SocketName, TSubclassOf<AManaEquipmentParent> EquipmentClass)
+void AGASManaCharacter::SetEquipment(AEquipment* Equipment)
 {
-	UWorld* World = GetWorld();
-	USkeletalMeshComponent* SkeletalMesh = GetMesh();
-
-	if (World && SkeletalMesh) {
-		AManaEquipmentParent* Equipment = World->SpawnActor<AManaEquipmentParent>(EquipmentClass, SkeletalMesh->GetSocketTransform(SocketName, ERelativeTransformSpace::RTS_World));
-		Equipment->AttachToComponent(SkeletalMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
-		return Equipment;
-	}
-	return nullptr;
-}
-
-/* Equipping */
-void AGASManaCharacter::PlayEquipMontage(const FName& SectionName)
-{
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance)
+	if (Equipment)
 	{
-		if (EquipMontageRight)
-		{
-<<<<<<< Updated upstream
-			AnimInstance->Montage_Play(EquipMontageRight);
-			AnimInstance->Montage_JumpToSection(SectionName, EquipMontageRight);
-		}
-
-		if (EquipMontageLeft)
-=======
-			AbilitySystemComponent->TryActivateAbilitiesByTag(EquipTagContainer);
-		}
-		
 		EquipmentState = Equipment->GetEquipmentType();
-
-		FName EquippedTagName;
 
 		switch (Equipment->GetItemType())
 		{
 			case EItemType::EIT_LeftHandedEquipment:
 				SetEquipMontageLeft(Equipment->GetEquipMontage());
-				EquippedTagName = "Character.Equipped.OneHanded.Left";
 				break;
 			case EItemType::EIT_RightHandedEquipment:
 				SetEquipMontageRight(Equipment->GetEquipMontage());
-				EquippedTagName = "Character.Equipped.OneHanded.Right";
 				break;
 			default:
 				break;
@@ -76,68 +47,34 @@ void AGASManaCharacter::PlayEquipMontage(const FName& SectionName)
 
 		Equipment->DisablePickUpCollision();
 
-		if (!AbilitySystemComponent->ComponentHasTag(EquippedTagName) && Equipment->GetEquipTypeClass())
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-		{
-			AnimInstance->Montage_Play(EquipMontageLeft);
-			AnimInstance->Montage_JumpToSection(SectionName, EquipMontageLeft);
-=======
+		const FName& EquipSocket = Equipment->GetEquipmentSocket(); 
+		EquipGearToSocket(Equipment, EquipSocket);
+		
+		if (Equipment->GetEquipTypeClass())
 		{
 			GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(
 				Equipment->GetEquipTypeClass()->GetDefaultObject<UGameplayEffect>(), 1.0f,
 				GetAbilitySystemComponent()->MakeEffectContext());
->>>>>>> Stashed changes
 		}
-		
-		const FName& EquipSocket = Equipment->GetEquipmentSocket(); 
-		EquipGearToSocket(Equipment, EquipSocket);
-		
 	}
 }
 
-void AGASManaCharacter::SetEquipment()
-{
-	//Here we need to get the variables stored in the item and set the right equipment type up for the player. For now, let's just set it to a one handed weapon until we get other items in the game
-	EquipmentState = EEquipmentState::EES_EquippedOneHandedWeapon;
-
-	//so here we'd set the equip class to match the weapon type
-	if (EquipmentTypeClass)
-	{
-		GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(EquipmentTypeClass->GetDefaultObject<UGameplayEffect>(), 1.0f, GetAbilitySystemComponent()->MakeEffectContext());
-
-	}
-}
-
-void AGASManaCharacter::AttatchWeaponToBack()
+void AGASManaCharacter::AttachWeaponToBack() const
 {
 
-	EquipGearToSocket(RightHandEquipment, "RightHandEquipSocket");
-	EquipGearToSocket(LeftHandEquipment, "LeftHandEquipSocket");
+	if (RightHandEquipment) EquipGearToSocket(RightHandEquipment, "RightHandEquipSocket");
+	if (LeftHandEquipment) EquipGearToSocket(LeftHandEquipment, "LeftHandEquipSocket");
 
 	RemoveAnyEquipClass();
 }
 
-void AGASManaCharacter::AttatchWeaponToHand()
+void AGASManaCharacter::AttachWeaponToHand()
 {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-	EquipGearToSocket(RightHandEquipment, "hand_rSocket");
-
-	EquipGearToSocket(LeftHandEquipment, "hand_lSocket");
-
-	SetEquipment();
-=======
-	if (RightHandEquipment) EquipRightHandGear();
-	if (LeftHandEquipment) EquipLeftHandGear();
->>>>>>> Stashed changes
-=======
-	if (RightHandEquipment) EquipRightHandGear();
-	if (LeftHandEquipment) EquipLeftHandGear();
->>>>>>> Stashed changes
+	if (RightHandEquipment) SetEquipment(RightHandEquipment);
+	if (LeftHandEquipment) SetEquipment(LeftHandEquipment);
 }
 
-void AGASManaCharacter::EquipGearToSocket(AManaEquipmentParent* GearToEquip, FName SocketName)
+void AGASManaCharacter::EquipGearToSocket(const AEquipment* GearToEquip, const FName SocketName) const
 {
 	if (GearToEquip)
 	{
@@ -145,7 +82,7 @@ void AGASManaCharacter::EquipGearToSocket(AManaEquipmentParent* GearToEquip, FNa
 	}
 }
 
-void AGASManaCharacter::RemoveAnyEquipClass()
+void AGASManaCharacter::RemoveAnyEquipClass() const
 {
 	if (!AbilitySystemComponent) return;
 
@@ -169,24 +106,25 @@ void AGASManaCharacter::FinishedBlocking()
 
 }
 
-void AGASManaCharacter::OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AGASManaCharacter::OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+                                              UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                              const FHitResult& SweepResult)
 {
 	if (OtherActor && OtherActor->Implements<UI_PickUpInterface>())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OtherActor: %s"), *GetNameSafe(OtherActor));
+		//UE_LOG(LogTemp, Warning, TEXT("OtherActor: %s"), *GetNameSafe(OtherActor));
 		UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
 		II_PickUpInterface::Execute_OnPickedUp(OtherActor, this, AbilitySystem);
 	}
 }
 
-void AGASManaCharacter::PlayFlashEffect(FVector InColor, float FlashLength)
+void AGASManaCharacter::PlayFlashEffect(FVector InColor, float FlashLength) const
 {
-	USkeletalMeshComponent* CharMesh = GetMesh();
-
-	if (CharMesh)
+	if (USkeletalMeshComponent* CharMesh = GetMesh())
 	{
 		CharMesh->SetVectorParameterValueOnMaterials("EffectColor", InColor);
-		CharMesh->SetScalarParameterValueOnMaterials("StartTime", GetWorld()->GetTimeSeconds());
+		CharMesh->SetScalarParameterValueOnMaterials("StartTime",
+			GetWorld()->GetTimeSeconds());
 		CharMesh->SetScalarParameterValueOnMaterials("EffectLength", FlashLength);
 	}
 }
@@ -194,7 +132,6 @@ void AGASManaCharacter::PlayFlashEffect(FVector InColor, float FlashLength)
 void AGASManaCharacter::HandleMelee()
 {
 	//Empty for now. Whenever other actors inherit from this, they can override this function
-
 }
 
 void AGASManaCharacter::PossessedBy(AController* NewController)
@@ -216,7 +153,8 @@ void AGASManaCharacter::GiveDefaultAbilities()
 	{
 		for (TSubclassOf<UGameplayAbility>& StartUpAbility : DefaultAbilities)
 		{
-			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(StartUpAbility.GetDefaultObject(), 1, 0));
+			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(StartUpAbility.GetDefaultObject(), 1,
+				0));
 		}
 	}
 
@@ -239,24 +177,22 @@ void AGASManaCharacter::GiveDefaultAbilities()
 	//}
 }
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 void AGASManaCharacter::EquipLeftHandGear()
-=======
-void AGASManaCharacter::EquipLeftHandGear() 
->>>>>>> Stashed changes
-=======
-void AGASManaCharacter::EquipLeftHandGear() 
->>>>>>> Stashed changes
 {
-	EquipGearToSocket(LeftHandEquipment, "hand_lSocket");
-	SetEquipment(LeftHandEquipment);
+	if (LeftHandEquipment)
+	{
+		EquipGearToSocket(LeftHandEquipment, "hand_lSocket");
+		SetEquipment(LeftHandEquipment);
+	}
 }
 
-void AGASManaCharacter::EquipRightHandGear() 
+void AGASManaCharacter::EquipRightHandGear()
 {
-	EquipGearToSocket(RightHandEquipment, "hand_rSocket");
-	SetEquipment(RightHandEquipment);
+	if (RightHandEquipment)
+	{
+		EquipGearToSocket(RightHandEquipment, "hand_rSocket");
+		SetEquipment(RightHandEquipment);
+	}
 }
 
 void AGASManaCharacter::InitializeAttributes()
@@ -265,11 +201,13 @@ void AGASManaCharacter::InitializeAttributes()
 	{
 		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
 		EffectContext.AddSourceObject(this);
-		FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(DefaultAttributeEffect, 1, EffectContext);
+		FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(
+			DefaultAttributeEffect, 1, EffectContext);
 
 		if (SpecHandle.IsValid())
 		{
-			FActiveGameplayEffectHandle GEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+			FActiveGameplayEffectHandle GEHandle =
+				AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 		}
 	}
 }
@@ -290,7 +228,7 @@ void AGASManaCharacter::OnRep_PlayerState()
 void AGASManaCharacter::InstantlyUnequipGear()
 {
 	EquipmentState = EEquipmentState::EES_Unequipped;
-	AttatchWeaponToBack();
+	AttachWeaponToBack();
 }
 
 void AGASManaCharacter::SetDefaultCombos()
@@ -299,7 +237,7 @@ void AGASManaCharacter::SetDefaultCombos()
 	bIsAttackWindowOpen = false;
 }
 
-void AGASManaCharacter::SetNextComboSegment(FName NextCombo)
+void AGASManaCharacter::SetNextComboSegment(const FName NextCombo)
 {
 	ComboAttackName = NextCombo;
 	bIsAttackWindowOpen = true;
