@@ -3,7 +3,6 @@
 #include "GASManaCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "AbilitySystemComponent.h"
-#include "AudioMixerBlueprintLibrary.h"
 #include "Public/ManaAttributeSet.h"
 #include "Components/CapsuleComponent.h"
 #include "Item/LeftHandEquipment.h"
@@ -28,15 +27,10 @@ AGASManaCharacter::AGASManaCharacter()
 
 }
 
-void AGASManaCharacter::SetEquipment(const AEquipment* Equipment)
+void AGASManaCharacter::SetEquipment(AEquipment* Equipment)
 {
 	if (Equipment)
 	{
-		if (AbilitySystemComponent->ComponentHasTag("Character.Equipped"))
-		{
-			AbilitySystemComponent->TryActivateAbilitiesByTag(EquipTagContainer);
-		}
-		
 		EquipmentState = Equipment->GetEquipmentType();
 
 		switch (Equipment->GetItemType())
@@ -76,10 +70,6 @@ void AGASManaCharacter::AttachWeaponToBack() const
 
 void AGASManaCharacter::AttachWeaponToHand()
 {
-	if (RightHandEquipment && !AbilitySystemComponent->ComponentHasTag("Character.Equipped.OneHanded.Right")) EquipGearToSocket(RightHandEquipment, "hand_rSocket"); 
-
-	if (LeftHandEquipment && !AbilitySystemComponent->ComponentHasTag("Character.Equipped.OneHanded.Left")) EquipGearToSocket(LeftHandEquipment, "hand_lSocket");
-
 	if (RightHandEquipment) SetEquipment(RightHandEquipment);
 	if (LeftHandEquipment) SetEquipment(LeftHandEquipment);
 }
@@ -142,7 +132,6 @@ void AGASManaCharacter::PlayFlashEffect(FVector InColor, float FlashLength) cons
 void AGASManaCharacter::HandleMelee()
 {
 	//Empty for now. Whenever other actors inherit from this, they can override this function
-
 }
 
 void AGASManaCharacter::PossessedBy(AController* NewController)
@@ -188,9 +177,22 @@ void AGASManaCharacter::GiveDefaultAbilities()
 	//}
 }
 
-void AGASManaCharacter::EquipLeftHandGear() const
+void AGASManaCharacter::EquipLeftHandGear()
 {
-	EquipGearToSocket(LeftHandEquipment, "hand_lSocket");
+	if (LeftHandEquipment)
+	{
+		EquipGearToSocket(LeftHandEquipment, "hand_lSocket");
+		SetEquipment(LeftHandEquipment);
+	}
+}
+
+void AGASManaCharacter::EquipRightHandGear()
+{
+	if (RightHandEquipment)
+	{
+		EquipGearToSocket(RightHandEquipment, "hand_rSocket");
+		SetEquipment(RightHandEquipment);
+	}
 }
 
 void AGASManaCharacter::InitializeAttributes()

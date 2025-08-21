@@ -43,12 +43,6 @@ class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, pub
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Damage", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> DamageEffectClass;
 
-public:
-	AGASManaCharacter();
-
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual void HandleMelee();
-
 protected:
 	UPROPERTY()
 	ARightHandEquipment* RightHandEquipment;
@@ -71,10 +65,12 @@ protected:
 	
 	//////////////////////////////////////
 
+	UPROPERTY()
 	UAnimMontage* EquipMontageRight;
+	UPROPERTY()
 	UAnimMontage* EquipMontageLeft;
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
-	void SetEquipment(const AEquipment* Equipment);
+	void SetEquipment(AEquipment* Equipment);
 
 	void RemoveAnyEquipClass() const;
 
@@ -84,11 +80,20 @@ protected:
 
 
 public:
+	AGASManaCharacter();
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	virtual void HandleMelee();
+
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
 	void InstantlyUnequipGear();
-	/* Instantly Equips Gear to left hand*/
-	void EquipLeftHandGear() const;
+	/** Instantly Equips Gear to left hand*/
+	UFUNCTION(BlueprintCallable)
+	void EquipLeftHandGear();
+	/** Instantly Equips Gear to Right hand*/
+	UFUNCTION(BlueprintCallable)
+	void EquipRightHandGear();
 	virtual void InitializeAttributes();
 	virtual void GiveDefaultAbilities();
 	

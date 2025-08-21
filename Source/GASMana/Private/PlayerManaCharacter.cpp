@@ -714,7 +714,10 @@ void APlayerManaCharacter::GrabOverlappingItem()
 
 void APlayerManaCharacter::Equip(const FInputActionValue& Value)
 {
-	GrabOverlappingItem();
+	if (const FGameplayTag EquipTag = FGameplayTag::RequestGameplayTag("Character.IsEquipping"); !GetAbilitySystemComponent()->HasMatchingGameplayTag(EquipTag))
+	{
+		GrabOverlappingItem();
+	}
 
 	if (!OverlappingItem)
 	{
