@@ -57,8 +57,6 @@ void UGA_ManaPlayerEquip::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 		if (AbilitySystemComponent)
 		{
 			AbilitySystemComponent->ApplyGameplayEffectToSelf(GASCharacter->GetEquipEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 		}
 
 		// Play the montage and bind delegates
@@ -66,60 +64,27 @@ void UGA_ManaPlayerEquip::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 		{
 			if (GASCharacter->GetEquipRightMontage())
 			{
-				UAbilityTask_PlayMontageAndWait* MontageRightTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, GASCharacter->GetEquipRightMontage(), 1.0f, MontageSectionName, false, 0.0f);
-
-				if (MontageRightTask)
-				{
-					MontageRightTask->ReadyForActivation();
-=======
-			
 				if (GASCharacter->GetRightHandEquipment())
 				{
-					if (GASCharacter->GetEquipRightMontage())
+					if (UAbilityTask_PlayMontageAndWait* MontageRightTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, GASCharacter->GetEquipRightMontage(), 1.0f, MontageSectionName, false, 0.0f))
 					{
-						if (UAbilityTask_PlayMontageAndWait* MontageRightTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, GASCharacter->GetEquipRightMontage(), 1.0f, MontageSectionName, false, 0.0f))
-						{
-							MontageRightTask->ReadyForActivation();
-						}
+						MontageRightTask->ReadyForActivation();
 					}
->>>>>>> Stashed changes
 				}
-
-<<<<<<< Updated upstream
+			}
 			if (GASCharacter->GetEquipLeftMontage())
 			{
-				UAbilityTask_PlayMontageAndWait* MontageLeftTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, GASCharacter->GetEquipLeftMontage(), 1.0f, MontageSectionName, false, 0.0f);
-
-				GASCharacter->GetMesh()->GetAnimInstance()->Montage_Play(GASCharacter->GetEquipLeftMontage());
-				if (MontageLeftTask)
-				{
-					MontageLeftTask->ReadyForActivation();
-=======
-=======
-			
-				if (GASCharacter->GetRightHandEquipment())
-				{
-					if (GASCharacter->GetEquipRightMontage())
-					{
-						if (UAbilityTask_PlayMontageAndWait* MontageRightTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, GASCharacter->GetEquipRightMontage(), 1.0f, MontageSectionName, false, 0.0f))
-						{
-							MontageRightTask->ReadyForActivation();
-						}
-					}
-				}
-
->>>>>>> Stashed changes
 				if (GASCharacter->GetLeftHandEquipment())
 				{
-					if (GASCharacter->GetEquipLeftMontage())
+					UAbilityTask_PlayMontageAndWait* MontageLeftTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, GASCharacter->GetEquipLeftMontage(), 1.0f, MontageSectionName, false, 0.0f);
+
+					//GASCharacter->GetMesh()->GetAnimInstance()->Montage_Play(GASCharacter->GetEquipLeftMontage());
+					if (MontageLeftTask)
 					{
-						if (UAbilityTask_PlayMontageAndWait* MontageLeftTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, GASCharacter->GetEquipLeftMontage(), 1.0f, MontageSectionName, false, 0.0f))
-						{
-							MontageLeftTask->ReadyForActivation();
-						}
+						MontageLeftTask->ReadyForActivation();
 					}
->>>>>>> Stashed changes
 				}
+			}
 		}
 	}
 
@@ -138,7 +103,11 @@ void UGA_ManaPlayerEquip::EndAbility(const FGameplayAbilitySpecHandle Handle, co
 	{
 		UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
 
-
+		FGameplayTag FreeTag = FGameplayTag::RequestGameplayTag(FName("Character.IsFree"));
+		if (!AbilitySystemComponent->HasMatchingGameplayTag(FreeTag))
+		{
+			AbilitySystemComponent->AddLooseGameplayTag(FreeTag);
+		}
 		//Update the anim instance
 		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GASCharacter->GetMesh()->GetAnimInstance());
 		if (AnimInstance)

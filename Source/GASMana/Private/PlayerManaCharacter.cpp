@@ -611,9 +611,6 @@ void APlayerManaCharacter::GetMontageToPlay()
 
 	if (EquipmentState == EEquipmentState::EES_Unequipped)
 	{
-		if (LeftHandEquipment) PlayAnimMontage(LeftHandEquipment->GetEquipMontage());
-		//TODO: Get current attack montage from the weapon we have.
-		//This maybe should get put somewhere else at some point, but the equip left montage DOES need to be called
 		if (GetCharacterMovement()->Velocity.IsNearlyZero())
 		{
 			GEngine->AddOnScreenDebugMessage(-1,5.f, FColor::Purple, "Getting Equip Attack!");

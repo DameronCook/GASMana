@@ -181,7 +181,7 @@ void AGASManaCharacter::EquipLeftHandGear()
 {
 	if (LeftHandEquipment)
 	{
-		EquipGearToSocket(LeftHandEquipment, "hand_lSocket");
+		//EquipGearToSocket(LeftHandEquipment, "hand_lSocket");
 		SetEquipment(LeftHandEquipment);
 	}
 }
@@ -190,7 +190,7 @@ void AGASManaCharacter::EquipRightHandGear()
 {
 	if (RightHandEquipment)
 	{
-		EquipGearToSocket(RightHandEquipment, "hand_rSocket");
+		//EquipGearToSocket(RightHandEquipment, "hand_rSocket");
 		SetEquipment(RightHandEquipment);
 	}
 }
