@@ -54,7 +54,7 @@ void UGA_ManaPlayerAirAttack::ActivateAbility(const FGameplayAbilitySpecHandle H
 	{
 		PlayerCharacter->SetAirAttackAbility(this);
 
-		if (PlayerCharacter->EquipmentState == EEquipmentState::EES_Unequipped)
+		if (PlayerCharacter->GetEquipmentState() == EEquipmentState::EES_Unequipped)
 		{
 			PlayerCharacter->AttachWeaponToHand();
 		}

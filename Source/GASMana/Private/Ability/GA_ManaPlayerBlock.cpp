@@ -4,7 +4,6 @@
 #include "Ability/GA_ManaPlayerBlock.h"
 #include "PlayerManaCharacter.h"
 #include "ManaPlayerAnimInstance.h"
-#include "Item/RightHandEquipment.h"
 
 UGA_ManaPlayerBlock::UGA_ManaPlayerBlock()
 {
@@ -42,16 +41,20 @@ void UGA_ManaPlayerBlock::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 			1.0f,
 			AbilitySystemComponent->MakeEffectContext()
 		);
-		
-		//GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Orange, "Block Ability Activated");
 
 		if (PlayerCharacter->GetLeftHandEquipment())
 		{
+<<<<<<< Updated upstream
+			if (PlayerCharacter->EquipmentState == EEquipmentState::EES_Unequipped)
+			{
+				PlayerCharacter->AttatchWeaponToHand();
+=======
 			//GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Orange, "Left hand equipment found");
 
-			if (PlayerCharacter->EquipmentState == EEquipmentState::EES_Unequipped)
+			if (PlayerCharacter->GetEquipmentState() == EEquipmentState::EES_Unequipped)
 			{	
 				PlayerCharacter->AttachWeaponToHand();
+>>>>>>> Stashed changes
 			}
 			PlayerCharacter->Blocking();
 		}
