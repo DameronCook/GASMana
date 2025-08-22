@@ -54,7 +54,7 @@ bool UManaCameraModifierPlayerActions::ProcessViewRotation(AActor* ViewTarget, f
 			ITargetingActorInterface* TargetingActor = Cast<ITargetingActorInterface>(ViewTarget);
 			AActor* CurrentTarget = TargetingActor->GetCurrentTarget();
 
-			InterpRotationSpeed = 5.f;
+			InterpRotationSpeed = 100.f;
 
 			FVector CameraLoc = CameraOwner->GetCameraLocation();
 			FVector DesiredLoc = CurrentTarget->GetActorLocation();

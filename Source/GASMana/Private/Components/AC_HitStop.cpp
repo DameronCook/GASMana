@@ -2,33 +2,29 @@
 
 
 #include "Components/AC_HitStop.h"
+#include "GASMana/GASManaCharacter.h"
 
 // Sets default values for this component's properties
 UAC_HitStop::UAC_HitStop()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
 }
 
-
-// Called when the game starts
-void UAC_HitStop::BeginPlay()
+void UAC_HitStop::StartHitStop(float Duration)
 {
-	Super::BeginPlay();
+	if (AGASManaCharacter* GASManaCharacter = Cast<AGASManaCharacter>(GetOwner()))
+	{
+		GetOwner()->CustomTimeDilation = 0.0f;
+		GetWorld()->GetTimerManager().SetTimer(HitStopTimerHandle, this, &UAC_HitStop::EndHitStop, Duration);
+	}
 
-	// ...
-	
 }
 
-
-// Called every frame
-void UAC_HitStop::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UAC_HitStop::EndHitStop() const
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
+	GetOwner()->CustomTimeDilation = 1.0f;
 }
-

@@ -3,6 +3,7 @@
 #include "GASManaCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "AbilitySystemComponent.h"
+#include "Components/AC_HitStop.h"
 #include "Public/ManaAttributeSet.h"
 #include "Components/CapsuleComponent.h"
 #include "Item/LeftHandEquipment.h"
@@ -25,6 +26,7 @@ AGASManaCharacter::AGASManaCharacter()
 
 	Attributes = CreateDefaultSubobject<UManaAttributeSet>(TEXT("Attributes"));
 
+	HitStopComponent = CreateDefaultSubobject<UAC_HitStop>(TEXT("HitStop"));
 }
 
 void AGASManaCharacter::SetEquipment(AEquipment* Equipment)

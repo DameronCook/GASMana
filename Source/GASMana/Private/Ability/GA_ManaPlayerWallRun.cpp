@@ -110,7 +110,7 @@ void UGA_ManaPlayerWallRun::EndAbility(const FGameplayAbilitySpecHandle Handle, 
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("EndAbility End")));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("EndAbility End")));
 	if (ActorInfo && ActorInfo->AbilitySystemComponent.IsValid())
 	{
 		//We should only remove the tag if the player JUMPS out of a wallrun. If we remove the wall run tag here, they'll just start running again and again and again and again and again and again

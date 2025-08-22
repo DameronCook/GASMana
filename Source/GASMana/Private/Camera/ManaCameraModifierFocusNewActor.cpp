@@ -18,7 +18,7 @@ bool UManaCameraModifierFocusNewActor::ProcessViewRotation(AActor* ViewTarget, f
 	//Check if we're selecting a target
 	if (!IsValid(ViewTarget))
 	{
-		GEngine->AddOnScreenDebugMessage(1, .1f, FColor::Orange, "No view target");
+		//GEngine->AddOnScreenDebugMessage(1, .1f, FColor::Orange, "No view target");
 		return false;
 	}
 
@@ -90,7 +90,7 @@ bool UManaCameraModifierFocusNewActor::ProcessViewRotation(AActor* ViewTarget, f
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(1, .1f, FColor::Orange, "No current target");
+		//GEngine->AddOnScreenDebugMessage(1, .1f, FColor::Orange, "No current target");
 
 		LastTarget = nullptr;
 

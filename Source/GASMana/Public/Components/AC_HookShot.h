@@ -29,6 +29,10 @@ class GASMANA_API UAC_HookShot : public UActorComponent
 
 	EGrappleState GrappleState;
 
+	/** Number of seconds hitstop will last before resuming gameplay */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hookshot", meta = (AllowPrivateAccess = "true"))
+	float HitStopDuration;
+
 	UFUNCTION()
 	void Inactive();
 
@@ -46,7 +50,7 @@ class GASMANA_API UAC_HookShot : public UActorComponent
 	UFUNCTION()
 	void SwingTarget(float DeltaTime);
 
-	void PushForceAwayFromWalls(APlayerManaCharacter* PlayerCharacter, FVector PushAwayDirection);
+	void PushForceAwayFromWalls(APlayerManaCharacter* PlayerCharacter, const FVector& PushAwayDirection) const;
 
 	UPROPERTY()
 	float MaxGrappleDistance;
@@ -77,8 +81,8 @@ class GASMANA_API UAC_HookShot : public UActorComponent
 	FName SocketNameStart = "hand_rSocket";
 	FName EndComponentName = "DefaultSceneRoot";
 
-	bool DrawLineToTarget(ACharacter* Character, AActor* OverlappedActor);
-	float CalculateAngleToTarget(ACharacter* Character, AActor* OverlappedActor);
+	bool DrawLineToTarget(const ACharacter* Character, const AActor* OverlappedActor) const;
+	static float CalculateAngleToTarget(ACharacter* Character, const AActor* OverlappedActor);
 	void SetCurrentTarget(AManaHookParent* Hook);
 
 
@@ -90,20 +94,20 @@ class GASMANA_API UAC_HookShot : public UActorComponent
 	float SwingAngle;
 
 	UFUNCTION()
-	FVector FindOptimalSwingPoint(APlayerManaCharacter* Character);
+	static FVector FindOptimalSwingPoint(const APlayerManaCharacter* Character);
 
 	UFUNCTION()
-	FVector FindSwingArcForce(APlayerManaCharacter* Character, float MinVelocity, float MaxVelocity, float ReduceSwingForceFactor);
+	FVector FindSwingArcForce(const APlayerManaCharacter* Character, float MinVelocity, float MaxVelocity, float ReduceSwingForceFactor) const;
 
 
 	UFUNCTION()
-	float FindSwingAngle(APlayerManaCharacter* Character);
+	float FindSwingAngle(const APlayerManaCharacter* Character) const;
 
 	UFUNCTION()
-	FRotator FindCharacterRotation(APlayerManaCharacter* Character, float DeltaTime);
+	FRotator FindCharacterRotation(const APlayerManaCharacter* Character, float DeltaTime) const;
 
 	UFUNCTION()
-	FRotator FindSwingSideAngle(APlayerManaCharacter* Character);
+	FRotator FindSwingSideAngle(const APlayerManaCharacter* Character) const;
 
 
 public:	
@@ -115,7 +119,7 @@ public:
 	void EndGrapple();
 
 	UFUNCTION()
-	FVector FindSwingLaunchForce(APlayerManaCharacter* Character, float ForwardSpeed, float UpSpeed);
+	FVector FindSwingLaunchForce(const APlayerManaCharacter* Character, float ForwardSpeed, float UpSpeed) const;
 
 	FORCEINLINE class AManaHookParent* GetCurrentTarget() const { return CurrentTarget; }
 	FORCEINLINE FVector GetCharacterInitDir() const { return CharacterInitDirection; }

@@ -66,7 +66,7 @@ void UGA_ManaPlayerAirAttack::ActivateAbility(const FGameplayAbilitySpecHandle H
 		{
 			//Grant the player a tag so that they can move again in case this was blocked before
 			PlayerCharacter->RemoveFreeTag();
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Removing Gameplay tag!");
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Removing Gameplay tag!");
 		}
 
 		//First, play the animation

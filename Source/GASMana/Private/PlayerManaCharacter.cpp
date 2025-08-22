@@ -352,12 +352,12 @@ void APlayerManaCharacter::SetNextComboSegment(const FName NextCombo)
 
 void APlayerManaCharacter::SetOverlappingItem(class AItem* Item)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "OverlappingItem");
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "OverlappingItem");
 
 	OverlappingItem = Item;
 	if (OverlappingItem)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Overlapping Item: %s"), *OverlappingItem->GetName()));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Overlapping Item: %s"), *OverlappingItem->GetName()));
 	}
 }
 
@@ -556,7 +556,7 @@ void APlayerManaCharacter::Move(const FInputActionValue& Value)
 			{
 				GetCharacterMovement()->AddForce(GamepadRightSwingForce(MovementVector.X));
 				GetCharacterMovement()->AddForce(GamepadForwardSwingForce(MovementVector.Y));
-				GEngine->AddOnScreenDebugMessage(6, .1f, FColor::Purple, "Applying Swinging Force and input!");
+				//GEngine->AddOnScreenDebugMessage(6, .1f, FColor::Purple, "Applying Swinging Force and input!");
 			}
 		}
 	}
@@ -613,7 +613,7 @@ void APlayerManaCharacter::GetMontageToPlay()
 	{
 		if (GetCharacterMovement()->Velocity.IsNearlyZero())
 		{
-			GEngine->AddOnScreenDebugMessage(-1,5.f, FColor::Purple, "Getting Equip Attack!");
+			//GEngine->AddOnScreenDebugMessage(-1,5.f, FColor::Purple, "Getting Equip Attack!");
 			MontageToPlay = RightHandEquipment->GetEquipAttack();
 			RemoveFreeTag();
 		}
