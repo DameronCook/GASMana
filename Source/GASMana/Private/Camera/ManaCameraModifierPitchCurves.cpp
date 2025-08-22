@@ -37,8 +37,8 @@ bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewI
 
 	if (IsZipToPoint)
 	{
-		TargetPitchToDist = 10.f;
-		InterpSpeed = 10.f;
+		TargetPitchToDist = 100.f;
+		InterpSpeed = 5.f;
 		AddFOV = 10.f;
 	}
 

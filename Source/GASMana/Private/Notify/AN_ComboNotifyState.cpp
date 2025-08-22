@@ -21,7 +21,7 @@ void UAN_ComboNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequ
 	if (Character)
 	{
 		Character->SetDefaultCombos();
-		GEngine->AddOnScreenDebugMessage(2, 5.f, FColor::Red, "Notify End read.");
+		//GEngine->AddOnScreenDebugMessage(2, 5.f, FColor::Red, "Notify End read.");
 
 	}
 }

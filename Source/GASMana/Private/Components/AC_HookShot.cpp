@@ -14,50 +14,8 @@
 #include "Actors/GrappleHook.h"
 #include "Ability/GA_ManaPlayerZipToPoint.h"
 #include "Ability/GA_ManaPlayerSwing.h"
+#include "Components/AC_HitStop.h"
 
-
-
-// Sets default values for this component's properties
-UAC_HookShot::UAC_HookShot()
-{
-	PrimaryComponentTick.bCanEverTick = true;
-
-	GrappleState = EGrappleState::E_Inactive;
-	MaxGrappleDistance = 2500.f;
-	PrimaryComponentTick.TickGroup = ETickingGroup::TG_PrePhysics;
-}
-
-void UAC_HookShot::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void UAC_HookShot::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	switch (GrappleState)
-	{
-	case EGrappleState::E_Inactive:
-		Inactive();
-		break;
-	case EGrappleState::E_Firing:
-		Firing();
-		break;
-	case EGrappleState::E_NearTarget:
-		NearTarget();
-		break;
-	case EGrappleState::E_ZipToPointTarget:
-		ZipToPointTarget(DeltaTime);
-		break;
-	case EGrappleState::E_SwingTarget:
-		SwingTarget(DeltaTime);
-		break;
-	default:
-		break;
-	}
-
-}
 
 void UAC_HookShot::Inactive()
 {
@@ -143,30 +101,6 @@ void UAC_HookShot::FindAndSetBestTarget(TArray<AActor*, FDefaultAllocator>& OutA
 	SetCurrentTarget(BestTarget);
 }
 
-void UAC_HookShot::SetCurrentTarget(AManaHookParent* Hook)
-{
-	if (IsValid(Hook))
-	{
-		//GEngine->AddOnScreenDebugMessage(3, .1f, FColor::Green, FString::Printf(TEXT("Current target should be set")));
-		if (IsValid(CurrentTarget))
-		{
-			CurrentTarget->SetActive(false);
-			CurrentTarget = Hook;
-			CurrentTarget->SetActive(true);
-		}
-	}
-	else
-	{
-		//GEngine->AddOnScreenDebugMessage(3, .1f, FColor::Green, FString::Printf(TEXT("Current hook must be null then")));
-
-		if (IsValid(CurrentTarget))
-		{
-			CurrentTarget->SetActive(false);
-			CurrentTarget = NULL;
-		}
-	}
-}
-
 void UAC_HookShot::Firing()
 {
 	if (GrappleHook && GrappleHook->DistanceToTarget() < StartJumpDistance)
@@ -174,18 +108,16 @@ void UAC_HookShot::Firing()
 		HitTarget = true;
 		GrappleState = EGrappleState::E_NearTarget;
 
-		APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(GetOwner());
-		if (PlayerCharacter)
+		if (const APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(GetOwner()))
 		{
-			
+			PlayerCharacter->GetHitStop()->StartHitStop(HitStopDuration);
 		}
 	}
 }
 
 void UAC_HookShot::NearTarget()
 {
-	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(GetOwner());
-	if (PlayerCharacter)
+	if (APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(GetOwner()))
 	{
 		UCharacterMovementComponent* CharMove = PlayerCharacter->GetCharacterMovement();
 		if (CurrentTarget && CharMove)
@@ -409,7 +341,7 @@ void UAC_HookShot::SwingTarget(float DeltaTime)
 	}
 }
 
-void UAC_HookShot::PushForceAwayFromWalls(APlayerManaCharacter* PlayerCharacter, FVector PushAwayDirection)
+void UAC_HookShot::PushForceAwayFromWalls(APlayerManaCharacter* PlayerCharacter, const FVector& PushAwayDirection) const
 {
 	FHitResult OutLineHit;
 
@@ -434,7 +366,7 @@ void UAC_HookShot::PushForceAwayFromWalls(APlayerManaCharacter* PlayerCharacter,
 	}
 }
 
-bool UAC_HookShot::DrawLineToTarget(ACharacter* Character, AActor* OverlappedActor)
+bool UAC_HookShot::DrawLineToTarget(const ACharacter* Character, const AActor* OverlappedActor) const
 {
 	FHitResult OutHitLine;
 
@@ -458,7 +390,7 @@ bool UAC_HookShot::DrawLineToTarget(ACharacter* Character, AActor* OverlappedAct
 	return OutHitLine.GetActor() == OverlappedActor;
 }
 
-float UAC_HookShot::CalculateAngleToTarget(ACharacter* Character, AActor* OverlappedActor)
+float UAC_HookShot::CalculateAngleToTarget(ACharacter* Character, const AActor* OverlappedActor)
 {
 	if (APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(Character))
 	{
@@ -475,6 +407,67 @@ float UAC_HookShot::CalculateAngleToTarget(ACharacter* Character, AActor* Overla
 		}
 	}
 	return 0.0f;
+}
+
+void UAC_HookShot::SetCurrentTarget(AManaHookParent* Hook)
+{
+	if (IsValid(Hook))
+	{
+		//GEngine->AddOnScreenDebugMessage(3, .1f, FColor::Green, FString::Printf(TEXT("Current target should be set")));
+		if (IsValid(CurrentTarget))
+		{
+			CurrentTarget->SetActive(false);
+			CurrentTarget = Hook;
+			CurrentTarget->SetActive(true);
+		}
+	}
+	else
+	{
+		//GEngine->AddOnScreenDebugMessage(3, .1f, FColor::Green, FString::Printf(TEXT("Current hook must be null then")));
+
+		if (IsValid(CurrentTarget))
+		{
+			CurrentTarget->SetActive(false);
+			CurrentTarget = NULL;
+		}
+	}
+}
+
+// Sets default values for this component's properties
+UAC_HookShot::UAC_HookShot()
+{
+	PrimaryComponentTick.bCanEverTick = true;
+
+	GrappleState = EGrappleState::E_Inactive;
+	MaxGrappleDistance = 2500.f;
+	PrimaryComponentTick.TickGroup = ETickingGroup::TG_PrePhysics;
+}
+
+void UAC_HookShot::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	switch (GrappleState)
+	{
+	case EGrappleState::E_Inactive:
+		Inactive();
+		break;
+	case EGrappleState::E_Firing:
+		Firing();
+		break;
+	case EGrappleState::E_NearTarget:
+		NearTarget();
+		break;
+	case EGrappleState::E_ZipToPointTarget:
+		ZipToPointTarget(DeltaTime);
+		break;
+	case EGrappleState::E_SwingTarget:
+		SwingTarget(DeltaTime);
+		break;
+	default:
+		break;
+	}
+
 }
 
 void UAC_HookShot::AttemptGrapple()
@@ -583,12 +576,17 @@ void UAC_HookShot::EndGrapple()
 	}
 }
 
+void UAC_HookShot::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 
 
 ///////////////////////////////
 ///	Swing Functions
 
-FVector UAC_HookShot::FindOptimalSwingPoint(APlayerManaCharacter* Character)
+FVector UAC_HookShot::FindOptimalSwingPoint(const APlayerManaCharacter* Character)
 {
 	if (Character)
 	{
@@ -610,7 +608,7 @@ FVector UAC_HookShot::FindOptimalSwingPoint(APlayerManaCharacter* Character)
 	return FVector();
 }
 
-FVector UAC_HookShot::FindSwingArcForce(APlayerManaCharacter* Character, float MinVelocity, float MaxVelocity, float ReduceSwingForceFactor)
+FVector UAC_HookShot::FindSwingArcForce(const APlayerManaCharacter* Character, const float MinVelocity, const float MaxVelocity, const float ReduceSwingForceFactor) const
 {
 	if (Character)
 	{
@@ -627,7 +625,56 @@ FVector UAC_HookShot::FindSwingArcForce(APlayerManaCharacter* Character, float M
 	return FVector();
 }
 
-FVector UAC_HookShot::FindSwingLaunchForce(APlayerManaCharacter* Character, float ForwardSpeed, float UpSpeed)
+float UAC_HookShot::FindSwingAngle(const APlayerManaCharacter* Character) const
+{
+	if (Character)
+	{
+		FVector DirectionToPlayer = (OptimalSwingPoint - Character->GetActorLocation());
+		FVector PlayerVelocity = Character->GetVelocity();
+		FVector CrossProduct = FVector::CrossProduct(DirectionToPlayer, PlayerVelocity);
+
+		FRotator SwingRot = UKismetMathLibrary::MakeRotFromZX(DirectionToPlayer, CrossProduct * -1);
+
+		//GEngine->AddOnScreenDebugMessage(2, 0.1f, FColor::Orange, FString::Printf(TEXT("Calculating Swing Angle: %f"), SwingRot.Roll)); 
+
+		return SwingRot.Roll;
+	}
+	return 0.0f;
+}
+
+FRotator UAC_HookShot::FindCharacterRotation(const APlayerManaCharacter* Character, const float DeltaTime) const
+{
+	if (Character)
+	{
+		FRotator RotationFromVelocity = UKismetMathLibrary::MakeRotFromX(Character->GetVelocity());
+		FRotator SwingSideAngle = FindSwingSideAngle(Character);
+		FRotator TargetRotation = FRotator(SwingSideAngle.Pitch, RotationFromVelocity.Yaw, SwingSideAngle.Roll);
+
+		FRotator InterpToRotation = UKismetMathLibrary::RInterpTo(Character->GetActorRotation(), TargetRotation, DeltaTime, 2.f);
+
+		return InterpToRotation;
+	}
+
+	return FRotator();
+}
+
+FRotator UAC_HookShot::FindSwingSideAngle(const APlayerManaCharacter* Character) const
+{
+	if (Character)
+	{
+		FVector DirectionToPlayer = (OptimalSwingPoint - Character->GetActorLocation()).GetSafeNormal();
+		FVector PlayerVelocity = Character->GetVelocity().GetSafeNormal();
+
+		FVector CrossProduct = UKismetMathLibrary::Cross_VectorVector(PlayerVelocity, DirectionToPlayer) * -1;
+
+		FRotator SwingSideAngle = UKismetMathLibrary::MakeRotFromZY(DirectionToPlayer, CrossProduct);
+		
+		return SwingSideAngle;
+	}
+	return FRotator();
+}
+
+FVector UAC_HookShot::FindSwingLaunchForce(const APlayerManaCharacter* Character, const float ForwardSpeed, const float UpSpeed) const
 {
 	FVector VelocityDir = Character->GetVelocity().GetSafeNormal();
 
@@ -648,55 +695,6 @@ FVector UAC_HookShot::FindSwingLaunchForce(APlayerManaCharacter* Character, floa
 	
 
 	return LaunchDir;
-}
-
-float UAC_HookShot::FindSwingAngle(APlayerManaCharacter* Character)
-{
-	if (Character)
-	{
-		FVector DirectionToPlayer = (OptimalSwingPoint - Character->GetActorLocation());
-		FVector PlayerVelocity = Character->GetVelocity();
-		FVector CrossProduct = FVector::CrossProduct(DirectionToPlayer, PlayerVelocity);
-
-		FRotator SwingRot = UKismetMathLibrary::MakeRotFromZX(DirectionToPlayer, CrossProduct * -1);
-
-		//GEngine->AddOnScreenDebugMessage(2, 0.1f, FColor::Orange, FString::Printf(TEXT("Calculating Swing Angle: %f"), SwingRot.Roll)); 
-
-		return SwingRot.Roll;
-	}
-	return 0.0f;
-}
-
-FRotator UAC_HookShot::FindCharacterRotation(APlayerManaCharacter* Character, float DeltaTime)
-{
-	if (Character)
-	{
-		FRotator RotationFromVelocity = UKismetMathLibrary::MakeRotFromX(Character->GetVelocity());
-		FRotator SwingSideAngle = FindSwingSideAngle(Character);
-		FRotator TargetRotation = FRotator(SwingSideAngle.Pitch, RotationFromVelocity.Yaw, SwingSideAngle.Roll);
-
-		FRotator InterpToRotation = UKismetMathLibrary::RInterpTo(Character->GetActorRotation(), TargetRotation, DeltaTime, 2.f);
-
-		return InterpToRotation;
-	}
-
-	return FRotator();
-}
-
-FRotator UAC_HookShot::FindSwingSideAngle(APlayerManaCharacter* Character)
-{
-	if (Character)
-	{
-		FVector DirectionToPlayer = (OptimalSwingPoint - Character->GetActorLocation()).GetSafeNormal();
-		FVector PlayerVelocity = Character->GetVelocity().GetSafeNormal();
-
-		FVector CrossProduct = UKismetMathLibrary::Cross_VectorVector(PlayerVelocity, DirectionToPlayer) * -1;
-
-		FRotator SwingSideAngle = UKismetMathLibrary::MakeRotFromZY(DirectionToPlayer, CrossProduct);
-		
-		return SwingSideAngle;
-	}
-	return FRotator();
 }
 
 
