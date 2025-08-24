@@ -11,6 +11,7 @@
 #include "Logging/LogMacros.h"
 #include "Character/CharacterTypes.h"
 #include "Interface/ComboInterface.h"
+#include "Interface/HitStopInterface.h"
 #include "Item/Equipment.h"
 #include "GASManaCharacter.generated.h"
 
@@ -24,7 +25,7 @@ class UInputAction;
 struct FInputActionValue;
 
 UCLASS()
-class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, public IComboInterface
+class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, public IComboInterface, public IHitStopInterface
 {
 	GENERATED_BODY()
 	//////////////////////////////////////
@@ -36,9 +37,6 @@ class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, pub
 	UPROPERTY()
 	class UManaAttributeSet* Attributes;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HitStop, meta = (AllowPrivateAccess = "true"))
-	UAC_HitStop* HitStopComponent;
-	
 	//////////////////////////////////////
 	///Equipment
 	/** Damaged Effect Class */
@@ -164,7 +162,6 @@ public:
 	//////////////////////////////////////////////////////////////////////
 	///Getters & Setters
 	FORCEINLINE class UAbilitySystemComponent* GetAbilitySystemComponent() const { return AbilitySystemComponent; }
-	FORCEINLINE UAC_HitStop* GetHitStop() const { return HitStopComponent; }
 	FORCEINLINE ARightHandEquipment* GetRightHandEquipment() const { return RightHandEquipment; }
 	FORCEINLINE ALeftHandEquipment* GetLeftHandEquipment() const { return LeftHandEquipment; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetDamageEffectClass() const { return DamageEffectClass; }
