@@ -14,30 +14,25 @@
 #include "Actors/GrappleHook.h"
 #include "Ability/GA_ManaPlayerZipToPoint.h"
 #include "Ability/GA_ManaPlayerSwing.h"
-#include "Components/AC_HitStop.h"
-
 
 void UAC_HookShot::Inactive()
 {
-	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(GetOwner());
 	//GEngine->AddOnScreenDebugMessage(10, 0.1f, FColor::Black, TEXT("PlayerCharacter Class: %s"));
-
-
-	if (PlayerCharacter)
+	if (APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(GetOwner()))
 	{
-		UObject* WorldContextObject = GetWorld();
+		const UObject* WorldContextObject = GetWorld();
 
-		FVector SpherePos = PlayerCharacter->GetActorLocation();
+		const FVector SpherePos = PlayerCharacter->GetActorLocation();
 
-		float SphereRadius = MaxGrappleDistance;
+		const float SphereRadius = MaxGrappleDistance;
 
-		// Set what actors to seek out from it's collision channel
+		// Set what actors to seek out from its collision channel
 		TArray<TEnumAsByte<EObjectTypeQuery>> TraceObjectTypes;
 		TraceObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
 
-		TSubclassOf<AActor> SeekClass = ParentHook;
+		const TSubclassOf<AActor> SeekClass = ParentHook;
 
-		TArray<AActor*> ActorsToIgnore;
+		const TArray<AActor*> ActorsToIgnore;
 
 		TArray<class AActor*> OutActors;
 
@@ -108,9 +103,10 @@ void UAC_HookShot::Firing()
 		HitTarget = true;
 		GrappleState = EGrappleState::E_NearTarget;
 
-		if (const APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(GetOwner()))
+		if (APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(GetOwner()))
 		{
-			PlayerCharacter->GetHitStop()->StartHitStop(HitStopDuration);
+			//PlayerCharacter->GetHitStop()->StartHitStop(HitStopDuration);
+			PlayerCharacter->StartHitStop(HitStopDuration, PlayerCharacter);
 		}
 	}
 }
@@ -434,7 +430,9 @@ void UAC_HookShot::SetCurrentTarget(AManaHookParent* Hook)
 }
 
 // Sets default values for this component's properties
-UAC_HookShot::UAC_HookShot()
+UAC_HookShot::UAC_HookShot() : HitStopDuration(0), GrappleHook(nullptr), GrappleCable(nullptr), CurrentTarget(nullptr),
+                               OptimalSwingPoint(),
+                               SwingTargetLocation(), SwingAngle(0)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
