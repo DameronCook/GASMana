@@ -3,6 +3,7 @@
 
 #include "AI/BTTask_GoAroundTarget.h"
 #include "NavigationSystem.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BTFunctionLibrary.h"
 
 
@@ -13,13 +14,17 @@ EBTNodeResult::Type UBTTask_GoAroundTarget::ExecuteTask(UBehaviorTreeComponent& 
 	if (!World) return EBTNodeResult::Failed;
 
 	const UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(World);
+	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
+	if (BlackboardComponent)
+	{
+		if (const AActor* TargetActor = Cast<const AActor>(BlackboardComponent->GetValueAsObject("TargetToFollow")))
+		{
+			FNavLocation Result;
+			NavSys->GetRandomPointInNavigableRadius(TargetActor->GetActorLocation(), RadiusRange, Result);
 
-	const AActor* TargetActor = UBTFunctionLibrary::GetBlackboardValueAsActor(this, TargetToFollow);
-	
-	FNavLocation Result;
-	NavSys->GetRandomPointInNavigableRadius(TargetActor->GetActorLocation(), RadiusRange, Result);
-
-	UBTFunctionLibrary::SetBlackboardValueAsVector(this, MoveToLocation, Result.Location);
-
+			BlackboardComponent->SetValueAsVector("MoveToLocation",Result.Location);
+		}
+	}
 	return EBTNodeResult::Succeeded;
+		
 }
