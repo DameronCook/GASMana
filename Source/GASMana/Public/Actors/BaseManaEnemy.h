@@ -16,6 +16,8 @@ class GASMANA_API ABaseManaEnemy : public AGASManaCharacter
 
 public:
 	UFUNCTION()
-	void ShowHealth();
-	
+	static void ShowHealth();
+
+	UFUNCTION()
+	static bool DoMeleeAttack();
 };

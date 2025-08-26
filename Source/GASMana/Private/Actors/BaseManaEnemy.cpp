@@ -10,3 +10,8 @@ void ABaseManaEnemy::ShowHealth()
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("HEALTH: %f"), GetAbilitySystemComponent()->GetNumericAttribute(UManaAttributeSet::GetHealthAttribute())));
 
 }
+
+bool ABaseManaEnemy::DoMeleeAttack()
+{
+	return true;
+}
