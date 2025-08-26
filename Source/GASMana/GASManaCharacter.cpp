@@ -244,3 +244,8 @@ void AGASManaCharacter::SetNextComboSegment(const FName NextCombo)
 	ComboAttackName = NextCombo;
 	bIsAttackWindowOpen = true;
 }
+
+bool AGASManaCharacter::IsAlive()
+{
+	return true;
+}

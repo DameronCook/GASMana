@@ -118,6 +118,8 @@ public:
 	virtual void SetDefaultCombos() override;
 	virtual void SetNextComboSegment(FName NextCombo) override;
 
+	UFUNCTION()
+	static bool IsAlive();
 
 	////////////////////////////////////////////////////////////////////
 	///Gear
