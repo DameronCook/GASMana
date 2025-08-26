@@ -2,36 +2,45 @@
 
 
 #include "AI/Service/BTService_DistanceToTarget.h"
-#include "BehaviorTree/BTFunctionLibrary.h"
 
+#include "BehaviorTree/BlackboardComponent.h"
+#include "BehaviorTree/BTFunctionLibrary.h"
+#include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
 
 
 void UBTService_DistanceToTarget::OnSearchStart(FBehaviorTreeSearchData& SearchData)
 {
 	Super::OnSearchStart(SearchData);
 
-	OwnerActor = SearchData.OwnerComp.GetOwner();
-	GetDistanceBetweenActors();
+	OwnerActor = Cast<AActor>(SearchData.OwnerComp.GetBlackboardComponent()->GetValueAsObject("SelfActor"));
+	GetDistanceBetweenActors(SearchData.OwnerComp);
 }
 
 void UBTService_DistanceToTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
-	GetDistanceBetweenActors();
+	GetDistanceBetweenActors(OwnerComp);
 }
 
 float UBTService_DistanceToTarget::GetDistance(const AActor* ActorOne, const AActor* ActorTwo)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, FString::Printf(TEXT("Distance: %.2f"), ActorOne->GetDistanceTo(ActorTwo)));
 	return ActorOne->GetDistanceTo(ActorTwo);
 }
 
-void UBTService_DistanceToTarget::GetDistanceBetweenActors()
+void UBTService_DistanceToTarget::GetDistanceBetweenActors(UBehaviorTreeComponent& OwnerComp) const
 {
-	AActor* TargetActor = UBTFunctionLibrary::GetBlackboardValueAsActor(this, TargetToFollow);
-
-	if (OwnerActor && TargetActor)
+	float Dist = BIG_NUMBER;
+	if (const AActor* TargetActor = Cast<const AActor>(
+		OwnerComp.GetBlackboardComponent()->GetValueAsObject("TargetToFollow"));
+		OwnerActor && TargetActor)
 	{
-		GetDistance(OwnerActor, TargetActor);
+		Dist = GetDistance(OwnerActor, TargetActor);
+	}
+
+	if (UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent())
+	{
+		BlackboardComponent->SetValueAsFloat("DistToTarget", Dist);
 	}
 }

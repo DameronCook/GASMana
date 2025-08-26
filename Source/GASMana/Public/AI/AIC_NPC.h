@@ -13,6 +13,7 @@ UCLASS()
 class GASMANA_API AAIC_NPC : public AAIController
 {
 	GENERATED_BODY()
+	AAIC_NPC();
 	
 	virtual void BeginPlay() override;
 

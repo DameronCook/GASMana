@@ -5,13 +5,21 @@
 
 #include "BehaviorTree/BlackboardComponent.h"
 
+
+AAIC_NPC::AAIC_NPC()
+{
+	BlackboardAsset = NewObject<UBlackboardData>();
+	
+	BlackboardComp = CreateDefaultSubobject<UBlackboardComponent>(TEXT("BlackboardComponent"));
+}
+
 void AAIC_NPC::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	if (BlackboardAsset) UseBlackboard(BlackboardAsset, BlackboardComp);
 
-	UseBlackboard(BlackboardAsset, BlackboardComp);
-
-	BlackboardComp->SetValueAsBool("IsRanged", bIsRanged);
+	if (BlackboardComp) BlackboardComp->SetValueAsBool("IsRanged", bIsRanged);
 
 	RunBehaviorTree(BehaviorTree);
 }

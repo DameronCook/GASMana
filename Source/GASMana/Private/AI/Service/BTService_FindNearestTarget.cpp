@@ -3,35 +3,47 @@
 
 #include "AI/Service/BTService_FindNearestTarget.h"
 
-#include "BehaviorTree/BTFunctionLibrary.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 void UBTService_FindNearestTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
-	float ClosestDistance = BIG_NUMBER;
 
-	FName TagToSearch = "Enemy";
-	if (AActor* OwnerActor = OwnerComp.GetOwner())
+	FName TagToSearch = "Player";
+	if (const AActor* OwnerActor = OwnerComp.GetOwner())
 	{
+		AActor* NearestTarget = nullptr;
+		float ClosestDistance = BIG_NUMBER;
+
+		
 		if (OwnerActor->ActorHasTag("Player"))
 		{
-			TagToSearch = TEXT("Player");
+			TagToSearch = TEXT("Enemy");
 		}
 
 		TArray<AActor*> OutActors;
 		UGameplayStatics::GetAllActorsWithTag(GetWorld(), TagToSearch, OutActors);
 
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Number of Players found: %d"), OutActors.Num()));
 		for (AActor* Actor : OutActors)
 		{
-			float TempDist = OwnerActor->GetDistanceTo(Actor);
-
-			if (TempDist < ClosestDistance) ClosestDistance = TempDist;
-
-			UBTFunctionLibrary::SetBlackboardValueAsObject(this, TargetToFollow, Actor);
+			if (float TempDist = OwnerActor->GetDistanceTo(Actor); TempDist < ClosestDistance)
+			{
+				ClosestDistance = TempDist;
+				NearestTarget = Actor;
+			}
 		}
-		UBTFunctionLibrary::SetBlackboardValueAsFloat(this, DistToTarget, ClosestDistance);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Nearest Player's Name: %s"), *NearestTarget->GetName()));
+
+		UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
+		if (BlackboardComponent && NearestTarget)
+		{
+			BlackboardComponent->SetValueAsObject("TargetToFollow", NearestTarget);
+			BlackboardComponent->SetValueAsFloat("DistToTarget", ClosestDistance);
+		}
+		//UBTFunctionLibrary::SetBlackboardValueAsObject(this, TargetToFollow, NearestTarget);
+		//UBTFunctionLibrary::SetBlackboardValueAsFloat(this, DistToTarget, ClosestDistance);
 	}
-	
 }

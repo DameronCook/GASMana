@@ -18,4 +18,7 @@ class GASMANA_API UBTTask_AttackMelee : public UBTTaskNode
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector IsAttacking;
+
+	UPROPERTY()
+	AActor* OwnerActor;
 };
