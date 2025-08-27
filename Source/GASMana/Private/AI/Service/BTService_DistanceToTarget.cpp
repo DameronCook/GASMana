@@ -25,7 +25,7 @@ void UBTService_DistanceToTarget::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 
 float UBTService_DistanceToTarget::GetDistance(const AActor* ActorOne, const AActor* ActorTwo)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, FString::Printf(TEXT("Distance: %.2f"), ActorOne->GetDistanceTo(ActorTwo)));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, FString::Printf(TEXT("Distance: %.2f"), ActorOne->GetDistanceTo(ActorTwo)));
 	return ActorOne->GetDistanceTo(ActorTwo);
 }
 

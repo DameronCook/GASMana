@@ -168,7 +168,7 @@ bool UAC_WallRun::CanWallRunOnSurface(FVector ImpactNormal, UCharacterMovementCo
 	//Calculate if the wall we're on is angled down like an overhang 
 	if (ImpactNormal.Z < -.09)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, .2f, FColor::Red, "Overhang detected! Canceling wall run!");
+		//GEngine->AddOnScreenDebugMessage(-1, .2f, FColor::Red, "Overhang detected! Canceling wall run!");
 		return false;
 	}
 

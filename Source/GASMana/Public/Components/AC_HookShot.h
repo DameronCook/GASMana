@@ -83,6 +83,7 @@ class GASMANA_API UAC_HookShot : public UActorComponent
 
 	bool DrawLineToTarget(const ACharacter* Character, const AActor* OverlappedActor) const;
 	static float CalculateAngleToTarget(ACharacter* Character, const AActor* OverlappedActor);
+	static float CalculateDistToTarget(const APlayerManaCharacter* PlayerCharacter, const AActor* Actor);
 	void SetCurrentTarget(AManaHookParent* Hook);
 
 

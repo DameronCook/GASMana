@@ -51,13 +51,14 @@ bool UManaCameraModifierPlayerActions::ProcessViewRotation(AActor* ViewTarget, f
 
 		if (IsZipToPoint)
 		{
-			ITargetingActorInterface* TargetingActor = Cast<ITargetingActorInterface>(ViewTarget);
-			AActor* CurrentTarget = TargetingActor->GetCurrentTarget();
+			const ITargetingActorInterface* TargetingActor = Cast<ITargetingActorInterface>(ViewTarget);
+			const AActor* CurrentTarget = TargetingActor->GetCurrentTarget();
 
 			InterpRotationSpeed = 100.f;
 
-			FVector CameraLoc = CameraOwner->GetCameraLocation();
-			FVector DesiredLoc = CurrentTarget->GetActorLocation();
+			const FVector CameraLoc = CameraOwner->GetCameraLocation();
+			FVector DesiredLoc = PlayerChar->GetActorLocation();
+			if (CurrentTarget) DesiredLoc = CurrentTarget->GetActorLocation();
 			NewCameraRotation = UKismetMathLibrary::FindLookAtRotation(CameraLoc, DesiredLoc);
 		}
 

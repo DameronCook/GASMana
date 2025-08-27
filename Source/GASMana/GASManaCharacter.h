@@ -177,12 +177,8 @@ public:
 	FORCEINLINE EEquipmentState GetEquipmentState() const { return EquipmentState; }
 	FORCEINLINE FGameplayTagContainer GetEquipTag() const { return EquipTagContainer; }
 	FORCEINLINE FName GetComboAttackName() const { return ComboAttackName; }
-
-
+	
 	FORCEINLINE UAnimMontage* SetEquipMontageRight(UAnimMontage* Montage) { return EquipMontageRight = Montage; }
 	FORCEINLINE UAnimMontage* SetEquipMontageLeft(UAnimMontage* Montage) { return EquipMontageLeft = Montage; }
 	FORCEINLINE EEquipmentState SetEquipmentState(EEquipmentState State) { return EquipmentState = State; }
-
-
-
 };
