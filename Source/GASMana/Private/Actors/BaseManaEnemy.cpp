@@ -3,6 +3,21 @@
 
 #include "Actors/BaseManaEnemy.h"
 #include "ManaAttributeSet.h"
+#include "Item/RightHandEquipment.h"
+
+void ABaseManaEnemy::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (UWorld* World = GetWorld())
+	{
+		RightHandEquipment = World->SpawnActor<ARightHandEquipment>(RightHandEquipmentClass, GetActorTransform());
+		if (RightHandEquipment)
+		{
+			SetEquipment(RightHandEquipment);
+		}
+	}
+}
 
 void ABaseManaEnemy::ShowHealth()
 {

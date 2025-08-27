@@ -14,6 +14,7 @@
 #include "Item/Equipment.h"
 #include "GASManaCharacter.generated.h"
 
+class UGA_ManaPlayerAttack;
 class UAC_HitStop;
 class ALeftHandEquipment;
 class ARightHandEquipment;
@@ -65,7 +66,7 @@ class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, pub
 	const FName DefaultComboName = "Attack01";
 	FName ComboAttackName = DefaultComboName;
 	bool bIsAttackWindowOpen;
-	
+
 protected:
 
 	/////////////////////////////////////////////////////////////////////
@@ -105,6 +106,27 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Overlap")
 	virtual void OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	virtual FGameplayTagContainer GetAttackType() const;
+
+	/** Sets the attack montage for the attack to play */
+	virtual void GetMontageToPlay();
+
+	/** Attack Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer AttackTagContainer;
+
+	UPROPERTY()
+	UAnimMontage* CurrentAttackMontage;
+	
+	UPROPERTY()
+	UGA_ManaPlayerAttack* ActiveAttackAbility;
+
+	UPROPERTY()
+	FName NextAttackMontageSection = "Attack01";
+	
+	/** Attacking Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Attack", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> AttackingEffectClass;
 
 
 public:
@@ -120,6 +142,10 @@ public:
 
 	UFUNCTION()
 	static bool IsAlive();
+
+	/**Called for attack by controller or by input */
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	virtual bool Attack();
 
 	////////////////////////////////////////////////////////////////////
 	///Gear
@@ -171,14 +197,22 @@ public:
 	FORCEINLINE ALeftHandEquipment* GetLeftHandEquipment() const { return LeftHandEquipment; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetDamageEffectClass() const { return DamageEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetEquipEffectClass() const { return EquipClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetAttackingEffectClass() const { return AttackingEffectClass; }
 	FORCEINLINE UAnimMontage* GetHitReactMontage() const { return HitReactMontage; }
+	FORCEINLINE UGA_ManaPlayerAttack* GetAttackAbility() const { return ActiveAttackAbility; }
 	FORCEINLINE UAnimMontage* GetEquipRightMontage() const { return EquipMontageRight; }
 	FORCEINLINE UAnimMontage* GetEquipLeftMontage() const { return EquipMontageLeft; }
 	FORCEINLINE EEquipmentState GetEquipmentState() const { return EquipmentState; }
 	FORCEINLINE FGameplayTagContainer GetEquipTag() const { return EquipTagContainer; }
 	FORCEINLINE FName GetComboAttackName() const { return ComboAttackName; }
+	FORCEINLINE UAnimMontage* GetCurrentAttackMontage() const { return CurrentAttackMontage; }
+	FORCEINLINE FName GetNextAttackMontageSection() const { return NextAttackMontageSection; }
+
 	
 	FORCEINLINE UAnimMontage* SetEquipMontageRight(UAnimMontage* Montage) { return EquipMontageRight = Montage; }
 	FORCEINLINE UAnimMontage* SetEquipMontageLeft(UAnimMontage* Montage) { return EquipMontageLeft = Montage; }
-	FORCEINLINE EEquipmentState SetEquipmentState(EEquipmentState State) { return EquipmentState = State; }
+	FORCEINLINE EEquipmentState SetEquipmentState(const EEquipmentState State) { return EquipmentState = State; }
+	FORCEINLINE UGA_ManaPlayerAttack* SetAttackAbility(UGA_ManaPlayerAttack* Attack) { return ActiveAttackAbility = Attack; }
+	FORCEINLINE UAnimMontage* SetAttackMontage(UAnimMontage* UAttackMontage) { return CurrentAttackMontage = UAttackMontage; }
+
 };

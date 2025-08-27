@@ -14,9 +14,9 @@ EBTNodeResult::Type UBTTask_AttackMelee::ExecuteTask(UBehaviorTreeComponent& Own
 	OwnerActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("SelfActor"));
 
 	
-	if (const ABaseManaEnemy* Enemy = Cast<ABaseManaEnemy>(OwnerActor))
+	if (AGASManaCharacter* Char = Cast<AGASManaCharacter>(OwnerActor))
 	{
-		if (Enemy->DoMeleeAttack())
+		if (Char->Attack())
 		{
 			FinishTask = EBTNodeResult::Succeeded;	
 		}

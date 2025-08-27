@@ -34,24 +34,22 @@ void UGA_ManaPlayerAttack::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		return;
 	}
-	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
+	AGASManaCharacter* Character = Cast<AGASManaCharacter>(ActorInfo->AvatarActor.Get());
 	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
 
 	
-	if (PlayerCharacter) {
+	if (Character) {
 
-		PlayerCharacter->SetAttackAbility(this);
+		Character->SetAttackAbility(this);
 
 		// Play the montage and bind delegates
-		if (PlayerCharacter->GetCurrentAttackMontage() && ActorInfo->AvatarActor.IsValid())
+		if (Character->GetCurrentAttackMontage() && ActorInfo->AvatarActor.IsValid())
 		{
-			PlayerCharacter->GetEquipmentState() == EEquipmentState::EES_Unequipped ? PlayerCharacter->SetEquipmentState(EEquipmentState::EES_EquippedOneHandedWeapon) : PlayerCharacter->SetEquipmentState(PlayerCharacter->GetEquipmentState());
+			Character->GetEquipmentState() == EEquipmentState::EES_Unequipped ? Character->SetEquipmentState(EEquipmentState::EES_EquippedOneHandedWeapon) : Character->SetEquipmentState(Character->GetEquipmentState());
 
 			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("Next Combo Section: %s"), *PlayerCharacter->GetNextAttackMontageSection().ToString()));
 
-			UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, PlayerCharacter->GetCurrentAttackMontage(), 1.0f, PlayerCharacter->GetNextAttackMontageSection(), false, 0.0f);
-
-			if (MontageTask)
+			if (UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, Character->GetCurrentAttackMontage(), 1.0f, Character->GetNextAttackMontageSection(), false, 0.0f))
 			{
 				MontageTask->OnCompleted.AddDynamic(this, &UGA_ManaPlayerAttack::OnMontageEnded);
 				MontageTask->OnInterrupted.AddDynamic(this, &UGA_ManaPlayerAttack::OnMontageEnded);
@@ -66,10 +64,13 @@ void UGA_ManaPlayerAttack::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 			EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		}
 
-		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetAttackingEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+		AbilitySystemComponent->ApplyGameplayEffectToSelf(Character->GetAttackingEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 
-		//Update Stamina Regen
-		PlayerCharacter->UpdateStaminaRegen();
+		//Update Stamina Regen if player
+		if (const APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(Character))
+		{
+			PlayerChar->UpdateStaminaRegen();
+		}
 	}
 }
 
@@ -85,75 +86,21 @@ void UGA_ManaPlayerAttack::EndAbility(const FGameplayAbilitySpecHandle Handle, c
 		AttackTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking")));
 		ActorInfo->AbilitySystemComponent->RemoveActiveEffectsWithGrantedTags(AttackTags);
 		
-		FGameplayTag FreeTag = FGameplayTag::RequestGameplayTag(FName("Character.IsFree"));
-		
-		FGameplayTag RollingTag = FGameplayTag::RequestGameplayTag(FName("Player.IsRolling"));
-
-		/*
-		if (!ActorInfo->AbilitySystemComponent->HasMatchingGameplayTag(FreeTag))
+		if (AGASManaCharacter* Character = Cast<AGASManaCharacter>(ActorInfo->AvatarActor.Get()))
 		{
-			if (!ActorInfo->AbilitySystemComponent->HasMatchingGameplayTag(RollingTag))
-			{
-				//Grant the player a tag so that they can move again in case this was blocked before
-				ActorInfo->AbilitySystemComponent->AddLooseGameplayTag(FreeTag);
-				//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Adding Gameplay tag!");
-			}
-		}
-		*/
-		
-		if (APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get()))
-		{
-			PlayerCharacter->SetAttackAbility(nullptr);
+			Character->SetAttackAbility(nullptr);
 
-			//Update the anim instance
-			if (UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(PlayerCharacter->GetMesh()->GetAnimInstance()))
+			//Update Stamina Regen if player
+			if (const APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(Character))
 			{
-				//TODO: Need to set IsAttacking to false whenever the montage has completely ended... haven't used the IsAttacking variable yet though
+				//Apparently we don't need to do anything with the anim instance?
+				PlayerChar->UpdateStaminaRegen();
+				//UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 				//AnimInstance->SetIsAttacking(false);
 			}
-
-			//Update Stamina Regen
-			PlayerCharacter->UpdateStaminaRegen();
 		}
 	}
 }
-
-/*
-void UGA_ManaPlayerAttack::OnGameplayEventReceived(FGameplayEventData const Payload)
-{
-	if (DamageEffectClass && Payload.Target)
-	{
-		const AGASManaCharacter* TargetGASCharacter = Cast<AGASManaCharacter>(Payload.Target.Get());
-		AGASManaCharacter* MutableTargetGASCharacter = const_cast<AGASManaCharacter*>(TargetGASCharacter);
-		if (TargetGASCharacter)
-		{
-			if (UAbilitySystemComponent* TargetASC = TargetGASCharacter->GetAbilitySystemComponent())
-			{
-				//Create a gameplay effect spec
-				FGameplayEffectContextHandle EffectContext = TargetASC->MakeEffectContext();
-				FGameplayEffectSpecHandle SpecHandle = TargetASC->MakeOutgoingSpec(DamageEffectClass, 1, EffectContext);
-				if (SpecHandle.IsValid())
-				{
-					TargetASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
-				}
-			}
-
-			//After applying damage, now play a hit react montage (change this function later to run a function that returns a montage depending on direction!)
-			MutableTargetGASCharacter->PlayAnimMontage(TargetGASCharacter->GetHitReactMontage());
-
-			//Uncomment if debug strings are needed
-			
-			if (GEngine)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Cyan, FString::Printf(TEXT("Payload.Target: %s"), *Payload.Target->GetName()));
-				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Cyan, FString::Printf(TEXT("Damage Class: %s"), *DamageEffectClass->GetName()));
-				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("Gameplay Effect Applied!"));
-			}
-			
-		}
-	}
-}
-*/
 
 void UGA_ManaPlayerAttack::EndAbilityAndListenForCombo()
 {

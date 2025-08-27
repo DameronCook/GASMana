@@ -2,33 +2,29 @@
 
 
 #include "PlayerManaCharacter.h"
-#include "ManaPlayerAnimInstance.h"
-#include "Camera/CameraComponent.h"
-#include "Components/CapsuleComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "Camera/ManaSpringArmComponent.h"
-#include "GameFramework/Controller.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "InputActionValue.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "InputActionValue.h"
-#include "Effect/GE_ManaPlayerGrounded.h"
-#include "Kismet/KismetSystemLibrary.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Kismet/GameplayStatics.h"
-#include "Blueprint/UserWidget.h"
 #include "AbilitySystemBlueprintLibrary.h"
-#include "Actors/BaseManaEnemy.h"
-#include "Actors/ManaHookParent.h"
-#include "Components/AC_HookShot.h"
-#include "Components/AC_WallRun.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputActionValue.h"
+#include "ManaPlayerAnimInstance.h"
 #include "Ability/GA_ManaPlayerAirAttack.h"
 #include "Ability/GA_ManaPlayerAttack.h"
-#include "Item/Item.h"
+#include "Actors/BaseManaEnemy.h"
+#include "Actors/ManaHookParent.h"
+#include "Blueprint/UserWidget.h"
+#include "Camera/CameraComponent.h"
+#include "Camera/ManaSpringArmComponent.h"
+#include "Components/AC_HookShot.h"
+#include "Components/AC_WallRun.h"
+#include "Components/CapsuleComponent.h"
+#include "Effect/GE_ManaPlayerGrounded.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/Controller.h"
 #include "Item/LeftHandEquipment.h"
 #include "Item/RightHandEquipment.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 
 APlayerManaCharacter::APlayerManaCharacter()
@@ -161,10 +157,6 @@ void APlayerManaCharacter::OnMovementModeChanged(const EMovementMode PrevMovemen
 
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
 
-	//if (GEngine)
-	//{
-	//	GEngine->AddOnScreenDebugMessage(1, .1f, FColor::Red, "MovementModeChangedCalled");
-	//}
 
 	if (!AbilitySystem)
 	{
@@ -182,7 +174,6 @@ void APlayerManaCharacter::OnMovementModeChanged(const EMovementMode PrevMovemen
 	}
 	//If needed, remove the airborne effect here. However, the landed function should be able to handle this
 }
-
 
 FVector APlayerManaCharacter::GamepadRightSwingForce(const float MovementInput) const
 {
@@ -437,7 +428,7 @@ void APlayerManaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Attacking
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &APlayerManaCharacter::Attack);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &APlayerManaCharacter::AttackInput);
 
 		// Rolling
 		EnhancedInputComponent->BindAction(RollAction, ETriggerEvent::Started, this, &APlayerManaCharacter::Roll);
@@ -575,34 +566,35 @@ void APlayerManaCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void APlayerManaCharacter::Attack(const FInputActionValue& Value)
+bool APlayerManaCharacter::Attack()
 {
-	if (RightHandEquipment)
+	if (Super::Attack())
 	{
-		GetMontageToPlay();
-		const FGameplayTagContainer AttackType = GetAttackType(); 
-		if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackType, true))
-		{
-			UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-			AnimInstance->SetIsAttacking(true);
-		}
+		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+		AnimInstance->SetIsAttacking(true);
+		return true;
 	}
+	return false;
+}
+
+void APlayerManaCharacter::AttackInput(const FInputActionValue& Value)
+{
+	Attack();
 }
 
 FGameplayTagContainer APlayerManaCharacter::GetAttackType() const
 {
-	FGameplayTagContainer fAttackType;
-	FGameplayTag AirTag = FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne"));
-	if (GetAbilitySystemComponent()->HasMatchingGameplayTag(AirTag))
+	FGameplayTagContainer FAttackType;
+	if (const FGameplayTag AirTag = FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne")); GetAbilitySystemComponent()->HasMatchingGameplayTag(AirTag))
 	{
-		fAttackType = AirAttackTagContainer;
+		FAttackType = AirAttackTagContainer;
 	}
 	else
 	{
-		fAttackType = AttackTagContainer;
+		FAttackType = AttackTagContainer;
 	}
 
-	return fAttackType;
+	return FAttackType;
 }
 
 void APlayerManaCharacter::GetMontageToPlay()
@@ -637,7 +629,8 @@ void APlayerManaCharacter::GetMontageToPlay()
 		}
 	}
 
-	if (MontageToPlay) SetAttackMontage(MontageToPlay);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Montage set to: %s"), *MontageToPlay->GetName()));
+	if (MontageToPlay) SetAttackMontage(MontageToPlay);	
 }
 
 void APlayerManaCharacter::Block(const FInputActionValue& Value) 

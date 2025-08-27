@@ -1,14 +1,14 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "GASManaCharacter.h"
-#include "Engine/LocalPlayer.h"
 #include "AbilitySystemComponent.h"
 #include "Components/AC_HitStop.h"
-#include "Public/ManaAttributeSet.h"
 #include "Components/CapsuleComponent.h"
+#include "Engine/LocalPlayer.h"
 #include "Item/LeftHandEquipment.h"
-#include "Public/Interface/I_PickUpInterface.h"
 #include "Item/RightHandEquipment.h"
+#include "Public/ManaAttributeSet.h"
+#include "Public/Interface/I_PickUpInterface.h"
 
 //DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -120,6 +120,28 @@ void AGASManaCharacter::OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedCom
 	}
 }
 
+bool AGASManaCharacter::Attack()
+{
+	if (RightHandEquipment)
+	{
+		GetMontageToPlay();
+		const FGameplayTagContainer AttackType = GetAttackType(); 
+		return GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackType, true);
+	}
+	return true;
+}
+
+FGameplayTagContainer AGASManaCharacter::GetAttackType() const
+{
+	FGameplayTagContainer FAttackType;
+	return FAttackType = AttackTagContainer;
+}
+
+void AGASManaCharacter::GetMontageToPlay()
+{
+	if (UAnimMontage* MontageToPlay = RightHandEquipment->GetAttackCombo()) SetAttackMontage(MontageToPlay);
+}
+
 void AGASManaCharacter::PlayFlashEffect(FVector InColor, float FlashLength) const
 {
 	if (USkeletalMeshComponent* CharMesh = GetMesh())
@@ -183,7 +205,6 @@ void AGASManaCharacter::EquipLeftHandGear()
 {
 	if (LeftHandEquipment)
 	{
-		//EquipGearToSocket(LeftHandEquipment, "hand_lSocket");
 		SetEquipment(LeftHandEquipment);
 	}
 }
@@ -192,7 +213,6 @@ void AGASManaCharacter::EquipRightHandGear()
 {
 	if (RightHandEquipment)
 	{
-		//EquipGearToSocket(RightHandEquipment, "hand_rSocket");
 		SetEquipment(RightHandEquipment);
 	}
 }
