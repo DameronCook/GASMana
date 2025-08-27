@@ -26,7 +26,7 @@ void UBTService_FindNearestTarget::TickNode(UBehaviorTreeComponent& OwnerComp, u
 		TArray<AActor*> OutActors;
 		UGameplayStatics::GetAllActorsWithTag(GetWorld(), TagToSearch, OutActors);
 
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Number of Players found: %d"), OutActors.Num()));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Number of Players found: %d"), OutActors.Num()));
 		for (AActor* Actor : OutActors)
 		{
 			if (float TempDist = OwnerActor->GetDistanceTo(Actor); TempDist < ClosestDistance)
@@ -35,10 +35,10 @@ void UBTService_FindNearestTarget::TickNode(UBehaviorTreeComponent& OwnerComp, u
 				NearestTarget = Actor;
 			}
 		}
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Nearest Player's Name: %s"), *NearestTarget->GetName()));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Nearest Player's Name: %s"), *NearestTarget->GetName()));
 
-		UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
-		if (BlackboardComponent && NearestTarget)
+		if (UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent(); BlackboardComponent &&
+			NearestTarget)
 		{
 			BlackboardComponent->SetValueAsObject("TargetToFollow", NearestTarget);
 			BlackboardComponent->SetValueAsFloat("DistToTarget", ClosestDistance);
