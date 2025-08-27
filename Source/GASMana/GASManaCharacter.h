@@ -16,7 +16,6 @@
 #include "GASManaCharacter.generated.h"
 
 class UGA_ManaPlayerAttack;
-class UAC_HitStop;
 class ALeftHandEquipment;
 class ARightHandEquipment;
 class USpringArmComponent;

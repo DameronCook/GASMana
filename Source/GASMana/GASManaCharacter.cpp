@@ -2,7 +2,6 @@
 
 #include "GASManaCharacter.h"
 #include "AbilitySystemComponent.h"
-#include "Components/AC_HitStop.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/LocalPlayer.h"
 #include "Item/LeftHandEquipment.h"
@@ -25,8 +24,6 @@ AGASManaCharacter::AGASManaCharacter()
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 
 	Attributes = CreateDefaultSubobject<UManaAttributeSet>(TEXT("Attributes"));
-
-	HitStopComponent = CreateDefaultSubobject<UAC_HitStop>(TEXT("HitStop"));
 }
 
 void AGASManaCharacter::SetEquipment(AEquipment* Equipment)

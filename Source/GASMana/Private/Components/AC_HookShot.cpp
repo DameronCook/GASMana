@@ -14,8 +14,6 @@
 #include "Actors/GrappleHook.h"
 #include "Ability/GA_ManaPlayerZipToPoint.h"
 #include "Ability/GA_ManaPlayerSwing.h"
-#include "Components/AC_HitStop.h"
-
 
 void UAC_HookShot::Inactive()
 {
@@ -106,9 +104,9 @@ void UAC_HookShot::Firing()
 		HitTarget = true;
 		GrappleState = EGrappleState::E_NearTarget;
 
-		if (const APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(GetOwner()))
+		if (APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(GetOwner()))
 		{
-			PlayerCharacter->GetHitStop()->StartHitStop(HitStopDuration);
+			PlayerCharacter->StartHitStop(HitStopDuration, PlayerCharacter);
 		}
 	}
 }
