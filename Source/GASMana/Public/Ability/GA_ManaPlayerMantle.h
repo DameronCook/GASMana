@@ -16,7 +16,8 @@ class GASMANA_API UGA_ManaPlayerMantle : public UGameplayAbility
 	
 	UGA_ManaPlayerMantle();
 
-	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
+	virtual void ActivateAbility(FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayAbilityActivationInfo
+	                             ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
 
 public:

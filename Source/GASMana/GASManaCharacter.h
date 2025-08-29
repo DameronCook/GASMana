@@ -11,6 +11,7 @@
 #include "Logging/LogMacros.h"
 #include "Character/CharacterTypes.h"
 #include "Interface/ComboInterface.h"
+#include "Interface/IFocusableInterface.h"
 #include "Item/Equipment.h"
 #include "GASManaCharacter.generated.h"
 
@@ -25,7 +26,7 @@ class UInputAction;
 struct FInputActionValue;
 
 UCLASS()
-class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, public IComboInterface
+class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, public IComboInterface, public IIFocusableInterface
 {
 	GENERATED_BODY()
 	//////////////////////////////////////

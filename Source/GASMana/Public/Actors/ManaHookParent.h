@@ -50,7 +50,6 @@ class GASMANA_API AManaHookParent : public AActor
 	EGrappleType GrappleType;
 
 
-
 	///MESHES WHOOOOOOOOOOOOOOOO
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Hooks, meta = (AllowPrivateAccess = "true"))
 	UStaticMesh* ZipToPointMesh;
@@ -75,7 +74,7 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UWidgetComponent> TargetTypeWidget;
 
-	FORCEINLINE EGrappleType GetGrappleType() { return GrappleType; }
+	FORCEINLINE EGrappleType GetGrappleType() const { return GrappleType; }
 
 protected:
 	virtual void BeginPlay() override;

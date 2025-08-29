@@ -2,11 +2,15 @@
 
 
 #include "Camera/ManaCameraModifierPitchCurves.h"
+
+#include "PlayerManaCharacter.h"
 #include "Camera/ManaPlayerCamManager.h"
 
-UManaCameraModifierPitchCurves::UManaCameraModifierPitchCurves()
+UManaCameraModifierPitchCurves::UManaCameraModifierPitchCurves() : PitchToDistanceCurve(nullptr),
+                                                                   PitchToFOVCurve(nullptr), PlayerChar(nullptr),
+                                                                   CurrentPitchToDist(0),
+                                                                   CurrentAddFOV(0)
 {
-
 }
 
 bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewInfo& InOutPOV)
@@ -51,9 +55,20 @@ bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewI
 
 	if (IsBlocking)
 	{
-		TargetPitchToDist = 250.f;
-		InterpSpeed = 5.f;
-		AddFOV = 10.f;
+		if (PlayerChar)
+		{
+			if (PlayerChar->GetCombatCameraTarget())
+			{
+				
+				TargetPitchToDist = 150.f;
+				InterpSpeed = 15.f;
+			}
+			else
+			{
+				TargetPitchToDist = 250.f;
+				InterpSpeed = 5.f;
+			}
+		}
 	}
 
 	if (IsAirAttack)
@@ -74,12 +89,7 @@ bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewI
 	GetWorld()->SweepSingleByChannel(Result, GetViewTarget()->GetActorLocation(), DesiredLocation, FQuat::Identity, CamManager->LineOfSightProbeChannel, FCollisionShape::MakeSphere(CamManager->LineOfSightProbeSize), QueryParams);
 
 	DesiredLocation = Result.bBlockingHit ? Result.Location : DesiredLocation;
-
-
-	//GEngine->AddOnScreenDebugMessage(7, .1f, FColor::Purple, DesiredLocation.ToString());
-	//GEngine->AddOnScreenDebugMessage(8, .1f, FColor::Purple, FString::Printf(TEXT("Desired length based on pitch: %f"), TargetPitchToDist));
-	//GEngine->AddOnScreenDebugMessage(9, .1f, FColor::Purple, FString::Printf(TEXT("Actual Current Length: %f"), CamManager->));
-
+	
 	InOutPOV.Location = DesiredLocation;
 	InOutPOV.FOV += CurrentAddFOV;
 

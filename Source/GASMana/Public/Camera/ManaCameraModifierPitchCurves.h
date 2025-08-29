@@ -6,6 +6,7 @@
 #include "Camera/ManaCameraModifier.h"
 #include "ManaCameraModifierPitchCurves.generated.h"
 
+class APlayerManaCharacter;
 /**
  * Applies different curves effects depending on the pitch of the camera
  */
@@ -16,11 +17,6 @@ class GASMANA_API UManaCameraModifierPitchCurves : public UManaCameraModifier
 	
 	UManaCameraModifierPitchCurves();
 
-public:
-
-	virtual bool ModifyCamera(float DeltaTime, FMinimalViewInfo& InOutPOV) override;
-
-
 protected:
 	//Curve to convert changes in pitch to changes in distance
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Custom, meta = (AllowAbstract = "true"))
@@ -30,7 +26,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Custom, meta = (AllowAbstract = "true"))
 	UCurveFloat* PitchToFOVCurve;
 
+	UPROPERTY()
+	APlayerManaCharacter* PlayerChar;
+	
 private:
 	float CurrentPitchToDist;
 	float CurrentAddFOV;
+	
+public:
+	virtual bool ModifyCamera(float DeltaTime, FMinimalViewInfo& InOutPOV) override;
+
+	FORCEINLINE APlayerManaCharacter* SetPlayerCharacter(APlayerManaCharacter* PlayerManaCharacter) { return PlayerChar = PlayerManaCharacter; };
+
 };

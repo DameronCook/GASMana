@@ -21,7 +21,8 @@ UGA_ManaPlayerJump::UGA_ManaPlayerJump()
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsEquipping")));
 }
 
-void UGA_ManaPlayerJump::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
+void UGA_ManaPlayerJump::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayAbilityActivationInfo
+                                         ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 
 	if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))

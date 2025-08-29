@@ -118,8 +118,6 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer RollTagContainer;
 
-
-
 	/** Air Attack Tag Container */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer AirAttackTagContainer;
@@ -140,15 +138,15 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer ZipToPointTagContainer;
 
-	/** Zip To Point Tag Container */
+	/** Swing Tag Container */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer SwingTagContainer;
 
-	/** Zip To Point Tag Container */
+	/** Swing Jump Tag Container */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer SwingJumpTagContainer;
 
-	/** Zip To Point Tag Container */
+	/** Hook Tag Container */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer HookTagContainer;
 
@@ -326,13 +324,22 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	float OriginalGravityScale = 2.0;
 
 	//Cam stuff....
+	UPROPERTY()
 	AManaCameraModificationVolume* CurrentCameraModificationVolume;
 
 	bool bShouldAddCameraTarget = false;
+
+	UPROPERTY()
 	AActor* CurrentCamTarget = nullptr;
+
+	UPROPERTY()
+	AActor* CombatCameraTarget = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly)
 	AItem* OverlappingItem = nullptr;
+
+	UPROPERTY()
+	AActor* OverlappingItemActor = nullptr;
 
 protected:
 
@@ -387,6 +394,7 @@ public:
 	APlayerManaCharacter();
 
 	virtual void Blocking() override;
+	void RemoveCameraFocus();
 
 	virtual void HandleMelee() override;
 
@@ -487,6 +495,9 @@ public:
 	FORCEINLINE float GetOriginalGravityScale() const { return OriginalGravityScale; }
 
 
+	FORCEINLINE AActor* GetCombatCameraTarget() const { return CombatCameraTarget; }
+
+
 	//////////////////////////////////////
 	//Setters
 	FORCEINLINE UGA_ManaPlayerWallRun* SetWallRunAbility(UGA_ManaPlayerWallRun* WallRunAbility) { return ActiveWallRunAbility = WallRunAbility; }
@@ -495,5 +506,5 @@ public:
 	FORCEINLINE UGA_ManaPlayerZipToPoint* SetZipToPointAbility(UGA_ManaPlayerZipToPoint* ZipAbility) { return ActiveZipAbility = ZipAbility; }
 	FORCEINLINE UGA_ManaPlayerSwing* SetSwingAbility(UGA_ManaPlayerSwing* SwingAbility) { return ActiveSwingAbility = SwingAbility; }
 	FORCEINLINE UGA_ManaPlayerAirAttack* SetAirAttackAbility(UGA_ManaPlayerAirAttack* AirAttack) { return ActiveAirAttackAbility = AirAttack; }
-
+	FORCEINLINE AActor* SetCombatCameraTarget(AActor* Target) { return CombatCameraTarget = Target; }
 };
