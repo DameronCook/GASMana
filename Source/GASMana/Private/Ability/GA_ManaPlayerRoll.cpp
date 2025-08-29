@@ -26,7 +26,8 @@ UGA_ManaPlayerRoll::UGA_ManaPlayerRoll()
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsEquipping")));
 }
 
-void UGA_ManaPlayerRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
+void UGA_ManaPlayerRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayAbilityActivationInfo
+                                         ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	//Next, Commit the ability
 	if (!CommitAbility(Handle, ActorInfo, ActivationInfo))

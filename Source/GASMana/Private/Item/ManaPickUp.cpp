@@ -47,7 +47,7 @@ void AManaPickUp::SetItem()
 		if (!ManaComponent)
 		{
 			ManaComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ManaEffect, GetActorLocation(), FRotator::ZeroRotator);
-			ManaComponent->Activate();
+			if (ManaComponent) ManaComponent->Activate();
 		}
 	}
 }

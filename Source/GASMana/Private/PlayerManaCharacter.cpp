@@ -13,6 +13,7 @@
 #include "Actors/ManaHookParent.h"
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
+#include "Camera/ManaCameraModifierPitchCurves.h"
 #include "Camera/ManaSpringArmComponent.h"
 #include "Components/AC_HookShot.h"
 #include "Components/AC_WallRun.h"
@@ -86,8 +87,8 @@ void APlayerManaCharacter::BeginPlay()
 
 	if (AbilitySystem && GroundedEffectClass && FreeEffectClass)
 	{
-			AbilitySystem->ApplyGameplayEffectToSelf(GroundedEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
-			AbilitySystem->ApplyGameplayEffectToSelf(FreeEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
+		AbilitySystem->ApplyGameplayEffectToSelf(GroundedEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
+		AbilitySystem->ApplyGameplayEffectToSelf(FreeEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
 	}
 
 	if (AbilitySystem)
@@ -100,20 +101,27 @@ void APlayerManaCharacter::BeginPlay()
 
 	EquipmentState = EEquipmentState::EES_Unequipped;
 
-	/*
-	RightHandEquipment = AddEquipment(FName("RightHandEquipSocket"), GetRightHandEquipment());
-	LeftHandEquipment = AddEquipment(FName("LeftHandEquipSocket"), GetLeftHandEquipment());
-	*/
-	
-	if (PlayerHUDClass)
-	{
-		//Configure Player HUD
-		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		PlayerHUD = CreateWidget<UUserWidget>(PlayerController, PlayerHUDClass);
-		PlayerHUD->AddToViewport();
-	}
-
 	UpdateStaminaRegen();
+
+	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+	{
+		if (PlayerHUDClass)
+		{
+			//Configure Player HUD
+			PlayerHUD = CreateWidget<UUserWidget>(PlayerController, PlayerHUDClass);
+			PlayerHUD->AddToViewport();
+		}
+
+		if (APlayerCameraManager* CameraManager = PlayerController->PlayerCameraManager)
+		{
+			// Add the modifier and pass a reference to this character.
+
+			if (UManaCameraModifierPitchCurves* Modifier = Cast<UManaCameraModifierPitchCurves>(CameraManager->AddNewCameraModifier(UManaCameraModifierPitchCurves::StaticClass())))
+			{
+				Modifier->SetPlayerCharacter(this);
+			}
+		}
+	}
 }
 
 void APlayerManaCharacter::Tick(float DeltaTime)
@@ -236,6 +244,18 @@ void APlayerManaCharacter::Blocking()
 	}
 }
 
+void APlayerManaCharacter::RemoveCameraFocus()
+{
+	if (CombatCameraTarget)
+	{
+		if (const ABaseManaEnemy* CombatTarget = Cast<ABaseManaEnemy>(CombatCameraTarget))
+		{
+			CombatTarget->SetTargetWidgetIcon(false);
+		}
+		SetCombatCameraTarget(nullptr);
+	}
+}
+
 void APlayerManaCharacter::FinishedBlocking()
 {
 	Super::FinishedBlocking();
@@ -245,6 +265,8 @@ void APlayerManaCharacter::FinishedBlocking()
 		AnimInstance->SetIsBlocking(false);
 		AnimInstance->Montage_Stop(.2f, CurrentBlockingMontage);
 	}
+
+	RemoveCameraFocus();
 }
 
 void APlayerManaCharacter::HandleMelee()
@@ -629,7 +651,7 @@ void APlayerManaCharacter::GetMontageToPlay()
 		}
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Montage set to: %s"), *MontageToPlay->GetName()));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Montage set to: %s"), *MontageToPlay->GetName()));
 	if (MontageToPlay) SetAttackMontage(MontageToPlay);	
 }
 

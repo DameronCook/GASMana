@@ -28,7 +28,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	float RotationSpeed;
 
-	FRotator GetDeltaCameraRotation(float DeltaTime, float InterpSpeed, FRotator CurrentRotation, FRotator FinalRotation);
+	static FRotator GetDeltaCameraRotation(float DeltaTime, float InterpSpeed, const FRotator& CurrentRotation, const FRotator& FinalRotation);
 
-	FVector GetDeltaCameraLotation(float DeltaTime, float InterpSpeed, FVector CurrentLocation, FVector FinalLocation);
+	static FVector GetDeltaCameraLocation(float DeltaTime, float InterpSpeed, const FVector& CurrentLocation, const FVector& FinalLocation);
 };

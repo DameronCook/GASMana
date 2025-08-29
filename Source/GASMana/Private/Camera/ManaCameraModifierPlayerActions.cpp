@@ -2,7 +2,6 @@
 
 
 #include "Camera/ManaCameraModifierPlayerActions.h"
-#include "Camera/ManaPlayerCamManager.h"
 #include "Camera/ManaSpringArmComponent.h"
 #include "PlayerManaCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -20,8 +19,7 @@ bool UManaCameraModifierPlayerActions::ModifyCamera(float DeltaTime, FMinimalVie
 bool UManaCameraModifierPlayerActions::ProcessViewRotation(AActor* ViewTarget, float DeltaTime, FRotator& OutViewRotation, FRotator& OutDeltaRot)
 {
 	Super::ProcessViewRotation(ViewTarget, DeltaTime, OutViewRotation, OutDeltaRot);
-	APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(ViewTarget);
-	if (PlayerChar)
+	if (const APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(ViewTarget))
 	{
 		FRotator NewCameraRotation = FRotator(OutViewRotation.Pitch, OutViewRotation.Yaw, 0.f);
 		FVector TargetCamSocketOffset = FVector(0.f, 40.f, 40.f);
@@ -31,13 +29,13 @@ bool UManaCameraModifierPlayerActions::ProcessViewRotation(AActor* ViewTarget, f
 		{
 			InterpRotationSpeed = 4.f;
 
-			bool bWallRunRight = (PlayerChar->GetWallRun()->GetWallRunSide() == EWallRunSide::Right);
+			const bool bWallRunRight = (PlayerChar->GetWallRun()->GetWallRunSide() == EWallRunSide::Right);
 
 			TargetCamSocketOffset = bWallRunRight ? FVector(0.f, -150.f, 0.f): FVector(0.f, 150.f, 0.f);
 
-			float NewRoll = bWallRunRight ? -15.f : 15.f;
-			float NewYaw = bWallRunRight ? -20.f : 20.f;
-			float NewPitch = -10.f;
+			const float NewRoll = bWallRunRight ? -15.f : 15.f;
+			const float NewYaw = bWallRunRight ? -20.f : 20.f;
+			constexpr float NewPitch = -10.f;
 
 			NewCameraRotation = PlayerChar->GetActorRotation();
 
@@ -62,13 +60,24 @@ bool UManaCameraModifierPlayerActions::ProcessViewRotation(AActor* ViewTarget, f
 			NewCameraRotation = UKismetMathLibrary::FindLookAtRotation(CameraLoc, DesiredLoc);
 		}
 
-		if (IsBlocking && !IsRunning)
+		if (IsBlocking)
 		{
-			InterpRotationSpeed = 7.f;
-
-			NewCameraRotation = PlayerChar->GetActorForwardVector().Rotation();
-
-			NewCameraRotation.Pitch -= 5.f;
+			if (const AActor* CurrentTarget = PlayerChar->GetCombatCameraTarget())
+			{
+				InterpRotationSpeed = 10.f;
+				const FVector CameraLoc = CameraOwner->GetCameraLocation();
+				const FRotator DesiredCamRot = UKismetMathLibrary::FindLookAtRotation(CameraLoc, CurrentTarget->GetActorLocation());
+				NewCameraRotation = FRotator(0.f, DesiredCamRot.Yaw, 0.f);
+			}
+			else
+			{
+				if (!IsRunning)
+				{
+					InterpRotationSpeed = 7.f;
+					NewCameraRotation = PlayerChar->GetActorForwardVector().Rotation();
+					NewCameraRotation.Pitch -= 5.f;
+				}
+			}
 		}
 
 		if (IsRoll)
@@ -93,18 +102,18 @@ bool UManaCameraModifierPlayerActions::ProcessViewRotation(AActor* ViewTarget, f
 		UManaSpringArmComponent* PlayerSpringArm = PlayerChar->GetCameraBoom();
 		PlayerSpringArm->SocketOffset = FMath::VInterpTo(PlayerSpringArm->SocketOffset, TargetCamSocketOffset, DeltaTime, InterpRotationSpeed);
 
-		FRotator CameraDelta = GetDeltaCameraRotation(DeltaTime, InterpRotationSpeed, OutViewRotation, NewCameraRotation);
+		const FRotator CameraDelta = GetDeltaCameraRotation(DeltaTime, InterpRotationSpeed, OutViewRotation, NewCameraRotation);
 		OutViewRotation += CameraDelta;
 	}
 	return false;
 }
 
-FRotator UManaCameraModifierPlayerActions::GetDeltaCameraRotation(float DeltaTime, float InterpSpeed, FRotator CurrentRotation, FRotator FinalRotation)
+FRotator UManaCameraModifierPlayerActions::GetDeltaCameraRotation(float DeltaTime, float InterpSpeed, const FRotator& CurrentRotation, const FRotator& FinalRotation)
 {
     return FMath::RInterpTo(CurrentRotation, FinalRotation, DeltaTime, InterpSpeed) - CurrentRotation;
 }
 
-FVector UManaCameraModifierPlayerActions::GetDeltaCameraLotation(float DeltaTime, float InterpSpeed, FVector CurrentLocation, FVector FinalLocation)
+FVector UManaCameraModifierPlayerActions::GetDeltaCameraLocation(const float DeltaTime, float InterpSpeed, const FVector& CurrentLocation, const FVector& FinalLocation)
 {
 	return FMath::VInterpTo(CurrentLocation, FinalLocation, DeltaTime, InterpSpeed) - CurrentLocation;
 }

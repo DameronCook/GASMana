@@ -11,7 +11,11 @@
 #include "Logging/LogMacros.h"
 #include "Character/CharacterTypes.h"
 #include "Interface/ComboInterface.h"
+<<<<<<< HEAD
 #include "Interface/HitStopInterface.h"
+=======
+#include "Interface/IFocusableInterface.h"
+>>>>>>> Enemy-AI
 #include "Item/Equipment.h"
 #include "GASManaCharacter.generated.h"
 
@@ -25,7 +29,11 @@ class UInputAction;
 struct FInputActionValue;
 
 UCLASS()
+<<<<<<< HEAD
 class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, public IComboInterface, public IHitStopInterface
+=======
+class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, public IComboInterface, public IIFocusableInterface
+>>>>>>> Enemy-AI
 {
 	GENERATED_BODY()
 	//////////////////////////////////////

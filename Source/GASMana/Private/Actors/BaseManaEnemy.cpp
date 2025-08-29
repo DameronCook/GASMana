@@ -2,8 +2,17 @@
 
 
 #include "Actors/BaseManaEnemy.h"
-#include "ManaAttributeSet.h"
+#include "Components/WidgetComponent.h"
 #include "Item/RightHandEquipment.h"
+#include "UI/CameraTarget.h"
+
+ABaseManaEnemy::ABaseManaEnemy()
+{
+	TargetedWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetedWidget"));
+	TargetedWidget->SetWidgetClass(CameraTarget);
+	TargetedWidget->SetupAttachment(RootComponent);
+	
+}
 
 void ABaseManaEnemy::BeginPlay()
 {
@@ -17,16 +26,31 @@ void ABaseManaEnemy::BeginPlay()
 			SetEquipment(RightHandEquipment);
 		}
 	}
+
+	SetTargetWidgetIcon(false);
+
 }
+
 
 void ABaseManaEnemy::ShowHealth()
 {
 	//if (GEngine)
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("HEALTH: %f"), GetAbilitySystemComponent()->GetNumericAttribute(UManaAttributeSet::GetHealthAttribute())));
-
 }
 
 bool ABaseManaEnemy::DoMeleeAttack()
 {
 	return true;
+}
+
+void ABaseManaEnemy::SetTargetWidgetIcon(const bool IsTargeted) const
+{
+	if (TargetedWidget)
+	{
+		if (UCameraTarget* CamTarget = Cast<UCameraTarget>(TargetedWidget->GetUserWidgetObject()))
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "SetTargetBrush called!");
+			if (IsTargeted) CamTarget->SetTargetBrush(TargetedTexture); else CamTarget->SetTargetBrush(NotTargetedTexture);
+		}
+	}
 }

@@ -6,6 +6,9 @@
 #include "../../GASManaCharacter.h"
 #include "BaseManaEnemy.generated.h"
 
+class UImage;
+class UCameraTarget;
+class UWidgetComponent;
 /**
  * 
  */
@@ -14,6 +17,24 @@ class GASMANA_API ABaseManaEnemy : public AGASManaCharacter
 {
 	GENERATED_BODY()
 	virtual void BeginPlay() override;
+
+	ABaseManaEnemy();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<ARightHandEquipment> RightHandEquipmentClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, meta = (AllowPrivateAccess = "true"))
+	UWidgetComponent* TargetedWidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UCameraTarget> CameraTarget;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Widget)
+	FSlateBrush TargetedTexture;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Widget)
+	FSlateBrush NotTargetedTexture;
 	
 public:
 	UFUNCTION()
@@ -22,6 +43,9 @@ public:
 	UFUNCTION()
 	static bool DoMeleeAttack();
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<ARightHandEquipment> RightHandEquipmentClass;
+	UFUNCTION()
+	void SetTargetWidgetIcon(bool IsTargeted) const;
+
+	FORCEINLINE UWidgetComponent* GetTargetedWidget() const { return TargetedWidget; }
+
 };
