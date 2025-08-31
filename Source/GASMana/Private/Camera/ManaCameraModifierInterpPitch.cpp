@@ -19,7 +19,7 @@ bool UManaCameraModifierInterpPitch::ProcessViewRotation(AActor* ViewTarget, flo
 	
 	CurrentAngle = ClampAngle(CurrentAngle);
 
-	float DesiredAngle = -10.f;
+	constexpr float DesiredAngle = -10.f;
 
 	float PitchDelta = FMath::FindDeltaAngleDegrees(CurrentAngle, DesiredAngle);
 
@@ -32,20 +32,6 @@ bool UManaCameraModifierInterpPitch::ProcessViewRotation(AActor* ViewTarget, flo
 
 	float PitchDeltaSign = FMath::Sign(PitchDelta);
 
-	/*
-	if (PreviousPitchDeltaSign != PitchDeltaSign)
-	{
-		if (DirectionChangeCooldownRemaining > 0)
-		{
-			return false;
-		}
-		else
-		{
-			PreviousPitchDeltaSign = PitchDeltaSign;
-			DirectionChangeCooldownRemaining = DirectionChangeCooldown;
-		}
-	}
-	*/
 	float AppliedPitchDelta = PitchDelta * RotationSpeed * DeltaTime;
 
 	if (FMath::Abs(PitchDelta) < FMath::Abs(AppliedPitchDelta))

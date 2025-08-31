@@ -60,23 +60,13 @@ bool UManaCameraModifierPlayerActions::ProcessViewRotation(AActor* ViewTarget, f
 			NewCameraRotation = UKismetMathLibrary::FindLookAtRotation(CameraLoc, DesiredLoc);
 		}
 
-		if (IsBlocking)
-		{
-			if (const AActor* CurrentTarget = PlayerChar->GetCombatCameraTarget())
+			
+		if (IsBlocking) {
+			if (!IsRunning)
 			{
-				InterpRotationSpeed = 10.f;
-				const FVector CameraLoc = CameraOwner->GetCameraLocation();
-				const FRotator DesiredCamRot = UKismetMathLibrary::FindLookAtRotation(CameraLoc, CurrentTarget->GetActorLocation());
-				NewCameraRotation = FRotator(0.f, DesiredCamRot.Yaw, 0.f);
-			}
-			else
-			{
-				if (!IsRunning)
-				{
-					InterpRotationSpeed = 7.f;
-					NewCameraRotation = PlayerChar->GetActorForwardVector().Rotation();
-					NewCameraRotation.Pitch -= 5.f;
-				}
+				InterpRotationSpeed = 7.f;
+				NewCameraRotation = PlayerChar->GetActorForwardVector().Rotation();
+				NewCameraRotation.Pitch -= 5.f;
 			}
 		}
 
@@ -97,6 +87,18 @@ bool UManaCameraModifierPlayerActions::ProcessViewRotation(AActor* ViewTarget, f
 
 			TargetCamSocketOffset = FVector(0.f, 150.f, 0.f);
 
+		}
+
+		
+		if (IsFocused)
+		{
+			if (const AActor* CurrentTarget = PlayerChar->GetCombatCameraTarget())
+			{
+				InterpRotationSpeed = 8.f;
+				const FVector CameraLoc = CameraOwner->GetCameraLocation();
+				const FRotator DesiredCamRot = UKismetMathLibrary::FindLookAtRotation(CameraLoc, CurrentTarget->GetActorLocation());
+				NewCameraRotation = FRotator(0.f, DesiredCamRot.Yaw, 0.f);
+			}
 		}
 
 		UManaSpringArmComponent* PlayerSpringArm = PlayerChar->GetCameraBoom();
