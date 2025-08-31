@@ -16,14 +16,14 @@ bool UManaCameraModifier::ProcessViewRotation(AActor* ViewTarget, float DeltaTim
 		return false;
 	}
 
-	APawn* Pawn = Cast<APawn>(ViewTarget);
+	const APawn* Pawn = Cast<APawn>(ViewTarget);
 
 	if (!IsValid(Pawn))
 	{
 		return false;
 	}
 
-	APlayerController* PlayerController = Cast<APlayerController>(Pawn->Controller);
+	const APlayerController* PlayerController = Cast<APlayerController>(Pawn->Controller);
 
 	if (!IsValid(PlayerController))
 	{
@@ -43,10 +43,9 @@ bool UManaCameraModifier::ProcessViewRotation(AActor* ViewTarget, float DeltaTim
 	}
 
     //Finally check if the view target is the player and set the following variables so that all of the modifiers can access them
-    APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(ViewTarget);
-    if (PlayerChar)
+    if (const APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(ViewTarget))
     {
-        if (UAbilitySystemComponent* AbilitySystem = PlayerChar->GetAbilitySystemComponent())
+        if (const UAbilitySystemComponent* AbilitySystem = PlayerChar->GetAbilitySystemComponent())
         {
             //We need to check for: Rolling, Blocking, Zip To Pointing, Swinging(?), WallRunning
             WallRunning = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
@@ -56,6 +55,7 @@ bool UManaCameraModifier::ProcessViewRotation(AActor* ViewTarget, float DeltaTim
             IsSwing = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwinging")));
             IsRoll = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling")));
             IsAirAttack = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirAttacking")));
+            IsFocused = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsFocused")));
         }
     }
 
@@ -67,10 +67,9 @@ bool UManaCameraModifier::ModifyCamera(float DeltaTime, FMinimalViewInfo& InOutP
     Super::ModifyCamera(DeltaTime, InOutPOV);
 
     //Finally check if the view target is the player and set the following variables so that all of the modifiers can access them
-    APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(CameraOwner->GetViewTarget());
-    if (PlayerChar)
+    if (const APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(CameraOwner->GetViewTarget()))
     {
-        if (UAbilitySystemComponent* AbilitySystem = PlayerChar->GetAbilitySystemComponent())
+        if (const UAbilitySystemComponent* AbilitySystem = PlayerChar->GetAbilitySystemComponent())
         {
             //We need to check for: Rolling, Blocking, Zip To Pointing, Swinging(?), WallRunning
             WallRunning = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
@@ -85,12 +84,12 @@ bool UManaCameraModifier::ModifyCamera(float DeltaTime, FMinimalViewInfo& InOutP
     return false;
 }
 
-FManaCameraInfo UManaCameraModifier::GetCurrentModifiers()
+FManaCameraInfo UManaCameraModifier::GetCurrentModifiers() const
 {
 	return CurrentModifiers;
 }
 
-FManaCameraInfo UManaCameraModifier::GetTargetModifiers()
+FManaCameraInfo UManaCameraModifier::GetTargetModifiers() const
 {
 	return TargetModifiers;
 }
@@ -182,7 +181,7 @@ bool UManaCameraModifier::PlayerHasRecentlyChangedCamera() const
 
 void UManaCameraModifier::ApplyCameraInfo(const FManaCameraInfo& CamInfo, const float Factor, FMinimalViewInfo& MinimalViewInfo) const
 {
-    AActor* ViewTarget = GetViewTarget();
+    const AActor* ViewTarget = GetViewTarget();
 
     if (!IsValid(ViewTarget))
     {
@@ -193,17 +192,15 @@ void UManaCameraModifier::ApplyCameraInfo(const FManaCameraInfo& CamInfo, const 
     ViewTarget->GetRootComponent()->GetChildrenComponents(true, children);
 
     // Apply FOV.
-    float appliedFOV = CamInfo.FOV * Factor;
-    MinimalViewInfo.FOV = MinimalViewInfo.FOV + appliedFOV;
+    const float AppliedFOV = CamInfo.FOV * Factor;
+    MinimalViewInfo.FOV = MinimalViewInfo.FOV + AppliedFOV;
 
     // Apply spring arm length.
-    for (int index = 0; index < children.Num(); ++index)
+    for (int Index = 0; Index < children.Num(); ++Index)
     {
-        UManaSpringArmComponent* springArmComponent = Cast<UManaSpringArmComponent>(children[index]);
-
-        if (IsValid(springArmComponent))
+        if (UManaSpringArmComponent* SpringArmComponent = Cast<UManaSpringArmComponent>(children[Index]); IsValid(SpringArmComponent))
         {
-            springArmComponent->TargetArmLengthModifier += CamInfo.SpringArmLength * Factor;
+            SpringArmComponent->TargetArmLengthModifier += CamInfo.SpringArmLength * Factor;
             break;
         }
     }

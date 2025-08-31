@@ -17,7 +17,7 @@ class GASMANA_API UManaCameraModifierInterpPitch : public UManaCameraModifier
 public:
 	virtual bool ProcessViewRotation(class AActor* ViewTarget, float DeltaTime, FRotator& OutViewRotation, FRotator& OutDeltaRot) override;
 
-	float ClampAngle(float CurrentAngle);
+	static float ClampAngle(float CurrentAngle);
 
 	/*Rate at which the camera should rotate back to zero, in degrees per second*/
 	UPROPERTY(EditDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))

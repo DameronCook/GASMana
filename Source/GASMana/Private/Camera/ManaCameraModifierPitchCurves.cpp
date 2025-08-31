@@ -5,6 +5,7 @@
 
 #include "PlayerManaCharacter.h"
 #include "Camera/ManaPlayerCamManager.h"
+#include "Kismet/KismetMathLibrary.h"
 
 UManaCameraModifierPitchCurves::UManaCameraModifierPitchCurves() : PitchToDistanceCurve(nullptr),
                                                                    PitchToFOVCurve(nullptr), PlayerChar(nullptr),
@@ -33,7 +34,7 @@ bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewI
 	float AddFOV = IsValid(PitchToFOVCurve) ? PitchToFOVCurve->GetFloatValue(CamRotation.Pitch) : 0.f;
 
 	float InterpSpeed = 5.f;
-
+	
 	if (WallRunning)
 	{
 		TargetPitchToDist = 50.f;
@@ -55,20 +56,8 @@ bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewI
 
 	if (IsBlocking)
 	{
-		if (PlayerChar)
-		{
-			if (PlayerChar->GetCombatCameraTarget())
-			{
-				
-				TargetPitchToDist = 150.f;
-				InterpSpeed = 15.f;
-			}
-			else
-			{
-				TargetPitchToDist = 250.f;
-				InterpSpeed = 5.f;
-			}
-		}
+		TargetPitchToDist = 250.f;
+		InterpSpeed = 5.f;
 	}
 
 	if (IsAirAttack)
@@ -78,9 +67,23 @@ bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewI
 		AddFOV = 10.f;
 	}
 
+	if (IsFocused)
+	{
+		if (PlayerChar)
+		{
+			if (const AActor* Target = PlayerChar->GetCombatCameraTarget())
+			{
+				TargetPitchToDist = 150.f;
+				GEngine->AddOnScreenDebugMessage(8, 5.f, FColor::Purple, FString::Printf(TEXT("Dist: %f"), PlayerChar->GetDistanceTo(Target)));
+				InterpSpeed = 7.f;
+			}
+		}
+	}
+
 	CurrentPitchToDist = FMath::FInterpTo(CurrentPitchToDist, TargetPitchToDist, DeltaTime, InterpSpeed);
 	CurrentAddFOV = FMath::FInterpTo(CurrentAddFOV, AddFOV, DeltaTime, InterpSpeed);
 
+	GEngine->AddOnScreenDebugMessage(7, 5.f, FColor::Purple, FString::Printf(TEXT("Pitch to dist: %f"), CurrentPitchToDist));
 	FVector DesiredLocation = CamLocation - CamRotation.RotateVector(FVector::ForwardVector) * CurrentPitchToDist;
 
 	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(SpringArm), false, GetViewTarget());

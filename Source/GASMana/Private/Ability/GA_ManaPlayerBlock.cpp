@@ -5,8 +5,6 @@
 #include "PlayerManaCharacter.h"
 #include "ManaPlayerAnimInstance.h"
 #include "Actors/BaseManaEnemy.h"
-#include "Camera/CameraComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 
 UGA_ManaPlayerBlock::UGA_ManaPlayerBlock()
 {
@@ -25,71 +23,6 @@ UGA_ManaPlayerBlock::UGA_ManaPlayerBlock()
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsEquipping")));
 }
 
-
-TArray<class AActor*> UGA_ManaPlayerBlock::FindAllActorsInRange(const APlayerManaCharacter* PlayerCharacter,
-                                                                const float Radius) const
-{
-	const UObject* WorldContextObject = GetWorld();
-
-	const FVector SpherePos = PlayerCharacter->GetActorLocation();
-	
-	// Set what actors to seek out from its collision channel
-	TArray<TEnumAsByte<EObjectTypeQuery>> TraceObjectTypes;
-	TraceObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
-
-	const TSubclassOf<AActor> SeekClass;
-
-	const TArray<AActor*> ActorsToIgnore;
-
-	TArray<AActor*> OutActors;
-	
-	UKismetSystemLibrary::SphereOverlapActors(WorldContextObject, SpherePos, Radius, TraceObjectTypes, SeekClass, ActorsToIgnore, OutActors);
-
-	return OutActors;
-}
-
-bool UGA_ManaPlayerBlock::DrawLineToTarget(const ACharacter* Character, const AActor* OverlappedActor) const
-{
-	FHitResult OutHitLine;
-
-	if (!OverlappedActor)
-	{
-		return false;
-	}
-	// Line parameters
-	const FVector LineStartLocation = Character->GetActorLocation();
-	const FVector LineEndLocation = OverlappedActor->GetActorLocation() + FVector(0.f, 0.f, 25.f);
-
-	//Trace Parameters
-	//bool bLineTraceComplex = false;
-	FCollisionQueryParams LineQueryParams;
-	LineQueryParams.AddIgnoredActor(Character);
-	constexpr ECollisionChannel CollisionChannel = ECollisionChannel::ECC_Pawn;
-	GetWorld()->LineTraceSingleByChannel(OutHitLine, LineStartLocation, LineEndLocation, CollisionChannel, LineQueryParams);
-
-	//DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
-
-	return OutHitLine.GetActor() == OverlappedActor;
-}
-
-float UGA_ManaPlayerBlock::CalculateAngleToTarget(ACharacter* Character, const AActor* OverlappedActor)
-{
-	if (const APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(Character))
-	{
-		if (const UCameraComponent* Camera = PlayerCharacter->GetFollowCamera())
-		{
-			const FVector CameraForward = Camera->GetForwardVector();
-
-			FVector DirectionToTarget = OverlappedActor->GetActorLocation() - Character->GetActorLocation();
-			DirectionToTarget.Normalize();
-
-			const float Angle = acosf(FVector::DotProduct(DirectionToTarget, CameraForward));
-			return Angle;
-		}
-	}
-	return BIG_NUMBER;
-}
-
 void UGA_ManaPlayerBlock::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo
                                           ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
@@ -101,8 +34,7 @@ void UGA_ManaPlayerBlock::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 	}
 
 	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
-	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
-	if (PlayerCharacter && PlayerCharacter->GetBlockingEffectClass() && AbilitySystemComponent)
+	if (UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get(); PlayerCharacter && PlayerCharacter->GetBlockingEffectClass() && AbilitySystemComponent)
 	{	
 		AbilitySystemComponent->ApplyGameplayEffectToSelf(
 			PlayerCharacter->GetBlockingEffectClass()->GetDefaultObject<UGameplayEffect>(),
@@ -123,36 +55,6 @@ void UGA_ManaPlayerBlock::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 		
 		//Update Stamina Regen
 		PlayerCharacter->UpdateStaminaRegen();
-		float BestAngle = BIG_NUMBER;
-		AActor* BestActor = nullptr;
-		for (TArray<AActor*> OutActors = FindAllActorsInRange(PlayerCharacter, 5000.f); AActor* Actor : OutActors)
-		{
-			if (Actor != PlayerCharacter)
-			{
-				//GEngine->AddOnScreenDebugMessage(2, 5.f, FColor::Orange, FString::Printf(TEXT("Actor's found: %d"), i));
-				if (Cast<IIFocusableInterface>(Actor))
-				{
-					if (DrawLineToTarget(PlayerCharacter, Actor))
-					{
-						const float CurrentAngle = CalculateAngleToTarget(PlayerCharacter, Actor);
-						//GEngine->AddOnScreenDebugMessage(4, 5.f, FColor::Orange, FString::Printf(TEXT("Current Angle to target: %f"), CurrentAngle));
-						if (CurrentAngle < BestAngle)
-						{
-							BestAngle = CurrentAngle;
-							BestActor = Actor;
-						}
-					}
-				}
-			}
-		}
-		if (BestActor)
-		{
-			PlayerCharacter->SetCombatCameraTarget(BestActor);
-			if (const ABaseManaEnemy* BaseEnemy = Cast<ABaseManaEnemy>(BestActor)) BaseEnemy->SetTargetWidgetIcon(true);
-			const FGameplayTag FocusTag = FGameplayTag::RequestGameplayTag("Player.IsFocused");
-			AbilitySystemComponent->AddLooseGameplayTag(FocusTag);
-			//GEngine->AddOnScreenDebugMessage(5, 5.f, FColor::Orange, FString::Printf(TEXT("Best Actor found: %s"), *BestActor->GetName()));
-		}
 	}
 	
 	EndAbility(Handle, ActorInfo, ActivationInfo, true, true);

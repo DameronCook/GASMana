@@ -19,6 +19,7 @@
 #include "PlayerManaCharacter.generated.h"
 
 
+class UGA_ManaPlayerFocus;
 class UManaSpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -149,6 +150,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Hook Tag Container */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer HookTagContainer;
+	
+	/** Focus Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer FocusTagContainer;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Effect Classes
@@ -217,9 +222,13 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Hook", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> SwingJumpClass;
 
-	/** Swing Jump Effect Class */
+	/** Hook Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Hook", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> HookClass;
+	
+	/** Focus Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> FocusClass;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Montages
@@ -295,29 +304,33 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	//////////////////////////////////////////
 	//Active Abilities
 
-	/**Active wall run ability*/
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	/**Active Wall run ability*/
+	UPROPERTY()
 	UGA_ManaPlayerWallRun* ActiveWallRunAbility = nullptr;
 
 	/**Active mantle ability*/
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	UGA_ManaPlayerMantle* ActiveMantleAbility = nullptr;
 
 	/**Active mantle ability*/
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	UGA_ManaPlayerHook* ActiveHookAbility = nullptr;
 
 	/**Active mantle ability*/
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	UGA_ManaPlayerZipToPoint* ActiveZipAbility = nullptr;
 
 	/**Active mantle ability*/
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	UGA_ManaPlayerSwing* ActiveSwingAbility = nullptr;
 
 	/**Active Air Attack ability*/
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	UGA_ManaPlayerAirAttack* ActiveAirAttackAbility = nullptr;
+	
+	/**Active Focus ability*/
+	UPROPERTY()
+	UGA_ManaPlayerFocus* ActiveFocusAbility = nullptr;
 
 	/////////////////////////////////////////////////////////////////////////
 	//Other
@@ -394,7 +407,6 @@ public:
 	APlayerManaCharacter();
 
 	virtual void Blocking() override;
-	void RemoveCameraFocus();
 
 	virtual void HandleMelee() override;
 
@@ -460,6 +472,7 @@ public:
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetSwingJumpEffectClass() const { return SwingJumpClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetHookEffectClass() const { return HookClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetMantleEffectClass() const { return MantleClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetFocusEffectClass() const { return FocusClass; }
 
 	//Ability Classes and Tags
 	FORCEINLINE FGameplayTagContainer GetZipToPointTag() const { return ZipToPointTagContainer; }
@@ -491,6 +504,10 @@ public:
 	FORCEINLINE UGA_ManaPlayerZipToPoint* GetZipAbility() const { return ActiveZipAbility; }
 	FORCEINLINE UGA_ManaPlayerSwing* GetSwingAbility() const { return ActiveSwingAbility; }
 	FORCEINLINE UGA_ManaPlayerAirAttack* GetAirAttackAbility() const { return ActiveAirAttackAbility; }
+	FORCEINLINE UGA_ManaPlayerFocus* GetFocusAbility() const { return ActiveFocusAbility; }
+
+	//Swinging stuff
+	//Move to another component?
 	FORCEINLINE float GetSwingSpeedBalancer() const { return SwingSpeedBalancer; }
 	FORCEINLINE float GetOriginalGravityScale() const { return OriginalGravityScale; }
 
@@ -506,5 +523,6 @@ public:
 	FORCEINLINE UGA_ManaPlayerZipToPoint* SetZipToPointAbility(UGA_ManaPlayerZipToPoint* ZipAbility) { return ActiveZipAbility = ZipAbility; }
 	FORCEINLINE UGA_ManaPlayerSwing* SetSwingAbility(UGA_ManaPlayerSwing* SwingAbility) { return ActiveSwingAbility = SwingAbility; }
 	FORCEINLINE UGA_ManaPlayerAirAttack* SetAirAttackAbility(UGA_ManaPlayerAirAttack* AirAttack) { return ActiveAirAttackAbility = AirAttack; }
+	FORCEINLINE UGA_ManaPlayerFocus* SetFocusAbility(UGA_ManaPlayerFocus* FocusAbility) { return ActiveFocusAbility = FocusAbility; }
 	FORCEINLINE AActor* SetCombatCameraTarget(AActor* Target) { return CombatCameraTarget = Target; }
 };

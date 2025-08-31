@@ -24,10 +24,10 @@ public:
 
 
 	/* Gets the current camera modifiers that are being applied */
-	FManaCameraInfo GetCurrentModifiers();
+	FManaCameraInfo GetCurrentModifiers() const;
 
 	/* Get the current camera modifiers that we are transitioning into */
-	FManaCameraInfo GetTargetModifiers();
+	FManaCameraInfo GetTargetModifiers() const;
 
 	/* Time to wait to apply changes automatically after the player has stopped inputing it */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
@@ -47,6 +47,7 @@ protected:
 	bool IsSwing;
 	bool IsRoll;
 	bool IsAirAttack;
+	bool IsFocused;
 
 private: 
 	void ApplyCameraInfo(const FManaCameraInfo& CamInfo, const float Factor, struct FMinimalViewInfo& MinimalViewInfo) const;

@@ -9,6 +9,7 @@
 #include "ManaPlayerAnimInstance.h"
 #include "Ability/GA_ManaPlayerAirAttack.h"
 #include "Ability/GA_ManaPlayerAttack.h"
+#include "Ability/GA_ManaPlayerFocus.h"
 #include "Actors/BaseManaEnemy.h"
 #include "Actors/ManaHookParent.h"
 #include "Blueprint/UserWidget.h"
@@ -208,19 +209,17 @@ FVector APlayerManaCharacter::GamepadForwardSwingForce(const float MovementInput
 	float VelocitySize = GetVelocity().Size();
 	VelocitySize = UKismetMathLibrary::FClamp(VelocitySize, 0.f, 1000.f);
 
-	float ReduceSwingForceVelocity = 50.f / SwingSpeedBalancer;
+	const float ReduceSwingForceVelocity = 50.f / SwingSpeedBalancer;
 
-	float FinalVelocity = VelocitySize * ReduceSwingForceVelocity;
+	const float FinalVelocity = VelocitySize * ReduceSwingForceVelocity;
 
-	float Input = MovementInput * FinalVelocity;
+	const float Input = MovementInput * FinalVelocity;
 
-	FVector FinalPlayerForwardVector;
+	const FVector PlayerForwardVector = GetActorForwardVector();
 
-	FVector PlayerForwardVector = GetActorForwardVector();
+	const FVector FinalPlayerForwardVector = FVector(PlayerForwardVector.X, PlayerForwardVector.Y, 0.f).GetSafeNormal();
 
-	FinalPlayerForwardVector = FVector(PlayerForwardVector.X, PlayerForwardVector.Y, 0.f).GetSafeNormal();
-
-	FVector FinalForce = UKismetMathLibrary::Multiply_VectorFloat(FinalPlayerForwardVector, Input);
+	const FVector FinalForce = UKismetMathLibrary::Multiply_VectorFloat(FinalPlayerForwardVector, Input);
 
 	return FinalForce;
 }
@@ -244,17 +243,6 @@ void APlayerManaCharacter::Blocking()
 	}
 }
 
-void APlayerManaCharacter::RemoveCameraFocus()
-{
-	if (CombatCameraTarget)
-	{
-		if (const ABaseManaEnemy* CombatTarget = Cast<ABaseManaEnemy>(CombatCameraTarget))
-		{
-			CombatTarget->SetTargetWidgetIcon(false);
-		}
-		SetCombatCameraTarget(nullptr);
-	}
-}
 
 void APlayerManaCharacter::FinishedBlocking()
 {
@@ -265,8 +253,6 @@ void APlayerManaCharacter::FinishedBlocking()
 		AnimInstance->SetIsBlocking(false);
 		AnimInstance->Montage_Stop(.2f, CurrentBlockingMontage);
 	}
-
-	RemoveCameraFocus();
 }
 
 void APlayerManaCharacter::HandleMelee()
@@ -283,19 +269,14 @@ void APlayerManaCharacter::HandleMelee()
 	UClass* Enemy = BaseEnemy;
 	TArray<AActor*> IgnoreActors;
 	IgnoreActors.Add(this);
-	TArray<AActor*> OutActors;
 
-	bool bHit = UKismetSystemLibrary::SphereOverlapActors(GetWorld(), Position, 40, ObjectTypes, Enemy, IgnoreActors, OutActors);
-
-	if (bHit)
+	if (TArray<AActor*> OutActors; UKismetSystemLibrary::SphereOverlapActors(GetWorld(), Position, 40, ObjectTypes, Enemy, IgnoreActors, OutActors))
 	{
 		for (AActor* HitActor : OutActors)
 		{
-			ABaseManaEnemy* HitManaCharacter = Cast<ABaseManaEnemy>(HitActor);
-			if (HitManaCharacter)
+			if (ABaseManaEnemy* HitManaCharacter = Cast<ABaseManaEnemy>(HitActor))
 			{
-				UAbilitySystemComponent* TargetAbilitySystemComponent = HitManaCharacter->GetAbilitySystemComponent();
-				if (TargetAbilitySystemComponent)
+				if (HitManaCharacter->GetAbilitySystemComponent())
 				{
 					FGameplayTag EventTag = FGameplayTag::RequestGameplayTag(FName("Character.Damaged"));
 					FGameplayEventData EventData;
@@ -455,7 +436,7 @@ void APlayerManaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		// Rolling
 		EnhancedInputComponent->BindAction(RollAction, ETriggerEvent::Started, this, &APlayerManaCharacter::Roll);
 
-		// Blocking
+		// Blocking/Focusing
 		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Triggered, this, &APlayerManaCharacter::Block);
 		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Ongoing, this, &APlayerManaCharacter::Block);
 		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Completed, this, &APlayerManaCharacter::StopBlock);
@@ -665,6 +646,8 @@ void APlayerManaCharacter::Block(const FInputActionValue& Value)
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Left Hand Equipment found!");
 		GetAbilitySystemComponent()->TryActivateAbilitiesByTag(BlockTagContainer, true);
 	}
+
+	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(FocusTagContainer, true);
 }
 
 void APlayerManaCharacter::StopBlock(const FInputActionValue& Value)
@@ -676,7 +659,9 @@ void APlayerManaCharacter::StopBlock(const FInputActionValue& Value)
 	FGameplayTagContainer Tag;
 	Tag.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsBlocking")));
 	GetAbilitySystemComponent()->RemoveActiveEffectsWithGrantedTags(Tag);
-
+	
+	if (ActiveFocusAbility) ActiveFocusAbility->EndFocusAbility();
+	
 	UpdateStaminaRegen();
 }
 
