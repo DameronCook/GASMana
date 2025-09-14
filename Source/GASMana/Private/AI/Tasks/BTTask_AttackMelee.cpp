@@ -8,18 +8,14 @@
 
 EBTNodeResult::Type UBTTask_AttackMelee::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	Super::ExecuteTask(OwnerComp, NodeMemory);
-	EBTNodeResult::Type FinishTask = EBTNodeResult::InProgress;
-
 	OwnerActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("SelfActor"));
-
 	
 	if (AGASManaCharacter* Char = Cast<AGASManaCharacter>(OwnerActor))
 	{
 		if (Char->Attack())
 		{
-			FinishTask = EBTNodeResult::Succeeded;	
+			return EBTNodeResult::Succeeded;	
 		}
 	}
-	return FinishTask;
+	return Super::ExecuteTask(OwnerComp, NodeMemory);
 }

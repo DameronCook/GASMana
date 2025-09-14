@@ -60,16 +60,6 @@ bool UManaCameraModifierPlayerActions::ProcessViewRotation(AActor* ViewTarget, f
 			NewCameraRotation = UKismetMathLibrary::FindLookAtRotation(CameraLoc, DesiredLoc);
 		}
 
-			
-		if (IsBlocking) {
-			if (!IsRunning)
-			{
-				InterpRotationSpeed = 7.f;
-				NewCameraRotation = PlayerChar->GetActorForwardVector().Rotation();
-				NewCameraRotation.Pitch -= 5.f;
-			}
-		}
-
 		if (IsRoll)
 		{
 			InterpRotationSpeed = 7.f;

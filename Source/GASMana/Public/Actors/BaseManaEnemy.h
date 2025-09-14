@@ -48,4 +48,8 @@ public:
 
 	FORCEINLINE UWidgetComponent* GetTargetedWidget() const { return TargetedWidget; }
 
+	/**Called by tree to grab nearby weapon */
+	UFUNCTION(Category = "Combat")
+	AEquipment* EnemyEquip();
+
 };

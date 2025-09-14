@@ -12,6 +12,7 @@
 #include "Interface/ComboInterface.h"
 #include "Interface/HitStopInterface.h"
 #include "Interface/IFocusableInterface.h"
+#include "Interface/PlayerCharacterInterface.h"
 #include "Item/Equipment.h"
 #include "GASManaCharacter.generated.h"
 
@@ -25,7 +26,7 @@ class UInputAction;
 struct FInputActionValue;
 
 UCLASS()
-class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, public IComboInterface, public IHitStopInterface, public IIFocusableInterface
+class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, public IComboInterface, public IHitStopInterface, public IIFocusableInterface, public IPlayerCharacterInterface
 {
 	GENERATED_BODY()
 	//////////////////////////////////////
@@ -91,22 +92,36 @@ protected:
 
 	void RemoveAnyEquipClass() const;
 
+	virtual bool GotMovementInput() const;
+	virtual void SetOverlappingItem(class AItem* Item) override;
+
 	/////////////////////////////////////////////////////////////////////////
 	///Combat
-	UFUNCTION(BlueprintCallable, Category = "Blocking")
+	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void Blocking();
 
-	UFUNCTION(BlueprintCallable, Category = "Blocking")
+	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void FinishedBlocking();
 
 	/** Runs on begin overlap */
-	UFUNCTION(BlueprintCallable, Category = "Overlap")
+	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	virtual FGameplayTagContainer GetAttackType() const;
 
 	/** Sets the attack montage for the attack to play */
 	virtual void GetMontageToPlay();
+
+	UPROPERTY()
+	AItem* OverlappingItem = nullptr;
+
+	UFUNCTION(Category = "Combat")
+	virtual void GrabOverlappingItem();
+
+	/** Pick Up Montage To Play */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* PickUpMontage;
+
 
 	/** Attack Tag Container */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
@@ -141,7 +156,7 @@ public:
 	static bool IsAlive();
 
 	/**Called for attack by controller or by input */
-	UFUNCTION(BlueprintCallable, Category = "Attack")
+	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual bool Attack();
 
 	////////////////////////////////////////////////////////////////////
@@ -203,6 +218,8 @@ public:
 	FORCEINLINE FName GetComboAttackName() const { return ComboAttackName; }
 	FORCEINLINE UAnimMontage* GetCurrentAttackMontage() const { return CurrentAttackMontage; }
 	FORCEINLINE FName GetNextAttackMontageSection() const { return NextAttackMontageSection; }
+	FORCEINLINE UAnimMontage* GetPickUpMontage() const { return PickUpMontage; }
+
 
 	
 	FORCEINLINE UAnimMontage* SetEquipMontageRight(UAnimMontage* Montage) { return EquipMontageRight = Montage; }
