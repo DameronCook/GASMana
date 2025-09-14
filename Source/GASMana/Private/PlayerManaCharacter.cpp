@@ -344,17 +344,6 @@ void APlayerManaCharacter::SetNextComboSegment(const FName NextCombo)
 	}
 }
 
-void APlayerManaCharacter::SetOverlappingItem(class AItem* Item)
-{
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "OverlappingItem");
-
-	OverlappingItem = Item;
-	if (OverlappingItem)
-	{
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Overlapping Item: %s"), *OverlappingItem->GetName()));
-	}
-}
-
 
 //////////////////// -- Camera Stuff -- \\\\\\\\\\\\\\\\\\\\\\\
 
@@ -681,33 +670,6 @@ void APlayerManaCharacter::Hook(const FInputActionValue& Value)
 	}
 }
 
-void APlayerManaCharacter::GrabOverlappingItem()
-{
-	if (OverlappingItem)
-	{
-		if (AEquipment* Equipment = Cast<AEquipment>(OverlappingItem))
-		{
-			ALeftHandEquipment* LEquipment;
-			ARightHandEquipment* REquipment;
-			switch (Equipment->GetItemType())
-			{
-			case EItemType::EIT_RightHandedEquipment:
-				REquipment = Cast<ARightHandEquipment>(Equipment);
-				if (REquipment) RightHandEquipment = REquipment;
-				break;
-			case EItemType::EIT_LeftHandedEquipment:
-				LEquipment = Cast<ALeftHandEquipment>(Equipment);
-				LeftHandEquipment = LEquipment;
-				break;
-			default:
-				break;
-			}
-			SetEquipment(Equipment);
-			OverlappingItem = nullptr;
-			PlayAnimMontage(GetPickUpMontage());
-		}
-	}
-}
 
 void APlayerManaCharacter::Equip(const FInputActionValue& Value)
 {

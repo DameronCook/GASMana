@@ -54,12 +54,6 @@ bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewI
 		AddFOV = 10.f;
 	}
 
-	if (IsBlocking)
-	{
-		TargetPitchToDist = 250.f;
-		InterpSpeed = 5.f;
-	}
-
 	if (IsAirAttack)
 	{
 		TargetPitchToDist = 100.f;
@@ -74,7 +68,7 @@ bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewI
 			if (const AActor* Target = PlayerChar->GetCombatCameraTarget())
 			{
 				TargetPitchToDist = 150.f;
-				GEngine->AddOnScreenDebugMessage(8, 5.f, FColor::Purple, FString::Printf(TEXT("Dist: %f"), PlayerChar->GetDistanceTo(Target)));
+				//GEngine->AddOnScreenDebugMessage(8, 5.f, FColor::Purple, FString::Printf(TEXT("Dist: %f"), PlayerChar->GetDistanceTo(Target)));
 				InterpSpeed = 7.f;
 			}
 		}

@@ -10,26 +10,29 @@ void UBTService_FindNearestTarget::TickNode(UBehaviorTreeComponent& OwnerComp, u
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
+	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
+	if (!BlackboardComponent) return;
 
+	
 	FName TagToSearch = "Player";
 	if (const AActor* OwnerActor = OwnerComp.GetOwner())
 	{
-		AActor* NearestTarget = nullptr;
-		float ClosestDistance = BIG_NUMBER;
 
-		
-		if (OwnerActor->ActorHasTag("Player"))
+
+		if (!BlackboardComponent->GetValueAsObject("RightHandEquipment"))
 		{
-			TagToSearch = TEXT("Enemy");
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Not Getting Value");
+			TagToSearch = "Equipment";
 		}
-
 		TArray<AActor*> OutActors;
 		UGameplayStatics::GetAllActorsWithTag(GetWorld(), TagToSearch, OutActors);
 
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Number of Players found: %d"), OutActors.Num()));
+		AActor* NearestTarget = nullptr;
+		float ClosestDistance = BIG_NUMBER;
 		for (AActor* Actor : OutActors)
 		{
-			if (float TempDist = OwnerActor->GetDistanceTo(Actor); TempDist < ClosestDistance)
+			if (const float TempDist = OwnerActor->GetDistanceTo(Actor); TempDist < ClosestDistance)
 			{
 				ClosestDistance = TempDist;
 				NearestTarget = Actor;
@@ -37,13 +40,10 @@ void UBTService_FindNearestTarget::TickNode(UBehaviorTreeComponent& OwnerComp, u
 		}
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Nearest Player's Name: %s"), *NearestTarget->GetName()));
 
-		if (UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent(); BlackboardComponent &&
-			NearestTarget)
+		if (NearestTarget)
 		{
 			BlackboardComponent->SetValueAsObject("TargetToFollow", NearestTarget);
 			BlackboardComponent->SetValueAsFloat("DistToTarget", ClosestDistance);
 		}
-		//UBTFunctionLibrary::SetBlackboardValueAsObject(this, TargetToFollow, NearestTarget);
-		//UBTFunctionLibrary::SetBlackboardValueAsFloat(this, DistToTarget, ClosestDistance);
 	}
 }

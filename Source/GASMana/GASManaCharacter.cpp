@@ -94,6 +94,46 @@ void AGASManaCharacter::RemoveAnyEquipClass() const
 
 }
 
+bool AGASManaCharacter::GotMovementInput() const
+{
+	return false;
+}
+
+
+void AGASManaCharacter::SetOverlappingItem(class AItem* Item)
+{
+	OverlappingItem = Item;
+}
+
+void AGASManaCharacter::GrabOverlappingItem()
+{
+	if (OverlappingItem)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Getting an overlapping item");
+		if (AEquipment* Equipment = Cast<AEquipment>(OverlappingItem))
+		{
+			ALeftHandEquipment* LEquipment;
+			ARightHandEquipment* REquipment;
+			switch (Equipment->GetItemType())
+			{
+			case EItemType::EIT_RightHandedEquipment:
+				REquipment = Cast<ARightHandEquipment>(Equipment);
+				if (REquipment) RightHandEquipment = REquipment;
+				break;
+			case EItemType::EIT_LeftHandedEquipment:
+				LEquipment = Cast<ALeftHandEquipment>(Equipment);
+				LeftHandEquipment = LEquipment;
+				break;
+			default:
+				break;
+			}
+			SetEquipment(Equipment);
+			OverlappingItem = nullptr;
+			PlayAnimMontage(GetPickUpMontage());
+		}
+	}
+}
+
 void AGASManaCharacter::Blocking()
 {
 	//Empty for now. Whenever other actors inherit from this, they can override this function
@@ -128,10 +168,11 @@ bool AGASManaCharacter::Attack()
 	return true;
 }
 
+
+
 FGameplayTagContainer AGASManaCharacter::GetAttackType() const
 {
-	FGameplayTagContainer FAttackType;
-	return FAttackType = AttackTagContainer;
+	return AttackTagContainer;
 }
 
 void AGASManaCharacter::GetMontageToPlay()

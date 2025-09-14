@@ -30,7 +30,7 @@ struct FInputActionValue;
 struct FGameplayTagContainer;
 
 UCLASS()
-class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_ProgressBarInterface, public ICameraActorInterface, public IPlayerCharacterInterface , public ITargetingActorInterface
+class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_ProgressBarInterface, public ICameraActorInterface , public ITargetingActorInterface
 {
 	GENERATED_BODY()
 
@@ -249,10 +249,6 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AirAttackMontage;
 
-	/** Pick Up Montage To Play */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* PickUpMontage;
-
 	/** Shield Block Montage To Play */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* ShieldBlockMontage;
@@ -348,9 +344,6 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY()
 	AActor* CombatCameraTarget = nullptr;
 
-	UPROPERTY(VisibleDefaultsOnly)
-	AItem* OverlappingItem = nullptr;
-
 	UPROPERTY()
 	AActor* OverlappingItemActor = nullptr;
 
@@ -398,7 +391,6 @@ protected:
 
 	/**Called for hook input */
 	void Hook(const FInputActionValue& Value);
-	void GrabOverlappingItem();
 
 	/**Called for Equip input */
 	void Equip(const FInputActionValue& Value);
@@ -425,9 +417,7 @@ public:
 	//Attack Interface
 	virtual void SetDefaultCombos() override;
 	virtual void SetNextComboSegment(FName NextCombo) override;
-
-	virtual void SetOverlappingItem(class AItem* Item) override;
-
+	
 	//////////////////////////////////////
 	//Camera Functions
 
@@ -485,7 +475,6 @@ public:
 	FORCEINLINE UAnimMontage* GetAirAttackMontage() const { return AirAttackMontage; }
 	FORCEINLINE UAnimMontage* GetZipToPointMontage() const { return ZipToPointMontage; }
 	FORCEINLINE UAnimMontage* GetSwingMontage() const { return SwingMontage; }
-	FORCEINLINE UAnimMontage* GetPickUpMontage() const { return PickUpMontage; }
 	FORCEINLINE UAnimMontage* GetThrowHookMontage() const { return ThrowHookMontage; }
 
 	FORCEINLINE UCurveFloat* GetDiveRollCurveFloat() const { return DiveRollCurveFloat; }
