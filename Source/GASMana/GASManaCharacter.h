@@ -93,6 +93,7 @@ protected:
 	void RemoveAnyEquipClass() const;
 
 	virtual bool GotMovementInput() const;
+	
 	virtual void SetOverlappingItem(class AItem* Item) override;
 
 	/////////////////////////////////////////////////////////////////////////
@@ -200,6 +201,8 @@ public:
 
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
+
+	virtual void RemoveFreeTag() const;
 	
 	//////////////////////////////////////////////////////////////////////
 	///Getters & Setters
