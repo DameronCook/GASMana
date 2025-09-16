@@ -38,8 +38,7 @@ void UGA_ManaPlayerEquip::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 
 	AGASManaCharacter* GASCharacter = Cast<AGASManaCharacter>(ActorInfo->AvatarActor.Get());
 	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
-
-
+	
 	if (GASCharacter)
 	{
 		FName MontageSectionName;

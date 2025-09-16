@@ -725,9 +725,3 @@ void APlayerManaCharacter::UpdateStaminaRegen() const
 	}
 }
 
-void APlayerManaCharacter::RemoveFreeTag() const
-{
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Black, "RemoveFreeTag called!");
-	FGameplayTag FreeTag = FGameplayTag::RequestGameplayTag(FName("Character.IsFree"));
-	GetAbilitySystemComponent()->RemoveLooseGameplayTag(FreeTag);
-}

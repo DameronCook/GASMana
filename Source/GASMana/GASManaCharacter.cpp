@@ -3,7 +3,6 @@
 #include "GASManaCharacter.h"
 #include "AbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Engine/LocalPlayer.h"
 #include "Item/LeftHandEquipment.h"
 #include "Item/RightHandEquipment.h"
 #include "Public/ManaAttributeSet.h"
@@ -51,6 +50,7 @@ void AGASManaCharacter::SetEquipment(AEquipment* Equipment)
 		
 		if (Equipment->GetEquipTypeClass())
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Setting Equip Type Class");
 			GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(
 				Equipment->GetEquipTypeClass()->GetDefaultObject<UGameplayEffect>(), 1.0f,
 				GetAbilitySystemComponent()->MakeEffectContext());
@@ -284,7 +284,6 @@ void AGASManaCharacter::OnRep_PlayerState()
 	InitializeAttributes();
 }
 
-
 void AGASManaCharacter::InstantlyUnequipGear()
 {
 	EquipmentState = EEquipmentState::EES_Unequipped;
@@ -306,4 +305,11 @@ void AGASManaCharacter::SetNextComboSegment(const FName NextCombo)
 bool AGASManaCharacter::IsAlive()
 {
 	return true;
+}
+
+void AGASManaCharacter::RemoveFreeTag() const
+{
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Black, "RemoveFreeTag called!");
+	const FGameplayTag FreeTag = FGameplayTag::RequestGameplayTag(FName("Character.IsFree"));
+	GetAbilitySystemComponent()->RemoveLooseGameplayTag(FreeTag);
 }

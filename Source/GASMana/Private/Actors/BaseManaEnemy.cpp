@@ -57,6 +57,26 @@ void ABaseManaEnemy::BeginPlay()
 
 }
 
+void ABaseManaEnemy::GetMontageToPlay()
+{
+	UAnimMontage* MontageToPlay;
+
+	if (EquipmentState == EEquipmentState::EES_Unequipped)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1,5.f, FColor::Purple, "Getting Equip Attack!");
+		MontageToPlay = RightHandEquipment->GetEquipAttack();
+		RemoveFreeTag();
+	}
+	else
+	{
+		//If we're not moving
+		RemoveFreeTag();
+		MontageToPlay = RightHandEquipment->GetAttackCombo();
+	}
+
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Montage set to: %s"), *MontageToPlay->GetName()));
+	if (MontageToPlay) SetAttackMontage(MontageToPlay);	
+}
 
 void ABaseManaEnemy::ShowHealth()
 {

@@ -433,9 +433,6 @@ public:
 
 	//////////////////////////////////////
 	//Convenience functions
-	/* Remove the free tag from the player */
-	void RemoveFreeTag() const;
-
 	//////////////////////////////////////
 	//Getters
 	// 
