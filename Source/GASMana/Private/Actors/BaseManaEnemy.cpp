@@ -18,9 +18,10 @@ ABaseManaEnemy::ABaseManaEnemy()
 
 AEquipment* ABaseManaEnemy::EnemyEquip()
 {
-	if (!RightHandEquipment)
+	AItem* TempItem = OverlappingItem;
+	
+	if (!RightHandEquipment || !LeftHandEquipment)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Running Grab Overlapping Item");
 		GrabOverlappingItem();
 	}
 
@@ -28,15 +29,13 @@ AEquipment* ABaseManaEnemy::EnemyEquip()
 	{
 		if (RightHandEquipment || LeftHandEquipment)
 		{
-			GetAbilitySystemComponent()->TryActivateAbilitiesByTag(EquipTagContainer, true);
+			if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(EquipTagContainer, true))
+			{
+				return Cast<AEquipment>(TempItem);
+			}
 		}
 	}
 	
-	if (RightHandEquipment)
-	{
-		return RightHandEquipment;
-	}
-	if (LeftHandEquipment) return LeftHandEquipment;
 	return nullptr;
 }
 
@@ -95,7 +94,6 @@ void ABaseManaEnemy::SetTargetWidgetIcon(const bool IsTargeted) const
 	{
 		if (UCameraTarget* CamTarget = Cast<UCameraTarget>(TargetedWidget->GetUserWidgetObject()))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "SetTargetBrush called!");
 			if (IsTargeted) CamTarget->SetTargetBrush(TargetedTexture); else CamTarget->SetTargetBrush(NotTargetedTexture);
 		}
 	}

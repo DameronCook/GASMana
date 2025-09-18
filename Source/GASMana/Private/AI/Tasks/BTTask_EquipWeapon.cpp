@@ -5,6 +5,8 @@
 
 #include "Actors/BaseManaEnemy.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Item/LeftHandEquipment.h"
+#include "Item/RightHandEquipment.h"
 
 EBTNodeResult::Type UBTTask_EquipWeapon::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
@@ -12,8 +14,20 @@ EBTNodeResult::Type UBTTask_EquipWeapon::ExecuteTask(UBehaviorTreeComponent& Own
 	{
 		if (AEquipment* Equipment = Char->EnemyEquip())
 		{
-			OwnerComp.GetBlackboardComponent()->SetValueAsObject("RightHandEquipment", Equipment);
-			return EBTNodeResult::Succeeded;
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Enemy Equip returned something");
+
+			if (ARightHandEquipment* RightEquipment = Cast<ARightHandEquipment>(Equipment))
+			{
+				OwnerComp.GetBlackboardComponent()->SetValueAsObject("RightHandEquipment", RightEquipment);
+				return EBTNodeResult::Succeeded;
+			}
+			
+			if (ALeftHandEquipment* LeftEquipment = Cast<ALeftHandEquipment>(Equipment))
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Setting Left hand equipment..");
+				OwnerComp.GetBlackboardComponent()->SetValueAsObject("LeftHandEquipment", LeftEquipment);
+				return EBTNodeResult::Succeeded;
+			}
 		}
 	}
 	
