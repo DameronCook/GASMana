@@ -50,7 +50,7 @@ void AGASManaCharacter::SetEquipment(AEquipment* Equipment)
 		
 		if (Equipment->GetEquipTypeClass())
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Setting Equip Type Class");
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Setting Equip Type Class");
 			GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(
 				Equipment->GetEquipTypeClass()->GetDefaultObject<UGameplayEffect>(), 1.0f,
 				GetAbilitySystemComponent()->MakeEffectContext());

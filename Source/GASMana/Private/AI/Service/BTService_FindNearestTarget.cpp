@@ -17,14 +17,21 @@ void UBTService_FindNearestTarget::TickNode(UBehaviorTreeComponent& OwnerComp, u
 	FName TagToSearch = "Player";
 	if (const AActor* OwnerActor = OwnerComp.GetOwner())
 	{
+		//See if we have anything in our left hand first
+		if (!BlackboardComponent->GetValueAsObject("LeftHandEquipment"))
+		{
+			TagToSearch = "LeftHandEquipment";
+		}
 
-
+		//Then check right. This goes last as we should ALWAYS prioritize right hand equipment
 		if (!BlackboardComponent->GetValueAsObject("RightHandEquipment"))
 		{
 			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Not Getting Value");
-			TagToSearch = "Equipment";
+			TagToSearch = "RightHandEquipment";
 		}
 		TArray<AActor*> OutActors;
+		
+		//TODO: This probably needs to change to a visibility or eqs check at some point
 		UGameplayStatics::GetAllActorsWithTag(GetWorld(), TagToSearch, OutActors);
 
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Number of Players found: %d"), OutActors.Num()));
