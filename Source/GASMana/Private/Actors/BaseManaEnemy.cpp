@@ -2,6 +2,8 @@
 
 
 #include "Actors/BaseManaEnemy.h"
+
+#include "AI/ManaEnemyAnimInstance.h"
 #include "Components/WidgetComponent.h"
 #include "Item/Equipment.h"
 #include "Item/RightHandEquipment.h"
@@ -31,6 +33,7 @@ AEquipment* ABaseManaEnemy::EnemyEquip()
 		{
 			if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(EquipTagContainer, true))
 			{
+				if (UManaEnemyAnimInstance* AnimInstance = Cast<UManaEnemyAnimInstance>(GetMesh()->GetAnimInstance())) AnimInstance->SetIsEquipping(true);
 				return Cast<AEquipment>(TempItem);
 			}
 		}

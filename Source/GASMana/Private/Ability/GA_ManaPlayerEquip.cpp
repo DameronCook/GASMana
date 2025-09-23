@@ -101,7 +101,7 @@ void UGA_ManaPlayerEquip::EndAbility(const FGameplayAbilitySpecHandle Handle, co
 
 	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Purple, FString("End Ability Called!"));
 
-	if (AGASManaCharacter* GASCharacter = Cast<AGASManaCharacter>(ActorInfo->AvatarActor.Get()))
+	if (const AGASManaCharacter* GASCharacter = Cast<AGASManaCharacter>(ActorInfo->AvatarActor.Get()))
 	{
 		UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
 
@@ -111,8 +111,7 @@ void UGA_ManaPlayerEquip::EndAbility(const FGameplayAbilitySpecHandle Handle, co
 			AbilitySystemComponent->AddLooseGameplayTag(FreeTag);
 		}
 		//Update the anim instance
-		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GASCharacter->GetMesh()->GetAnimInstance());
-		if (AnimInstance)
+		if (UManaCharacterAnimInstance* AnimInstance = Cast<UManaCharacterAnimInstance>(GASCharacter->GetMesh()->GetAnimInstance()))
 		{
 			AnimInstance->SetIsEquipping(false);
 			//AnimInstance->Montage_Stop(0.1f, GASCharacter->GetEquipMontage());
