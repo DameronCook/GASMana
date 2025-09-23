@@ -29,6 +29,11 @@ void AGASManaCharacter::SetEquipment(AEquipment* Equipment)
 {
 	if (Equipment)
 	{
+		Equipment->SetPickedUp(true);
+
+		const FGameplayTag Tag = FGameplayTag::RequestGameplayTag("Item.NotPickedUp");
+		Equipment->GetTagContainer().RemoveTag(Tag);
+		
 		EquipmentState = Equipment->GetEquipmentType();
 
 		switch (Equipment->GetItemType())
@@ -44,7 +49,7 @@ void AGASManaCharacter::SetEquipment(AEquipment* Equipment)
 		}
 
 		Equipment->DisablePickUpCollision();
-
+		
 		const FName& EquipSocket = Equipment->GetEquipmentSocket(); 
 		EquipGearToSocket(Equipment, EquipSocket);
 		
@@ -109,7 +114,6 @@ void AGASManaCharacter::GrabOverlappingItem()
 {
 	if (OverlappingItem)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Getting an overlapping item");
 		if (AEquipment* Equipment = Cast<AEquipment>(OverlappingItem))
 		{
 			ALeftHandEquipment* LEquipment;
@@ -261,7 +265,7 @@ void AGASManaCharacter::InitializeAttributes()
 	{
 		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
 		EffectContext.AddSourceObject(this);
-		FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(
+		const FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(
 			DefaultAttributeEffect, 1, EffectContext);
 
 		if (SpecHandle.IsValid())

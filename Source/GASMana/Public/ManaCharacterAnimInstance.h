@@ -52,7 +52,7 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 
 	UPROPERTY(BlueprintReadOnly)
-	class APlayerManaCharacter* ManaCharacter;
+	class AGASManaCharacter* ManaCharacter;
 
 	UPROPERTY(BlueprintReadOnly)
 	class UCharacterMovementComponent* ManaMovementComponent;

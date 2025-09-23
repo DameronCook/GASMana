@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Character/CharacterTypes.h"
 #include "GameFramework/Actor.h"
 #include "Engine/DataTable.h"
@@ -102,6 +103,9 @@ public:
 	void DisablePickUpCollision() const;
 
 	FORCEINLINE EItemType GetItemType() const { return ItemData.ItemType; }
+	FORCEINLINE FGameplayTagContainer GetTagContainer() const { return TagContainer; }
+	FORCEINLINE bool SetPickedUp(const bool bPickedUp) { return bIsPickedUp = bPickedUp; }
+	FORCEINLINE bool IsPickedUp() const { return bIsPickedUp; }
 
 	
 protected:
@@ -115,7 +119,7 @@ protected:
 	float TransformedCos() const;
 
 	template<typename T>
-	T Avg(T First, T Second);
+	static T Avg(T First, T Second);
 	
 	UFUNCTION()
 	virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -137,6 +141,12 @@ protected:
 private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float RunningTime;
+
+	UPROPERTY()
+	bool bIsPickedUp;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	FGameplayTagContainer TagContainer;
 	
 };
 
