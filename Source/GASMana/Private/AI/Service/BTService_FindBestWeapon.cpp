@@ -19,8 +19,6 @@ void UBTService_FindBestWeapon::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
 	if (!BlackboardComponent) return;
 	
-<<<<<<< Updated upstream
-=======
 	UObject* Target = BlackboardComponent->GetValueAsObject("TargetToFollow");
 	const AItem* Item = Cast<AItem>(Target);
 	
@@ -33,7 +31,6 @@ void UBTService_FindBestWeapon::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	}
 	
 	/* If we don't have a current target we find one */
->>>>>>> Stashed changes
 	if (const AActor* OwnerActor = OwnerComp.GetOwner())
 	{
 		TArray<AActor*> OutActors;

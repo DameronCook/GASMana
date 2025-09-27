@@ -13,13 +13,6 @@ UBTDecorator_WasMyItemPickedUp::UBTDecorator_WasMyItemPickedUp()
 
 bool UBTDecorator_WasMyItemPickedUp::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
-<<<<<<< Updated upstream
-	if (const AEquipment* Equipment = Cast<AEquipment>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("TargetToFollow")))
-	{
-		return !Equipment->IsPickedUp();
-	}
-	return false;
-=======
 	const UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 	if (!BlackboardComp) return false;
 	
@@ -29,5 +22,4 @@ bool UBTDecorator_WasMyItemPickedUp::CalculateRawConditionValue(UBehaviorTreeCom
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple,
 		FString::Printf(TEXT("My Item was picked up: %s"), Item->IsPickedUp() ? TEXT("true") : TEXT("false")));
 	return Item->IsPickedUp();
->>>>>>> Stashed changes
 }
