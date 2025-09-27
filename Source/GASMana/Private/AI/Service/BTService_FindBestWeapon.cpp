@@ -20,7 +20,10 @@ void UBTService_FindBestWeapon::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	if (!BlackboardComponent) return;
 	
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 	UObject* Target = BlackboardComponent->GetValueAsObject("TargetToFollow");
 	const AItem* Item = Cast<AItem>(Target);
 	
