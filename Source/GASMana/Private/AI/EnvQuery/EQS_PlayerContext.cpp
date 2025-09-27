@@ -19,9 +19,16 @@ void UEQS_PlayerContext::ProvideContext(FEnvQueryInstance& QueryInstance, FEnvQu
 
 	//->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, "Provide context called!");
 
-	/* we are getting a controller, but we aren't getting the seeing pawn */
-	if (AICon && AICon->GetSeeingPawn())
+	if (AICon)
 	{
-		UEnvQueryItemType_Actor::SetContextHelper(ContextData, AICon->GetSeeingPawn());
+		if (const AActor* SeenPawn = AICon->GetSeeingPawn())
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Providing context: %s"), *SeenPawn->GetName()));
+			UEnvQueryItemType_Actor::SetContextHelper(ContextData, SeenPawn);
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("No SeeingPawn!"));
+		}
 	}
 }

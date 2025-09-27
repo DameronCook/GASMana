@@ -29,6 +29,8 @@ AAIC_NPC::AAIC_NPC()
  
 	//Register the sight sense to our Perception Component
 	AIPerceptionComponent->ConfigureSense(*Sight);
+
+	AIPerceptionComponent->OnPerceptionUpdated.AddDynamic(this, &AAIC_NPC::OnSenseUpdated);
 }
 
 void AAIC_NPC::BeginPlay()
@@ -55,32 +57,21 @@ void AAIC_NPC::Possess(APawn* InPawn)
 
 AActor* AAIC_NPC::GetSeeingPawn() const
 {
-	
-	//Return the seeing pawn
-	UObject* Object = BlackboardComp->GetValueAsObject(BlackboardTargetKey);
- 
-	return Object ?  Cast<AActor>(Object) : nullptr;
+	return SensedActor ?  Cast<AActor>(SensedActor) : nullptr;
 }
 
 void AAIC_NPC::OnSenseUpdated(const TArray<AActor*>& DetectedActors)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Orange,"SenseUpdated!");
-	/*
-	//If our character exists inside the UpdatedActors array, register him
-	//to our blackboard component
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, "Sense updated");
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan,"SenseUpdated!");
+
 	for (AActor* Actor : DetectedActors)
 	{
-		if (Cast<AItem>(Actor) && !GetSeeingPawn())
+		if (Cast<APawn>(Actor))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Actor Seen: %s"), *Actor->GetName()));
-			BlackboardComp->SetValueAsObject(BlackboardTargetKey, Actor);
+			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Cyan, FString::Printf(TEXT("Actor Seen: %s"), *Actor->GetName()));
+			SensedActor = Actor;
 			return;
 		}
 	}
-
-	//The character doesn't exist in our updated actors - so make sure
-	//to delete any previous reference of him from the blackboard
-	BlackboardComp->SetValueAsObject(BlackboardTargetKey, nullptr);
-	*/
+	SensedActor = nullptr;
 }

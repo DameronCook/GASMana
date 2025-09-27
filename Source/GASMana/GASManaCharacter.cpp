@@ -22,6 +22,8 @@ AGASManaCharacter::AGASManaCharacter()
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel4, ECollisionResponse::ECR_Block);
+	
 	Attributes = CreateDefaultSubobject<UManaAttributeSet>(TEXT("Attributes"));
 }
 

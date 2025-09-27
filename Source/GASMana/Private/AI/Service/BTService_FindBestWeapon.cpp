@@ -19,12 +19,27 @@ void UBTService_FindBestWeapon::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
 	if (!BlackboardComponent) return;
 	
+<<<<<<< Updated upstream
+=======
+	UObject* Target = BlackboardComponent->GetValueAsObject("TargetToFollow");
+	const AItem* Item = Cast<AItem>(Target);
+	
+	if (Item && !BlackboardComponent->GetValueAsBool("IsMyItemPickedUp"))
+	{
+		if (Item->IsPickedUp())
+		{
+			BlackboardComponent->SetValueAsBool("IsMyItemPickedUp", true);
+		}
+	}
+	
+	/* If we don't have a current target we find one */
+>>>>>>> Stashed changes
 	if (const AActor* OwnerActor = OwnerComp.GetOwner())
 	{
 		TArray<AActor*> OutActors;
 		
 		//TODO: This probably needs to change to a visibility or eqs check at some point
-		UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld(), ItemClass,"Equipment", OutActors);
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ItemClass, OutActors);
 
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Number of Players found: %d"), OutActors.Num()));
 		AActor* NearestTarget = nullptr;
@@ -47,10 +62,7 @@ void UBTService_FindBestWeapon::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 		if (NearestTarget)
 		{
 			BlackboardComponent->SetValueAsObject("TargetToFollow", NearestTarget);
-		}
-		else
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "I couldn't find any equipment!");
+			BlackboardComponent->SetValueAsBool("IsMyItemPickedUp", false);
 		}
 	}
 }

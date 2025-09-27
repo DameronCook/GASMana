@@ -38,6 +38,8 @@ class GASMANA_API AAIC_NPC : public AAIController
 
 	FName BlackboardTargetKey = FName("TargetToFollow");
 
+	AActor* SensedActor;
+
 protected:
 	/** The Behavior Tree that contains the logic of our AI */
 	UPROPERTY(EditAnywhere)
