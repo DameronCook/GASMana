@@ -25,11 +25,16 @@ void UBTService_FindPlayer::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* N
 
 	AAIController* AIController = OwnerComp.GetAIOwner();
 	if (!AIController) return;
+
+	const AActor* OwnerActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("SelfActor"));
+	if (!OwnerActor) return;
 	
 	if (const AAIC_NPC* Controller = Cast<AAIC_NPC>(AIController))
 	{
 		if (AActor* Actor = Controller->GetSensedActor())
 		{
+			const float Dist = OwnerActor->GetDistanceTo(Actor);
+			BlackboardComponent->SetValueAsFloat("DistToTarget", Dist);
 			BlackboardComponent->SetValueAsObject("TargetToFollow", Actor);
 		}
 	}

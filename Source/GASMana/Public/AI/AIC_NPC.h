@@ -7,6 +7,7 @@
 #include "BehaviorTree/BehaviorTreeTypes.h"
 #include "AIC_NPC.generated.h"
 
+class AEquipment;
 struct FBlackboardKeySelector;
 class UAISenseConfig_Sight;
 class UBehaviorTreeComponent;
@@ -46,6 +47,9 @@ class GASMANA_API AAIC_NPC : public AAIController
 	UPROPERTY()
 	AActor* SensedActor;
 
+	UPROPERTY()
+	TArray<AEquipment*> SensedEquipment;
+
 protected:
 	/** The Behavior Tree that contains the logic of our AI */
 	UPROPERTY(EditAnywhere)
@@ -66,4 +70,5 @@ public:
 	/** Returns the seeing pawn. Returns null, if our AI has no target */
 	AActor* GetSeeingPawn() const;
 	FORCEINLINE AActor* GetSensedActor() const { return SensedActor; }
+	FORCEINLINE TArray<AEquipment*> GetSensedEquipment() const { return SensedEquipment; }
 };
