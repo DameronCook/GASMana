@@ -3,9 +3,9 @@
 
 #include "AI/Service/BTService_FindBestWeapon.h"
 
+#include "AI/AIC_NPC.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Item/Equipment.h"
-#include "Kismet/GameplayStatics.h"
 
 UBTService_FindBestWeapon::UBTService_FindBestWeapon()
 {
@@ -14,10 +14,16 @@ UBTService_FindBestWeapon::UBTService_FindBestWeapon()
 void UBTService_FindBestWeapon::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "I am running the service!");
-
+	
 	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
 	if (!BlackboardComponent) return;
+
+	AAIController* OwnerController = OwnerComp.GetAIOwner();
+	if (!OwnerController) return;
+
+	AAIC_NPC* NPCController = Cast<AAIC_NPC>(OwnerController);
+	if (!NPCController) return;
+
 	
 	UObject* Target = BlackboardComponent->GetValueAsObject("TargetToFollow");
 	const AItem* Item = Cast<AItem>(Target);
@@ -29,28 +35,22 @@ void UBTService_FindBestWeapon::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 			BlackboardComponent->SetValueAsBool("IsMyItemPickedUp", true);
 		}
 	}
-	
-	/* If we don't have a current target we find one */
-	if (const AActor* OwnerActor = OwnerComp.GetOwner())
-	{
-		TArray<AActor*> OutActors;
-		
-		//TODO: This probably needs to change to a visibility or eqs check at some point
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ItemClass, OutActors);
 
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Number of Players found: %d"), OutActors.Num()));
+	/* If we don't have a current target we find one */
+	if (const AActor* OwnerActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("SelfActor")))
+	{
 		AActor* NearestTarget = nullptr;
 		float ClosestDistance = BIG_NUMBER;
-		for (AActor* Actor : OutActors)
+		for (AEquipment* Equipment : NPCController->GetSensedEquipment())
 		{
-			if (const AEquipment* Equipment = Cast<AEquipment>(Actor)) 
+			if (Equipment->GetClass() == ItemClass)
 			{
 				if (!Equipment->IsPickedUp())
 				{
-					if (const float TempDist = OwnerActor->GetDistanceTo(Actor); TempDist < ClosestDistance)
+					if (const float TempDist = OwnerActor->GetDistanceTo(Equipment); TempDist < ClosestDistance)
 					{
 						ClosestDistance = TempDist;
-						NearestTarget = Actor;
+						NearestTarget = Equipment;
 					}
 				}
 			}
@@ -59,6 +59,7 @@ void UBTService_FindBestWeapon::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 		if (NearestTarget)
 		{
 			BlackboardComponent->SetValueAsObject("TargetToFollow", NearestTarget);
+			BlackboardComponent->SetValueAsFloat("DistToTarget", ClosestDistance);
 			BlackboardComponent->SetValueAsBool("IsMyItemPickedUp", false);
 		}
 	}

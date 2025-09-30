@@ -7,6 +7,7 @@
 #include "Item.h"
 #include "Equipment.generated.h"
 
+class UAIPerceptionStimuliSourceComponent;
 class UGameplayEffect;
 
 UCLASS()
@@ -38,9 +39,14 @@ protected:
 	/** Tag to be granted to the character when an item is equipped. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
 	FGameplayTag EquipmentTag;
-	
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
+	UAIPerceptionStimuliSourceComponent* StimuliSource;
+
 public:
 	AEquipment();
+
+	virtual void BeginPlay() override;
 
 	void AttachMeshToSocket(USceneComponent* InParent, FName InSocketName) const;
 
@@ -48,4 +54,5 @@ public:
 	FORCEINLINE UAnimMontage* GetEquipMontage() const { return EquipMontage; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetEquipTypeClass() const { return EquipmentTypeClass; }
 	FORCEINLINE FName GetEquipmentSocket() const { return EquipmentSocket; }
+	FORCEINLINE UAIPerceptionStimuliSourceComponent* GetStimuliSource() const { return StimuliSource; }
 };

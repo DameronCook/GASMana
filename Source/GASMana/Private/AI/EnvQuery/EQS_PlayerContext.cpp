@@ -10,6 +10,9 @@
 void UEQS_PlayerContext::ProvideContext(FEnvQueryInstance& QueryInstance, FEnvQueryContextData& ContextData) const
 {
 	Super::ProvideContext(QueryInstance, ContextData);
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, "Provide Context Called");
+
+	
 
 	if (!GetWorld()) return;
 	

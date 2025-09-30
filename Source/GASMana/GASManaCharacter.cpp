@@ -5,6 +5,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Item/LeftHandEquipment.h"
 #include "Item/RightHandEquipment.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Sight.h"
 #include "Public/ManaAttributeSet.h"
 #include "Public/Interface/I_PickUpInterface.h"
 
@@ -118,6 +120,7 @@ void AGASManaCharacter::GrabOverlappingItem()
 	{
 		if (AEquipment* Equipment = Cast<AEquipment>(OverlappingItem))
 		{
+			Equipment->GetStimuliSource()->UnregisterFromSense(UAISense_Sight::StaticClass());
 			ALeftHandEquipment* LEquipment;
 			ARightHandEquipment* REquipment;
 			switch (Equipment->GetItemType())

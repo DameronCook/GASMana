@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTService.h"
+#include "EnvironmentQuery/EnvQuery.h"
+#include "EnvironmentQuery/EnvQueryManager.h"
 #include "BTService_FindPlayer.generated.h"
 
 /**
@@ -14,8 +16,14 @@ class GASMANA_API UBTService_FindPlayer : public UBTService
 {
 	GENERATED_BODY()
 
-	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+public:
+	UBTService_FindPlayer();
+
+protected:
+
+	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	TSubclassOf<AActor> PlayerClass;
+
 };

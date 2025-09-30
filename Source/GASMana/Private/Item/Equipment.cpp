@@ -3,15 +3,25 @@
 
 #include "Item/Equipment.h"
 
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Sight.h"
 
 // Sets default values
 AEquipment::AEquipment()
 {
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	SkeletalMesh->SetupAttachment(RootComponent);
+
+	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
 }
 
-void AEquipment::AttachMeshToSocket(USceneComponent* InParent, FName InSocketName) const
+void AEquipment::BeginPlay()
+{
+	Super::BeginPlay();
+	if (StimuliSource) StimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
+}
+
+void AEquipment::AttachMeshToSocket(USceneComponent* InParent, const FName InSocketName) const
 {
 	const FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 	SkeletalMesh->AttachToComponent(InParent, TransformRules, InSocketName);
