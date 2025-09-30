@@ -62,8 +62,6 @@ AActor* AAIC_NPC::GetSeeingPawn() const
 
 void AAIC_NPC::OnSenseUpdated(const TArray<AActor*>& DetectedActors)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan,"SenseUpdated!");
-
 	for (AActor* Actor : DetectedActors)
 	{
 		if (Cast<APawn>(Actor))

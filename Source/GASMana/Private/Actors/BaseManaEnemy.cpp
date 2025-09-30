@@ -8,6 +8,7 @@
 #include "Item/Equipment.h"
 #include "Item/RightHandEquipment.h"
 #include "Item/LeftHandEquipment.h"
+#include "Perception/PawnSensingComponent.h"
 #include "UI/CameraTarget.h"
 
 ABaseManaEnemy::ABaseManaEnemy()
@@ -15,7 +16,6 @@ ABaseManaEnemy::ABaseManaEnemy()
 	TargetedWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetedWidget"));
 	TargetedWidget->SetWidgetClass(CameraTarget);
 	TargetedWidget->SetupAttachment(RootComponent);
-	
 }
 
 AEquipment* ABaseManaEnemy::EnemyEquip()
@@ -42,6 +42,7 @@ AEquipment* ABaseManaEnemy::EnemyEquip()
 	return nullptr;
 }
 
+
 void ABaseManaEnemy::BeginPlay()
 {
 	Super::BeginPlay();
@@ -56,7 +57,6 @@ void ABaseManaEnemy::BeginPlay()
 	// }
 
 	SetTargetWidgetIcon(false);
-
 }
 
 void ABaseManaEnemy::GetMontageToPlay()

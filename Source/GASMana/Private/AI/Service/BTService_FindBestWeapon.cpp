@@ -14,8 +14,7 @@ UBTService_FindBestWeapon::UBTService_FindBestWeapon()
 void UBTService_FindBestWeapon::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "I am running the service!");
-
+	
 	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
 	if (!BlackboardComponent) return;
 	

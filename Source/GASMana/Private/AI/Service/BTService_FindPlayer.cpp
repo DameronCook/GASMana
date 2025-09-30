@@ -3,28 +3,34 @@
 
 #include "AI/Service/BTService_FindPlayer.h"
 
+#include "AIController.h"
+#include "AI/AIC_NPC.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Kismet/GameplayStatics.h"
+#include "BehaviorTree/Tasks/BTTask_RunEQSQuery.h"
 
-void UBTService_FindPlayer::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+UBTService_FindPlayer::UBTService_FindPlayer()
 {
-	Super::OnBecomeRelevant(OwnerComp, NodeMemory);
+	NodeName = "Find Player";
+	Interval = 0.5f;
+	bNotifyTick = true; 
+}
 
+
+void UBTService_FindPlayer::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+{
+	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
+	
 	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
 	if (!BlackboardComponent) return;
-	
-	TArray<AActor*> OutActors;
-	
-	//TODO: This probably needs to change to a visibility or eqs check at some point
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), PlayerClass, OutActors);
-	
 
-	if (OutActors[0])
+	AAIController* AIController = OwnerComp.GetAIOwner();
+	if (!AIController) return;
+	
+	if (const AAIC_NPC* Controller = Cast<AAIC_NPC>(AIController))
 	{
-		BlackboardComponent->SetValueAsObject("TargetToFollow", OutActors[0]);
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "I couldn't find any equipment!");
+		if (AActor* Actor = Controller->GetSensedActor())
+		{
+			BlackboardComponent->SetValueAsObject("TargetToFollow", Actor);
+		}
 	}
 }

@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "BehaviorTree/BehaviorTreeTypes.h"
 #include "AIC_NPC.generated.h"
 
+struct FBlackboardKeySelector;
 class UAISenseConfig_Sight;
 class UBehaviorTreeComponent;
 /**
@@ -28,16 +30,20 @@ class GASMANA_API AAIC_NPC : public AAIController
 	UPROPERTY()
 	bool bIsRanged;
 
+	UPROPERTY(EditAnywhere)
+	FBlackboardKeySelector PlayerKey;
+
 	/** The function that fires when the perception of our AI gets updated */
 	UFUNCTION()
 	void OnSenseUpdated(const TArray<AActor*>& DetectedActors);
- 
+	
 	/** A Sight Sense config for our AI */
 	UPROPERTY()
 	UAISenseConfig_Sight* Sight;
 
 	FName BlackboardTargetKey = FName("TargetToFollow");
 
+	UPROPERTY()
 	AActor* SensedActor;
 
 protected:
@@ -59,4 +65,5 @@ public:
 
 	/** Returns the seeing pawn. Returns null, if our AI has no target */
 	AActor* GetSeeingPawn() const;
+	FORCEINLINE AActor* GetSensedActor() const { return SensedActor; }
 };

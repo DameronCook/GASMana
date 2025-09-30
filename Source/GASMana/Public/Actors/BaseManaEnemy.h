@@ -18,7 +18,7 @@ class GASMANA_API ABaseManaEnemy : public AGASManaCharacter
 	GENERATED_BODY()
 	virtual void BeginPlay() override;
 	virtual void GetMontageToPlay() override;
-
+	
 	ABaseManaEnemy();
 
 protected:
