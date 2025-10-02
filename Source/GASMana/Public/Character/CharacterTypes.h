@@ -8,3 +8,11 @@ enum class EEquipmentState : uint8
 	EES_EquippedTwoHandedWeapon UMETA(DisplayName = "Equipped Two-Handed Weapon"),
 	EES_EquippedBow UMETA(DisplayName = "Equipped Bow")
 };
+
+UENUM(BlueprintType)
+enum class EPatrolType : uint8
+{
+	Spline UMETA(DisplayName = "Spline"),
+	Sentry UMETA(DisplayName = "Spline"),
+	Stationary UMETA(DisplayName = "Spline")
+};

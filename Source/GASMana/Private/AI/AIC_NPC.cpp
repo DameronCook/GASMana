@@ -5,7 +5,6 @@
 
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Item/Equipment.h"
-#include "Item/Item.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 
@@ -67,15 +66,13 @@ void AAIC_NPC::OnSenseUpdated(const TArray<AActor*>& DetectedActors)
 	{
 		if (AEquipment* Equipment = Cast<AEquipment>(Actor))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, "Finding Equipment!");
 			SensedEquipment.AddUnique(Equipment);
 		}
 		if (Cast<APawn>(Actor))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Cyan, FString::Printf(TEXT("Actor Seen: %s"), *Actor->GetName()));
 			SensedActor = Actor;
 			return;
 		}
 	}
-	SensedActor = nullptr;
+	//SensedActor = nullptr;
 }

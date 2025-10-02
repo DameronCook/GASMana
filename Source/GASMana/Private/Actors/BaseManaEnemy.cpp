@@ -4,6 +4,7 @@
 #include "Actors/BaseManaEnemy.h"
 
 #include "AI/ManaEnemyAnimInstance.h"
+#include "Components/SplineComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Item/Equipment.h"
 #include "Item/RightHandEquipment.h"
@@ -13,6 +14,9 @@
 
 ABaseManaEnemy::ABaseManaEnemy()
 {
+	SplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("SplineComponent"));
+	SplineComponent->SetupAttachment(RootComponent);
+	SplineCount = SplineComponent->GetNumberOfSplinePoints();
 	TargetedWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetedWidget"));
 	TargetedWidget->SetWidgetClass(CameraTarget);
 	TargetedWidget->SetupAttachment(RootComponent);

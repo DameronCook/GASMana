@@ -6,9 +6,11 @@
 #include "../../GASManaCharacter.h"
 #include "BaseManaEnemy.generated.h"
 
+class USplineComponent;
 class UImage;
 class UCameraTarget;
 class UWidgetComponent;
+
 /**
  * 
  */
@@ -24,6 +26,12 @@ class GASMANA_API ABaseManaEnemy : public AGASManaCharacter
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<ARightHandEquipment> RightHandEquipmentClass;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, meta = (AllowPrivateAccess = "true"))
+	USplineComponent* SplineComponent;
+
+	UPROPERTY()
+	int SplineCount;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, meta = (AllowPrivateAccess = "true"))
 	UWidgetComponent* TargetedWidget;
@@ -36,6 +44,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Widget)
 	FSlateBrush NotTargetedTexture;
+
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	EPatrolType PatrolType;
 	
 public:
 	UFUNCTION()
@@ -54,3 +65,4 @@ public:
 	AEquipment* EnemyEquip();
 
 };
+

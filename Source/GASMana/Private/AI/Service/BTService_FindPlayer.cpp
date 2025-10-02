@@ -22,7 +22,7 @@ void UBTService_FindPlayer::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* N
 	
 	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
 	if (!BlackboardComponent) return;
-
+	
 	AAIController* AIController = OwnerComp.GetAIOwner();
 	if (!AIController) return;
 
@@ -33,6 +33,7 @@ void UBTService_FindPlayer::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* N
 	{
 		if (AActor* Actor = Controller->GetSensedActor())
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Sensed Actor Name: " + Actor->GetName());
 			const float Dist = OwnerActor->GetDistanceTo(Actor);
 			BlackboardComponent->SetValueAsFloat("DistToTarget", Dist);
 			BlackboardComponent->SetValueAsObject("TargetToFollow", Actor);
