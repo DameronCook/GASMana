@@ -6,6 +6,7 @@
 #include "../../GASManaCharacter.h"
 #include "BaseManaEnemy.generated.h"
 
+class AAIC_NPC;
 class USplineComponent;
 class UImage;
 class UCameraTarget;
@@ -45,9 +46,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Widget)
 	FSlateBrush NotTargetedTexture;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Widget)
+	FSlateBrush EmptyTexture;
+
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	EPatrolType PatrolType;
-	
+
+	UPROPERTY()
+	AAIC_NPC* EnemyController;
+
 public:
 	UFUNCTION()
 	static void ShowHealth();
@@ -56,7 +63,7 @@ public:
 	static bool DoMeleeAttack();
 
 	UFUNCTION()
-	void SetTargetWidgetIcon(bool IsTargeted) const;
+	void SetTargetWidgetIcon(bool IsTargeted, const AActor* Caller) const;
 
 	FORCEINLINE UWidgetComponent* GetTargetedWidget() const { return TargetedWidget; }
 

@@ -118,7 +118,7 @@ void UGA_ManaPlayerFocus::ActivateAbility(FGameplayAbilitySpecHandle Handle, con
 			if (BestActor)
 			{
 				PlayerCharacter->SetCombatCameraTarget(BestActor);
-				if (const ABaseManaEnemy* BaseEnemy = Cast<ABaseManaEnemy>(BestActor)) BaseEnemy->SetTargetWidgetIcon(true);
+				if (const ABaseManaEnemy* BaseEnemy = Cast<ABaseManaEnemy>(BestActor)) BaseEnemy->SetTargetWidgetIcon(true, PlayerCharacter);
 				AbilitySystemComponent->ApplyGameplayEffectToSelf(
 			PlayerCharacter->GetFocusEffectClass()->GetDefaultObject<UGameplayEffect>(),
 			1.0f,
@@ -150,7 +150,7 @@ void UGA_ManaPlayerFocus::EndAbility(const FGameplayAbilitySpecHandle Handle,
 		{
 			if (const ABaseManaEnemy* CombatTarget = Cast<ABaseManaEnemy>(Target))
 			{
-				CombatTarget->SetTargetWidgetIcon(false);
+				CombatTarget->SetTargetWidgetIcon(false, PlayerChar);
 			}
 			PlayerChar->SetCombatCameraTarget(nullptr);
 		}

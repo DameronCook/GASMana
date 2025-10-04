@@ -3,13 +3,14 @@
 
 #include "Actors/BaseManaEnemy.h"
 
+#include "PlayerManaCharacter.h"
+#include "AI/AIC_NPC.h"
 #include "AI/ManaEnemyAnimInstance.h"
 #include "Components/SplineComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Item/Equipment.h"
 #include "Item/RightHandEquipment.h"
 #include "Item/LeftHandEquipment.h"
-#include "Perception/PawnSensingComponent.h"
 #include "UI/CameraTarget.h"
 
 ABaseManaEnemy::ABaseManaEnemy()
@@ -50,17 +51,13 @@ AEquipment* ABaseManaEnemy::EnemyEquip()
 void ABaseManaEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	EnemyController = Cast<AAIC_NPC>(GetController());
 
-	// if (UWorld* World = GetWorld())
-	// {
-	// 	RightHandEquipment = World->SpawnActor<ARightHandEquipment>(RightHandEquipmentClass, GetActorTransform());
-	// 	if (RightHandEquipment)
-	// 	{
-	// 		SetEquipment(RightHandEquipment);
-	// 	}
-	// }
-
-	SetTargetWidgetIcon(false);
+	if (UCameraTarget* CamTarget = Cast<UCameraTarget>(TargetedWidget->GetUserWidgetObject()))
+	{
+		CamTarget->SetTargetBrush(EmptyTexture);
+	}
 }
 
 void ABaseManaEnemy::GetMontageToPlay()
@@ -95,8 +92,16 @@ bool ABaseManaEnemy::DoMeleeAttack()
 	return true;
 }
 
-void ABaseManaEnemy::SetTargetWidgetIcon(const bool IsTargeted) const
+void ABaseManaEnemy::SetTargetWidgetIcon(const bool IsTargeted, const AActor* Caller) const
 {
+	if (GetDistanceTo(Caller) >= 5000.f)
+	{
+		if (UCameraTarget* CamTarget = Cast<UCameraTarget>(TargetedWidget->GetUserWidgetObject()))
+		{
+			CamTarget->SetTargetBrush(EmptyTexture);
+			return;
+		}
+	}
 	if (TargetedWidget)
 	{
 		if (UCameraTarget* CamTarget = Cast<UCameraTarget>(TargetedWidget->GetUserWidgetObject()))

@@ -552,9 +552,11 @@ void APlayerManaCharacter::Look(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
+		constexpr float CamRotSpeed = 60.f;
+		const float DeltaSeconds = GetWorld()->GetDeltaSeconds() * CamRotSpeed;
 		// add yaw and pitch input to controller
-		AddControllerYawInput(LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
+		AddControllerYawInput(LookAxisVector.X * DeltaSeconds);
+		AddControllerPitchInput(LookAxisVector.Y * DeltaSeconds);
 	}
 }
 
