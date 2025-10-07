@@ -51,7 +51,10 @@ void AAIC_NPC::Possess(APawn* InPawn)
 	if (BlackboardAsset) UseBlackboard(BlackboardAsset, BlackboardComp);
 
 	if (BlackboardComp) BlackboardComp->SetValueAsBool("IsRanged", bIsRanged);
+}
 
+void AAIC_NPC::ActivateTree()
+{
 	RunBehaviorTree(BehaviorTree);
 }
 

@@ -8,7 +8,6 @@
 #include "Interface/I_ProgressBarInterface.h"
 #include "Interface/CameraActorInterface.h"
 #include "Interface/TargetingActorInterface.h"
-#include "Interface/PlayerCharacterInterface.h"
 #include "Ability/GA_ManaPlayerWallRun.h"
 #include "Ability/GA_ManaPlayerMantle.h"
 #include "Ability/GA_ManaPlayerZipToPoint.h"
@@ -61,6 +60,8 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UUserWidget> PlayerHUDClass;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Loading, meta = (AllowPrivateAccess = "true"))
+	USphereComponent* LoaderSphere;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Input
@@ -346,6 +347,12 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 
 	UPROPERTY()
 	AActor* OverlappingItemActor = nullptr;
+
+	UFUNCTION()
+	void OnLoaderSphereOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnLoaderEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 protected:
 

@@ -55,6 +55,9 @@ protected:
 	UPROPERTY()
 	AAIC_NPC* EnemyController;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Load)
+	USphereComponent* LoadSphere;
+
 public:
 	UFUNCTION()
 	static void ShowHealth();
@@ -71,5 +74,11 @@ public:
 	UFUNCTION(Category = "Combat")
 	AEquipment* EnemyEquip();
 
+	UFUNCTION(Category = "Loading")
+	virtual void LoadMe() override;
+
+	UFUNCTION(Category = "Loading")
+	virtual void UnloadMe() override;
+	
 };
 

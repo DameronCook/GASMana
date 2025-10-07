@@ -67,6 +67,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	UBlackboardData* BlackboardAsset;
 
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	void ActivateTree();
 	/** Returns the seeing pawn. Returns null, if our AI has no target */
 	AActor* GetSeeingPawn() const;
 	FORCEINLINE AActor* GetSensedActor() const { return SensedActor; }

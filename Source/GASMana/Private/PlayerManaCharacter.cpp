@@ -76,8 +76,35 @@ APlayerManaCharacter::APlayerManaCharacter()
 	//Create a hook shot component
 	WallRunComponent = CreateDefaultSubobject<UAC_WallRun>(TEXT("WallRunComponent"));
 
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
-	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+	//Create a sphere mesh that checks for enemies to load them in
+	LoaderSphere = CreateDefaultSubobject<USphereComponent>(TEXT("LoaderSphere"));
+	LoaderSphere->SetupAttachment(RootComponent);
+	LoaderSphere->SetSphereRadius(3000.f, false);
+	LoaderSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
+	LoaderSphere->SetCollisionObjectType(ECC_WorldDynamic);
+	LoaderSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+}
+
+void APlayerManaCharacter::OnLoaderSphereOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+		if (AGASManaCharacter* Character = Cast<AGASManaCharacter>(OtherActor))
+		{
+			if (Character != this)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Found A GASManaCharacter:" + Character->GetName());
+				Character->LoadMe();
+			}
+		}
+}
+
+void APlayerManaCharacter::OnLoaderEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (AGASManaCharacter* Character = Cast<AGASManaCharacter>(OtherActor))
+	{
+		Character->LoadMe();
+	}
 }
 
 void APlayerManaCharacter::BeginPlay()
@@ -122,6 +149,12 @@ void APlayerManaCharacter::BeginPlay()
 				Modifier->SetPlayerCharacter(this);
 			}
 		}
+	}
+
+	if (LoaderSphere)
+	{
+		LoaderSphere->OnComponentBeginOverlap.AddDynamic(this, &APlayerManaCharacter::OnLoaderSphereOverlap);
+		LoaderSphere->OnComponentEndOverlap.AddDynamic(this, &APlayerManaCharacter::OnLoaderEndOverlap);
 	}
 }
 
@@ -401,7 +434,7 @@ void APlayerManaCharacter::NotifyControllerChanged()
 	Super::NotifyControllerChanged();
 
 	// Add Input Mapping Context
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	if (APlayerController* PlayerController = Cast<APlayerController>(MyController))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
@@ -514,10 +547,10 @@ void APlayerManaCharacter::Move(const FInputActionValue& Value)
 			}
 		}
 
-		if (Controller != nullptr)
+		if (MyController != nullptr)
 		{
 			// find out which way is forward
-			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator Rotation = MyController->GetControlRotation();
 			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 			// get forward vector
@@ -550,7 +583,7 @@ void APlayerManaCharacter::Look(const FInputActionValue& Value)
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
-	if (Controller != nullptr)
+	if (MyController != nullptr)
 	{
 		constexpr float CamRotSpeed = 60.f;
 		const float DeltaSeconds = GetWorld()->GetDeltaSeconds() * CamRotSpeed;

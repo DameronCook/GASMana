@@ -6,6 +6,7 @@
 #include "PlayerManaCharacter.h"
 #include "AI/AIC_NPC.h"
 #include "AI/ManaEnemyAnimInstance.h"
+#include "Components/SphereComponent.h"
 #include "Components/SplineComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Item/Equipment.h"
@@ -18,6 +19,7 @@ ABaseManaEnemy::ABaseManaEnemy()
 	SplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("SplineComponent"));
 	SplineComponent->SetupAttachment(RootComponent);
 	SplineCount = SplineComponent->GetNumberOfSplinePoints();
+	
 	TargetedWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetedWidget"));
 	TargetedWidget->SetWidgetClass(CameraTarget);
 	TargetedWidget->SetupAttachment(RootComponent);
@@ -47,6 +49,26 @@ AEquipment* ABaseManaEnemy::EnemyEquip()
 	return nullptr;
 }
 
+void ABaseManaEnemy::LoadMe()
+{
+	Super::LoadMe();
+
+	SetActorHiddenInGame(false);
+	SetActorTickEnabled(true);
+	if (AAIC_NPC* ActorController = Cast<AAIC_NPC>(MyController))
+	{
+		ActorController->ActivateTree();
+	}
+}
+
+void ABaseManaEnemy::UnloadMe()
+{
+	Super::UnloadMe();
+	SetActorHiddenInGame(true);
+	SetActorTickEnabled(false);
+	//Maybe stop tree here?
+}
+
 
 void ABaseManaEnemy::BeginPlay()
 {
@@ -58,6 +80,8 @@ void ABaseManaEnemy::BeginPlay()
 	{
 		CamTarget->SetTargetBrush(EmptyTexture);
 	}
+
+	UnloadMe();
 }
 
 void ABaseManaEnemy::GetMontageToPlay()

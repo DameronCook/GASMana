@@ -209,6 +209,8 @@ void AGASManaCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
+	MyController = NewController;
+	
 	if (AbilitySystemComponent)
 	{
 		AbilitySystemComponent->InitAbilityActorInfo(this, this);
@@ -321,4 +323,14 @@ void AGASManaCharacter::RemoveFreeTag() const
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Black, "RemoveFreeTag called!");
 	const FGameplayTag FreeTag = FGameplayTag::RequestGameplayTag(FName("Character.IsFree"));
 	GetAbilitySystemComponent()->RemoveLooseGameplayTag(FreeTag);
+}
+
+void AGASManaCharacter::LoadMe()
+{
+	//Empty for now, designed to be overridden	
+}
+
+void AGASManaCharacter::UnloadMe()
+{
+	//Empty for now, designed to be overridden	
 }
