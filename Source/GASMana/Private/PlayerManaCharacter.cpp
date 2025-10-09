@@ -103,7 +103,10 @@ void APlayerManaCharacter::OnLoaderEndOverlap(UPrimitiveComponent* OverlappedCom
 {
 	if (AGASManaCharacter* Character = Cast<AGASManaCharacter>(OtherActor))
 	{
-		Character->LoadMe();
+		if (Character != this)
+		{
+			Character->UnloadMe();
+		}
 	}
 }
 
@@ -434,7 +437,7 @@ void APlayerManaCharacter::NotifyControllerChanged()
 	Super::NotifyControllerChanged();
 
 	// Add Input Mapping Context
-	if (APlayerController* PlayerController = Cast<APlayerController>(MyController))
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
@@ -547,10 +550,10 @@ void APlayerManaCharacter::Move(const FInputActionValue& Value)
 			}
 		}
 
-		if (MyController != nullptr)
+		if (Controller != nullptr)
 		{
 			// find out which way is forward
-			const FRotator Rotation = MyController->GetControlRotation();
+			const FRotator Rotation = Controller->GetControlRotation();
 			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 			// get forward vector
@@ -583,7 +586,7 @@ void APlayerManaCharacter::Look(const FInputActionValue& Value)
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
-	if (MyController != nullptr)
+	if (Controller != nullptr)
 	{
 		constexpr float CamRotSpeed = 60.f;
 		const float DeltaSeconds = GetWorld()->GetDeltaSeconds() * CamRotSpeed;
@@ -758,5 +761,16 @@ void APlayerManaCharacter::UpdateStaminaRegen() const
 	{
 		AbilitySystem->ApplyGameplayEffectToSelf(StaminaRegenEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
 	}
+}
+
+void APlayerManaCharacter::LoadMe()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Load Me called on player!"));
+}
+
+void APlayerManaCharacter::UnloadMe()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Unload Me called on player!"));
+
 }
 

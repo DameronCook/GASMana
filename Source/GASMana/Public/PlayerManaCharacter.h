@@ -411,6 +411,9 @@ public:
 
 	void UpdateStaminaRegen() const;
 
+	virtual void LoadMe() override;
+	virtual void UnloadMe() override;
+
 	//Interface overrides
 	///////////////////////////////////////
 	virtual float GetHealth_Implementation() const override;

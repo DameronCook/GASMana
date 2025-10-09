@@ -141,8 +141,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Attack", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> AttackingEffectClass;
 
-	UPROPERTY()
-	AController* MyController;
+	//UPROPERTY()
+	//AController* MyController;
 
 
 public:

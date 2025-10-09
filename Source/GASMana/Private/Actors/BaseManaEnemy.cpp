@@ -55,7 +55,7 @@ void ABaseManaEnemy::LoadMe()
 
 	SetActorHiddenInGame(false);
 	SetActorTickEnabled(true);
-	if (AAIC_NPC* ActorController = Cast<AAIC_NPC>(MyController))
+	if (AAIC_NPC* ActorController = Cast<AAIC_NPC>(Controller))
 	{
 		ActorController->ActivateTree();
 	}

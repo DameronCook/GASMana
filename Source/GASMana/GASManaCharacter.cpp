@@ -209,7 +209,7 @@ void AGASManaCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	MyController = NewController;
+	//MyController = NewController;
 	
 	if (AbilitySystemComponent)
 	{
