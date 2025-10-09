@@ -208,8 +208,6 @@ void AGASManaCharacter::HandleMelee()
 void AGASManaCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-
-	//MyController = NewController;
 	
 	if (AbilitySystemComponent)
 	{

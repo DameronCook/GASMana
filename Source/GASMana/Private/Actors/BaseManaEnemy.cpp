@@ -1,11 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Actors/BaseManaEnemy.h"
 
 #include "PlayerManaCharacter.h"
 #include "AI/AIC_NPC.h"
 #include "AI/ManaEnemyAnimInstance.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/SplineComponent.h"
 #include "Components/WidgetComponent.h"
@@ -55,10 +53,7 @@ void ABaseManaEnemy::LoadMe()
 
 	SetActorHiddenInGame(false);
 	SetActorTickEnabled(true);
-	if (AAIC_NPC* ActorController = Cast<AAIC_NPC>(Controller))
-	{
-		ActorController->ActivateTree();
-	}
+	if (EnemyController) EnemyController->ActivateTree();
 }
 
 void ABaseManaEnemy::UnloadMe()
@@ -66,9 +61,9 @@ void ABaseManaEnemy::UnloadMe()
 	Super::UnloadMe();
 	SetActorHiddenInGame(true);
 	SetActorTickEnabled(false);
+	if (UBlackboardComponent* BlackboardComponent = EnemyController->GetBlackboardComponent()) BlackboardComponent->SetValueAsBool("AmILoaded", false);
 	//Maybe stop tree here?
 }
-
 
 void ABaseManaEnemy::BeginPlay()
 {
