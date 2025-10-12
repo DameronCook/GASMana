@@ -62,7 +62,6 @@ void ABaseManaEnemy::UnloadMe()
 	SetActorHiddenInGame(true);
 	SetActorTickEnabled(false);
 	if (UBlackboardComponent* BlackboardComponent = EnemyController->GetBlackboardComponent()) BlackboardComponent->SetValueAsBool("AmILoaded", false);
-	//Maybe stop tree here?
 }
 
 void ABaseManaEnemy::BeginPlay()

@@ -479,6 +479,13 @@ void APlayerManaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 		// Hooking
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &APlayerManaCharacter::Equip);
+
+		/* DEBUGGING */
+		//Reload level
+		EnhancedInputComponent->BindAction(DEBUG_ReloadAction, ETriggerEvent::Completed, this, &APlayerManaCharacter::DEBUG_ReloadLevel);
+		
+		//Refill Mana
+		EnhancedInputComponent->BindAction(DEBUG_RefillManaAction, ETriggerEvent::Completed, this, &APlayerManaCharacter::DEBUG_RefillMana);
 	}
 	else
 	{
@@ -729,6 +736,17 @@ void APlayerManaCharacter::Equip(const FInputActionValue& Value)
 	}
 }
 
+void APlayerManaCharacter::DEBUG_ReloadLevel(const FInputActionValue& Value)
+{
+	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
+}
+
+void APlayerManaCharacter::DEBUG_RefillMana(const FInputActionValue& Value)
+{
+	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
+	AbilitySystem->ApplyGameplayEffectToSelf(ManaDebugRefillEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
+}
+
 //////////////////// -- Ability Regen -- \\\\\\\\\\\\\\\\\\\\\\\
 
 void APlayerManaCharacter::UpdateStaminaRegen() const
@@ -750,9 +768,7 @@ void APlayerManaCharacter::UpdateStaminaRegen() const
 	{
 		return;
 	}
-
-	//bool bIsFree = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree")));
-
+	
 	if (bIsBlocking)
 	{
 		AbilitySystem->ApplyGameplayEffectToSelf(StaminaRegenBlockEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
@@ -763,6 +779,9 @@ void APlayerManaCharacter::UpdateStaminaRegen() const
 	}
 }
 
+
+
+// Overrides
 void APlayerManaCharacter::LoadMe()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Load Me called on player!"));

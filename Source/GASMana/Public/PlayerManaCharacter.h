@@ -102,7 +102,17 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* EquipAction;
 
-	/* Cached direction of input (always calculated) */
+	/* RELOADING */
+	
+	/** DEBUG Reload Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* DEBUG_ReloadAction;
+	
+	/** DEBUG Reload Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* DEBUG_RefillManaAction;
+
+	/** Cached direction of input (always calculated) */
 	FVector CachedInputDirection;
 
 	//////////////////////////////////////////////////////////////////////////
@@ -230,6 +240,11 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Focus Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> FocusClass;
+	
+	/** DEBUG Mana Regen Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> ManaDebugRefillEffectClass;
+	
 
 	//////////////////////////////////////////////////////////////////////////
 	// Montages
@@ -401,6 +416,11 @@ protected:
 
 	/**Called for Equip input */
 	void Equip(const FInputActionValue& Value);
+
+	/** Called for Debug reload input */
+	void DEBUG_ReloadLevel(const FInputActionValue& Value);
+	/** Called for Debug refill Mana input */
+	void DEBUG_RefillMana(const FInputActionValue& Value);
 
 public:
 	APlayerManaCharacter();
