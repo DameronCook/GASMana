@@ -30,7 +30,7 @@ void ABaseManaEnemy::BeginPlay()
 	{
 		SplineCount = SplineComponent->GetNumberOfSplinePoints();
 
-		for (int i = 0; i < SplineCount - 1; i++)
+		for (int i = 0; i < SplineCount; i++)
 		{
 			PatrolPoints.Add(SplineComponent->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::World));
 			SplineComponent->SetSplinePointType(i, ESplinePointType::Linear);

@@ -35,8 +35,8 @@ class GASMANA_API ABaseManaEnemy : public AGASManaCharacter
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Patrol, meta = (AllowPrivateAccess = "true"))
 	int PatrolIndex = 0;
-
-	UPROPERTY()
+	/* Flip this to change the direction of patrol */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Patrol, meta = (AllowPrivateAccess = "true"))
 	bool PatrolDir;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Loading, meta = (AllowPrivateAccess = "true"))
