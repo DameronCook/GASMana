@@ -1,10 +1,9 @@
 #include "Actors/BaseManaEnemy.h"
-
 #include "PlayerManaCharacter.h"
 #include "AI/AIC_NPC.h"
 #include "AI/ManaEnemyAnimInstance.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Components/SphereComponent.h"
+#include "NavigationSystem.h"
 #include "Components/SplineComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Item/Equipment.h"
@@ -16,11 +15,93 @@ ABaseManaEnemy::ABaseManaEnemy()
 {
 	SplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("SplineComponent"));
 	SplineComponent->SetupAttachment(RootComponent);
-	SplineCount = SplineComponent->GetNumberOfSplinePoints();
+	SplineComponent->bInputSplinePointsToConstructionScript = true;
 	
 	TargetedWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetedWidget"));
 	TargetedWidget->SetWidgetClass(CameraTarget);
 	TargetedWidget->SetupAttachment(RootComponent);
+}
+
+void ABaseManaEnemy::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (SplineComponent)
+	{
+		SplineCount = SplineComponent->GetNumberOfSplinePoints();
+
+		for (int i = 0; i < SplineCount - 1; i++)
+		{
+			PatrolPoints.Add(SplineComponent->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::World));
+			SplineComponent->SetSplinePointType(i, ESplinePointType::Linear);
+		}
+	}
+
+	EnemyController = Cast<AAIC_NPC>(GetController());
+
+	/*
+	if (UCameraTarget* CamTarget = Cast<UCameraTarget>(TargetedWidget->GetUserWidgetObject()))
+	{
+		CamTarget->SetTargetBrush(EmptyTexture);
+	}
+	*/
+
+	if (ShouldIBeInitiallyUnloaded)
+	{
+		UnloadMe();
+		if (UBlackboardComponent* BlackboardComponent = EnemyController->GetBlackboardComponent()) BlackboardComponent->SetValueAsBool("AmILoaded", false);
+	}
+	else
+	{
+		if (UBlackboardComponent* BlackboardComponent = EnemyController->GetBlackboardComponent()) BlackboardComponent->SetValueAsBool("AmILoaded", true);
+	}
+}
+
+void ABaseManaEnemy::IterateNextPoint()
+{
+	int Iterator = -1;
+	if (PatrolDir) Iterator = 1;
+	PatrolIndex += Iterator;
+}
+
+FVector ABaseManaEnemy::GetNextPatrolPoint()
+{
+	const int NumOfPoints = PatrolPoints.Num() - 1;
+	if (NumOfPoints == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Patrol points set!!!"));
+		return GetActorLocation();
+	}
+
+	PatrolIndex += (PatrolDir ? 1 : -1);
+	
+	if (PatrolIndex < 0 || PatrolIndex >= NumOfPoints)
+	{
+		if (SplineComponent->IsClosedLoop())
+		{
+			PatrolIndex = PatrolDir ? 0 : NumOfPoints;
+		}
+		else
+		{
+			PatrolDir = !PatrolDir;
+			PatrolIndex += (PatrolDir ? 1 : NumOfPoints - 1);
+		}
+	}
+
+	PatrolIndex = FMath::Clamp(PatrolIndex, 0, NumOfPoints);
+	UE_LOG(LogTemp, Warning, TEXT("Next Patrol Point: %s"), *PatrolPoints[PatrolIndex].ToString());
+	return PatrolPoints[PatrolIndex];
+	/*
+	const UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(this);
+	FNavLocation OutLocation;
+	FVector QueryExtent = FVector(10.0f, 10.0f, 10.0f);
+	if (NavSystem->ProjectPointToNavigation(PatrolPoints[PatrolIndex], OutLocation, QueryExtent))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Did I find my point??");
+		return OutLocation.Location;
+	}
+	*/
+
 }
 
 AEquipment* ABaseManaEnemy::EnemyEquip()
@@ -64,20 +145,6 @@ void ABaseManaEnemy::UnloadMe()
 	if (UBlackboardComponent* BlackboardComponent = EnemyController->GetBlackboardComponent()) BlackboardComponent->SetValueAsBool("AmILoaded", false);
 }
 
-void ABaseManaEnemy::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	EnemyController = Cast<AAIC_NPC>(GetController());
-
-	if (UCameraTarget* CamTarget = Cast<UCameraTarget>(TargetedWidget->GetUserWidgetObject()))
-	{
-		CamTarget->SetTargetBrush(EmptyTexture);
-	}
-
-	UnloadMe();
-}
-
 void ABaseManaEnemy::GetMontageToPlay()
 {
 	UAnimMontage* MontageToPlay;
@@ -112,6 +179,7 @@ bool ABaseManaEnemy::DoMeleeAttack()
 
 void ABaseManaEnemy::SetTargetWidgetIcon(const bool IsTargeted, const AActor* Caller) const
 {
+	/*
 	if (GetDistanceTo(Caller) >= 5000.f)
 	{
 		if (UCameraTarget* CamTarget = Cast<UCameraTarget>(TargetedWidget->GetUserWidgetObject()))
@@ -120,6 +188,7 @@ void ABaseManaEnemy::SetTargetWidgetIcon(const bool IsTargeted, const AActor* Ca
 			return;
 		}
 	}
+	*/
 	if (TargetedWidget)
 	{
 		if (UCameraTarget* CamTarget = Cast<UCameraTarget>(TargetedWidget->GetUserWidgetObject()))

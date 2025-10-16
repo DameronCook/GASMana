@@ -24,15 +24,30 @@ class GASMANA_API ABaseManaEnemy : public AGASManaCharacter
 	
 	ABaseManaEnemy();
 
+	UFUNCTION()
+	void IterateNextPoint();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Patrol, meta = (AllowPrivateAccess = "true"))
+	int SplineCount;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Patrol, meta = (AllowPrivateAccess = "true"))
+	TArray<FVector> PatrolPoints;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Patrol, meta = (AllowPrivateAccess = "true"))
+	int PatrolIndex = 0;
+
+	UPROPERTY()
+	bool PatrolDir;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Loading, meta = (AllowPrivateAccess = "true"))
+	bool ShouldIBeInitiallyUnloaded = true;
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<ARightHandEquipment> RightHandEquipmentClass;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, meta = (AllowPrivateAccess = "true"))
 	USplineComponent* SplineComponent;
-
-	UPROPERTY()
-	int SplineCount;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, meta = (AllowPrivateAccess = "true"))
 	UWidgetComponent* TargetedWidget;
@@ -79,6 +94,8 @@ public:
 
 	UFUNCTION(Category = "Loading")
 	virtual void UnloadMe() override;
-	
+
+	UFUNCTION()
+	FVector GetNextPatrolPoint();
 };
 

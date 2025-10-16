@@ -8,7 +8,7 @@ public class GASMana : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayAbilities", "GameplayTasks", "GameplayTags", "UMG", "CableComponent", "Niagara", "NavigationSystem", "AIModule", "Slate", "SlateCore" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayAbilities", "GameplayTasks", "GameplayTags", "UMG", "CableComponent", "Niagara", "NavigationSystem", "AIModule", "Slate", "SlateCore", "NavigationSystem" });
 		PrivateDependencyModuleNames.AddRange(new string[] { "CableComponent" });
 
     }
