@@ -13,6 +13,6 @@ UENUM(BlueprintType)
 enum class EPatrolType : uint8
 {
 	Spline UMETA(DisplayName = "Spline"),
-	Sentry UMETA(DisplayName = "Spline"),
-	Stationary UMETA(DisplayName = "Spline")
+	Sentry UMETA(DisplayName = "Sentry"),
+	Stationary UMETA(DisplayName = "Stationary")
 };

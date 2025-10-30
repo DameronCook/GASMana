@@ -39,21 +39,23 @@ void ABaseManaEnemy::BeginPlay()
 
 	EnemyController = Cast<AAIC_NPC>(GetController());
 
-	/*
-	if (UCameraTarget* CamTarget = Cast<UCameraTarget>(TargetedWidget->GetUserWidgetObject()))
+	if (EnemyController)
 	{
-		CamTarget->SetTargetBrush(EmptyTexture);
-	}
-	*/
+		if (UBlackboardComponent* BlackboardComponent = EnemyController->GetBlackboardComponent())
+		{
+			const uint8 Byte = static_cast<uint8>(PatrolType);
+			BlackboardComponent->SetValueAsEnum("EnemyPatrolType", Byte);
 
-	if (ShouldIBeInitiallyUnloaded)
-	{
-		UnloadMe();
-		if (UBlackboardComponent* BlackboardComponent = EnemyController->GetBlackboardComponent()) BlackboardComponent->SetValueAsBool("AmILoaded", false);
-	}
-	else
-	{
-		if (UBlackboardComponent* BlackboardComponent = EnemyController->GetBlackboardComponent()) BlackboardComponent->SetValueAsBool("AmILoaded", true);
+			if (ShouldIBeInitiallyUnloaded)
+			{
+				UnloadMe();
+				BlackboardComponent->SetValueAsBool("AmILoaded", false);
+			}
+			else
+			{
+				BlackboardComponent->SetValueAsBool("AmILoaded", true);
+			}
+		}
 	}
 }
 
@@ -91,17 +93,6 @@ FVector ABaseManaEnemy::GetNextPatrolPoint()
 	PatrolIndex = FMath::Clamp(PatrolIndex, 0, NumOfPoints);
 	UE_LOG(LogTemp, Warning, TEXT("Next Patrol Point: %s"), *PatrolPoints[PatrolIndex].ToString());
 	return PatrolPoints[PatrolIndex];
-	/*
-	const UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(this);
-	FNavLocation OutLocation;
-	FVector QueryExtent = FVector(10.0f, 10.0f, 10.0f);
-	if (NavSystem->ProjectPointToNavigation(PatrolPoints[PatrolIndex], OutLocation, QueryExtent))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Did I find my point??");
-		return OutLocation.Location;
-	}
-	*/
-
 }
 
 AEquipment* ABaseManaEnemy::EnemyEquip()

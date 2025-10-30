@@ -61,10 +61,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Widget)
 	FSlateBrush NotTargetedTexture;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Widget)
-	FSlateBrush EmptyTexture;
-
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Patrol, meta = (AllowPrivateAccess = "true"))
 	EPatrolType PatrolType;
 
 	UPROPERTY()
