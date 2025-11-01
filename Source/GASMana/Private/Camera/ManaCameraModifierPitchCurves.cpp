@@ -47,6 +47,13 @@ bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewI
 		AddFOV = 10.f;
 	}
 
+	if (IsLaunchUp)
+	{
+		TargetPitchToDist = 100.f;
+		InterpSpeed = 3.f;
+		AddFOV = 10.f;
+	}
+
 	if (IsRoll)
 	{
 		TargetPitchToDist = 150.f;

@@ -11,6 +11,7 @@
 #include "Camera/CameraComponent.h"
 #include "CableActor.h"
 #include "CableComponent.h"
+#include "Ability/GA_ManaPlayerLaunchUp.h"
 #include "Actors/GrappleHook.h"
 #include "Ability/GA_ManaPlayerZipToPoint.h"
 #include "Ability/GA_ManaPlayerSwing.h"
@@ -126,21 +127,24 @@ void UAC_HookShot::NearTarget()
 
 			switch (CurrentTarget->GetGrappleType())
 			{
-			case EGrappleType::E_ZipToPoint:
-				GrappleState = EGrappleState::E_ZipToPointTarget;
-				break;
-			case EGrappleType::E_Swing:
-				GrappleState = EGrappleState::E_SwingTarget;
-				CharMove->MaxWalkSpeed = 1600.f;
-				CharMove->GravityScale = 3.f;
-				//CharMove->Launch(FVector::UpVector * 10000.f);
-				OptimalSwingPoint = FindOptimalSwingPoint(PlayerCharacter);
-				SwingTargetLocation = CurrentTarget->GetActorLocation();
-				CharacterInitDirection = (SwingTargetLocation - PlayerCharacter->GetActorLocation()).GetSafeNormal();
-				break;
-			default:
-				GrappleState = EGrappleState::E_ZipToPointTarget;
-				break;
+				case EGrappleType::E_ZipToPoint:
+					GrappleState = EGrappleState::E_ZipToPointTarget;
+					break;
+				case EGrappleType::E_Swing:
+					GrappleState = EGrappleState::E_SwingTarget;
+					CharMove->MaxWalkSpeed = 1600.f;
+					CharMove->GravityScale = 3.f;
+					//CharMove->Launch(FVector::UpVector * 10000.f);
+					OptimalSwingPoint = FindOptimalSwingPoint(PlayerCharacter);
+					SwingTargetLocation = CurrentTarget->GetActorLocation();
+					CharacterInitDirection = (SwingTargetLocation - PlayerCharacter->GetActorLocation()).GetSafeNormal();
+					break;
+				case EGrappleType::E_LaunchUp:
+					GrappleState = EGrappleState::E_LaunchUpTarget;
+					break;
+				default:
+					GrappleState = EGrappleState::E_ZipToPointTarget;
+					break;
 			}
 		}
 	}
@@ -178,20 +182,61 @@ void UAC_HookShot::ZipToPointTarget(float DeltaTime)
 					if (UGA_ManaPlayerZipToPoint* ZipAbility = PlayerCharacter->GetZipAbility())
 					{
 						ZipAbility->CancelMotionTask();
-
 					}
 				}
-
 			}
 			else
 			{
 				PlayerCharacter->GetAbilitySystemComponent()->TryActivateAbilitiesByTag(PlayerCharacter->GetZipToPointTag(), true);
-
 				//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString("I'm now on Zip To Point Target State!!!"));
-
 				const FVector DirectionToTarget = (CurrentTarget->GetActorLocation() - PlayerCharacter->GetActorLocation()).GetSafeNormal();
 				const FRotator AngleToTarget = DirectionToTarget.Rotation();
+				PlayerCharacter->SetActorRotation(FMath::RInterpTo(PlayerCharacter->GetActorRotation(), AngleToTarget, DeltaTime, 7.f));
+			}
+		}
+	}
+}
 
+void UAC_HookShot::LaunchUpTarget(float DeltaTime)
+{
+	if (APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(GetOwner()))
+	{
+		FHitResult OutHit;
+		// Capsule parameters
+		const FVector CapsuleLocation = PlayerCharacter->GetActorLocation();
+		constexpr float CapsuleRadius = 48.0f;
+		constexpr float CapsuleHalfHeight = 85.0f;
+		const FQuat CapsuleRotation = FQuat::Identity;
+
+		//Trace Parameters
+		const FCollisionQueryParams QueryParams;
+
+		// Draw the debug capsule
+		//DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation, FColor::Red, false, 0.f);
+
+		const bool bHit = GetWorld()->SweepSingleByChannel(OutHit, CapsuleLocation, CapsuleLocation, CapsuleRotation, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight), QueryParams);
+
+
+		if (CurrentTarget)
+		{
+			if (bHit || PlayerCharacter->GetDistanceTo(CurrentTarget) < EndJumpDistance)
+			{
+				EndGrapple();
+
+				if (bHit)
+				{
+					if (UGA_ManaPlayerLaunchUp* LaunchAbility = PlayerCharacter->GetLaunchUpAbility())
+					{
+						LaunchAbility->CancelMotionTask();
+					}
+				}
+			}
+			else
+			{
+				PlayerCharacter->GetAbilitySystemComponent()->TryActivateAbilitiesByTag(PlayerCharacter->GetLaunchUpTag(), true);
+				//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString("I'm now on Zip To Point Target State!!!"));
+				const FVector DirectionToTarget = (CurrentTarget->GetActorLocation() - PlayerCharacter->GetActorLocation()).GetSafeNormal();
+				const FRotator AngleToTarget = DirectionToTarget.Rotation();
 				PlayerCharacter->SetActorRotation(FMath::RInterpTo(PlayerCharacter->GetActorRotation(), AngleToTarget, DeltaTime, 7.f));
 			}
 		}
@@ -450,6 +495,9 @@ void UAC_HookShot::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 		break;
 	case EGrappleState::E_SwingTarget:
 		SwingTarget(DeltaTime);
+		break;
+	case EGrappleState::E_LaunchUpTarget:
+		LaunchUpTarget(DeltaTime);
 		break;
 	default:
 		break;

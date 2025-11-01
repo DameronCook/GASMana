@@ -18,6 +18,7 @@ enum class EGrappleState : uint8
 	E_Firing UMETA(DisplayName = "Firing"),
 	E_NearTarget UMETA(DisplayName = "NearTarget"),
 	E_ZipToPointTarget UMETA(DisplayName = "ZipToPoint"),
+	E_LaunchUpTarget UMETA(DisplayName = "LaunchUp"),
 	E_SwingTarget UMETA(DisplayName = "Swing"),
 
 };
@@ -48,11 +49,14 @@ class GASMANA_API UAC_HookShot : public UActorComponent
 	void ZipToPointTarget(float DeltaTime);
 
 	UFUNCTION()
+	void LaunchUpTarget(float DeltaTime);
+
+	UFUNCTION()
 	void SwingTarget(float DeltaTime);
 
 	void PushForceAwayFromWalls(APlayerManaCharacter* PlayerCharacter, const FVector& PushAwayDirection) const;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Hooks, meta = (AllowPrivateAccess = "true"))
 	float MaxGrappleDistance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Hooks, meta = (AllowPrivateAccess = "true"))
@@ -75,7 +79,7 @@ class GASMANA_API UAC_HookShot : public UActorComponent
 	bool HitTarget = false;
 	FVector CharacterInitDirection = FVector::ZeroVector;
 
-
+	UPROPERTY()
 	AManaHookParent* CurrentTarget;
 
 	FName SocketNameStart = "hand_rSocket";

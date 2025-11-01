@@ -715,7 +715,6 @@ void APlayerManaCharacter::Hook(const FInputActionValue& Value)
 	}
 }
 
-
 void APlayerManaCharacter::Equip(const FInputActionValue& Value)
 {
 	if (const FGameplayTag EquipTag = FGameplayTag::RequestGameplayTag("Character.IsEquipping"); !GetAbilitySystemComponent()->HasMatchingGameplayTag(EquipTag))
@@ -778,8 +777,6 @@ void APlayerManaCharacter::UpdateStaminaRegen() const
 		AbilitySystem->ApplyGameplayEffectToSelf(StaminaRegenEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
 	}
 }
-
-
 
 // Overrides
 void APlayerManaCharacter::LoadMe()

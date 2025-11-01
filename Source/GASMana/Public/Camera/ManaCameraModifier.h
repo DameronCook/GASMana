@@ -45,6 +45,7 @@ protected:
 	bool IsRunning; 
 	bool IsZipToPoint;
 	bool IsSwing;
+	bool IsLaunchUp;
 	bool IsRoll;
 	bool IsAirAttack;
 	bool IsFocused;

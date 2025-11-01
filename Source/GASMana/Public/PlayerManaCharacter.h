@@ -18,6 +18,7 @@
 #include "PlayerManaCharacter.generated.h"
 
 
+class UGA_ManaPlayerLaunchUp;
 class UGA_ManaPlayerFocus;
 class UManaSpringArmComponent;
 class UCameraComponent;
@@ -149,6 +150,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Zip To Point Tag Container */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer ZipToPointTagContainer;
+	
+	/** Launch Up Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer LaunchUpTagContainer;
 
 	/** Swing Tag Container */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
@@ -224,6 +229,14 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** ZipToPoint Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Hook", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> ZipToPointClass;
+	
+	/** LaunchUp Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Hook", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> LaunchUpClass;
+	
+	/** Hook Block Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Hook", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> HookBlockClass;
 
 	/** Swing Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Hook", meta = (AllowPrivateAccess = "true"))
@@ -324,15 +337,19 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY()
 	UGA_ManaPlayerMantle* ActiveMantleAbility = nullptr;
 
-	/**Active mantle ability*/
+	/**Active hook ability*/
 	UPROPERTY()
 	UGA_ManaPlayerHook* ActiveHookAbility = nullptr;
 
-	/**Active mantle ability*/
+	/**Active Zip to point ability */
 	UPROPERTY()
 	UGA_ManaPlayerZipToPoint* ActiveZipAbility = nullptr;
+	
+	/**Active Zip to point ability */
+	UPROPERTY()
+	UGA_ManaPlayerLaunchUp* ActiveLaunchUpAbility = nullptr;
 
-	/**Active mantle ability*/
+	/**Active swing ability*/
 	UPROPERTY()
 	UGA_ManaPlayerSwing* ActiveSwingAbility = nullptr;
 
@@ -485,6 +502,8 @@ public:
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetWallRunDrainEffectClass() const { return ManaWallRunDrainClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetAirborneEffectClass() const { return AirborneEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetZipToPointEffectClass() const { return ZipToPointClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetLaunchUpEffectClass() const { return LaunchUpClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetHookBlockEffectClass() const { return HookBlockClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetSwingEffectClass() const { return SwingClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetSwingJumpEffectClass() const { return SwingJumpClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetHookEffectClass() const { return HookClass; }
@@ -493,6 +512,7 @@ public:
 
 	//Ability Classes and Tags
 	FORCEINLINE FGameplayTagContainer GetZipToPointTag() const { return ZipToPointTagContainer; }
+	FORCEINLINE FGameplayTagContainer GetLaunchUpTag() const { return LaunchUpTagContainer; }
 	FORCEINLINE FGameplayTagContainer GetSwingTag() const { return SwingTagContainer; }
 	FORCEINLINE FGameplayTagContainer GetWallRunTag() const { return WallRunTagContainer; }
 	FORCEINLINE FGameplayTagContainer GetBlockTag() const { return BlockTagContainer; }
@@ -518,6 +538,7 @@ public:
 	FORCEINLINE UGA_ManaPlayerMantle* GetMantleAbility() const { return ActiveMantleAbility; }
 	FORCEINLINE UGA_ManaPlayerHook* GetHookAbility() const { return ActiveHookAbility; }
 	FORCEINLINE UGA_ManaPlayerZipToPoint* GetZipAbility() const { return ActiveZipAbility; }
+	FORCEINLINE UGA_ManaPlayerLaunchUp* GetLaunchUpAbility() const { return ActiveLaunchUpAbility; }
 	FORCEINLINE UGA_ManaPlayerSwing* GetSwingAbility() const { return ActiveSwingAbility; }
 	FORCEINLINE UGA_ManaPlayerAirAttack* GetAirAttackAbility() const { return ActiveAirAttackAbility; }
 	FORCEINLINE UGA_ManaPlayerFocus* GetFocusAbility() const { return ActiveFocusAbility; }
@@ -531,12 +552,12 @@ public:
 	FORCEINLINE AActor* GetCombatCameraTarget() const { return CombatCameraTarget; }
 
 
-	//////////////////////////////////////
-	//Setters
+	///////////////////////////////////// -- Setters
 	FORCEINLINE UGA_ManaPlayerWallRun* SetWallRunAbility(UGA_ManaPlayerWallRun* WallRunAbility) { return ActiveWallRunAbility = WallRunAbility; }
 	FORCEINLINE UGA_ManaPlayerMantle* SetMantleAbility(UGA_ManaPlayerMantle* MantleAbility) { return ActiveMantleAbility = MantleAbility; }
 	FORCEINLINE UGA_ManaPlayerHook* SetHookAbility(UGA_ManaPlayerHook* HookAbility) { return ActiveHookAbility = HookAbility; }
 	FORCEINLINE UGA_ManaPlayerZipToPoint* SetZipToPointAbility(UGA_ManaPlayerZipToPoint* ZipAbility) { return ActiveZipAbility = ZipAbility; }
+	FORCEINLINE UGA_ManaPlayerLaunchUp* SetLaunchUpAbility(UGA_ManaPlayerLaunchUp* ZipAbility) { return ActiveLaunchUpAbility = ZipAbility; }
 	FORCEINLINE UGA_ManaPlayerSwing* SetSwingAbility(UGA_ManaPlayerSwing* SwingAbility) { return ActiveSwingAbility = SwingAbility; }
 	FORCEINLINE UGA_ManaPlayerAirAttack* SetAirAttackAbility(UGA_ManaPlayerAirAttack* AirAttack) { return ActiveAirAttackAbility = AirAttack; }
 	FORCEINLINE UGA_ManaPlayerFocus* SetFocusAbility(UGA_ManaPlayerFocus* FocusAbility) { return ActiveFocusAbility = FocusAbility; }
