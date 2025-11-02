@@ -20,18 +20,52 @@ AAIC_NPC::AAIC_NPC()
  
 	Sight->SightRadius = 1000.f;
 	Sight->LoseSightRadius = 1500.f;
-	Sight->PeripheralVisionAngleDegrees = 130.f;
+	Sight->PeripheralVisionAngleDegrees = 90.f;
  
 	//Tell the sight sense to detect everything
 	Sight->DetectionByAffiliation.bDetectEnemies = true;
-	Sight->DetectionByAffiliation.bDetectFriendlies = true;
+	Sight->DetectionByAffiliation.bDetectFriendlies = false;
 	Sight->DetectionByAffiliation.bDetectNeutrals = true;
  
 	//Register the sight sense to our Perception Component
 	AIPerceptionComponent->ConfigureSense(*Sight);
 
-	AIPerceptionComponent->OnPerceptionUpdated.AddDynamic(this, &AAIC_NPC::OnSenseUpdated);
 }
+
+void AAIC_NPC::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
+{
+	if (Actor->ActorHasTag("Player"))
+	{
+		if (Stimulus.WasSuccessfullySensed())
+		{
+			//TODO: Stop using the sensed actor variable for attacks. Rely on tags.
+			SensedActor = Actor;
+
+			GetWorldTimerManager().ClearTimer(PlayerPerceptionTimer);
+			PlayerPerceptionTimer.Invalidate();
+
+			//TODO: Make the can see player only true if the enemy has full sight of the player
+			BlackboardComp->SetValueAsBool("CanSeePlayer", true);
+			BlackboardComp->SetValueAsObject("TargetToFollow", Actor);
+		}
+		else
+		{
+			GetWorldTimerManager().SetTimer(PlayerPerceptionTimer, this, &AAIC_NPC::ClearTargetToFollow, 8.f, false);
+			BlackboardComp->SetValueAsBool("CanSeePlayer", true);
+		}
+	}
+	else if (AEquipment* Equipment = Cast<AEquipment>(Actor))
+	{
+		SensedEquipment.AddUnique(Equipment);
+	}
+}
+
+void AAIC_NPC::ClearTargetToFollow() const
+{
+	BlackboardComp->SetValueAsObject("TargetToFollow", nullptr);
+	BlackboardComp->SetValueAsBool("NoticedPlayerBefore", false);
+}
+
 
 void AAIC_NPC::BeginPlay()
 {
@@ -42,6 +76,8 @@ void AAIC_NPC::BeginPlay()
 	if (BlackboardComp) BlackboardComp->SetValueAsBool("IsRanged", bIsRanged);
 
 	RunBehaviorTree(BehaviorTree);
+
+	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AAIC_NPC::OnTargetPerceptionUpdated);
 }
 
 void AAIC_NPC::Possess(APawn* InPawn)
@@ -67,6 +103,9 @@ AActor* AAIC_NPC::GetSeeingPawn() const
 	return SensedActor ?  Cast<AActor>(SensedActor) : nullptr;
 }
 
+
+
+/*
 void AAIC_NPC::OnSenseUpdated(const TArray<AActor*>& DetectedActors)
 {
 	for (AActor* Actor : DetectedActors)
@@ -83,3 +122,4 @@ void AAIC_NPC::OnSenseUpdated(const TArray<AActor*>& DetectedActors)
 	}
 	//SensedActor = nullptr;
 }
+*/

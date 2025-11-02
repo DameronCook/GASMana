@@ -7,6 +7,7 @@
 #include "BehaviorTree/BehaviorTreeTypes.h"
 #include "AIC_NPC.generated.h"
 
+struct FAIStimulus;
 class AEquipment;
 struct FBlackboardKeySelector;
 class UAISenseConfig_Sight;
@@ -36,7 +37,10 @@ class GASMANA_API AAIC_NPC : public AAIController
 
 	/** The function that fires when the perception of our AI gets updated */
 	UFUNCTION()
-	void OnSenseUpdated(const TArray<AActor*>& DetectedActors);
+	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
+
+	UFUNCTION()
+	void ClearTargetToFollow() const;
 	
 	/** A Sight Sense config for our AI */
 	UPROPERTY()
@@ -49,6 +53,10 @@ class GASMANA_API AAIC_NPC : public AAIController
 
 	UPROPERTY()
 	TArray<AEquipment*> SensedEquipment;
+
+	UPROPERTY()
+	FTimerHandle PlayerPerceptionTimer;
+
 
 protected:
 	/** The Behavior Tree that contains the logic of our AI */
