@@ -24,6 +24,7 @@ void UBTTask_PlayMontageAndWait::OnMontageEnded(UAnimMontage* AnimMontage, bool 
 	if (AnimInstance)
 	{
 		AnimInstance->OnMontageEnded.RemoveDynamic(this, &UBTTask_PlayMontageAndWait::OnMontageEnded);
+		AnimInstance->OnMontageBlendingOut.RemoveDynamic(this, &UBTTask_PlayMontageAndWait::OnMontageEnded);
 	}
 	
 	if (BehaviorTreeComp)
@@ -44,7 +45,7 @@ EBTNodeResult::Type UBTTask_PlayMontageAndWait::ExecuteTask(UBehaviorTreeCompone
 	AIController = OwnerComp.GetAIOwner();
 	if (!AIController) return EBTNodeResult::Failed;
 
-	const ACharacter* Char = Cast<ACharacter>(AIController->GetPawn());
+	ACharacter* Char = Cast<ACharacter>(AIController->GetPawn());
 	if (!Char) return EBTNodeResult::Failed;
 
 	AnimInstance = Char->GetMesh()->GetAnimInstance();
@@ -55,6 +56,7 @@ EBTNodeResult::Type UBTTask_PlayMontageAndWait::ExecuteTask(UBehaviorTreeCompone
 	AnimInstance->Montage_Play(MontageToPlay);
 
 	AnimInstance->OnMontageEnded.AddDynamic(this, &UBTTask_PlayMontageAndWait::OnMontageEnded);
+	AnimInstance->OnMontageBlendingOut.AddDynamic(this, &UBTTask_PlayMontageAndWait::OnMontageEnded);
 	
 	return EBTNodeResult::InProgress;
 }
@@ -65,6 +67,7 @@ void UBTTask_PlayMontageAndWait::OnTaskFinished(UBehaviorTreeComponent& OwnerCom
 	if (AnimInstance)
 	{
 		AnimInstance->OnMontageEnded.RemoveDynamic(this, &UBTTask_PlayMontageAndWait::OnMontageEnded);
+		AnimInstance->OnMontageBlendingOut.RemoveDynamic(this, &UBTTask_PlayMontageAndWait::OnMontageEnded);
 		AnimInstance = nullptr;
 	}
 

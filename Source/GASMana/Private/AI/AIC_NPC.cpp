@@ -36,6 +36,7 @@ void AAIC_NPC::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
 	if (Actor->ActorHasTag("Player"))
 	{
+		GEngine->AddOnScreenDebugMessage(2, 10.f, FColor::Purple, FString::Printf(TEXT("Strength: %f"), Stimulus.Strength));
 		if (Stimulus.WasSuccessfullySensed())
 		{
 			//TODO: Stop using the sensed actor variable for attacks. Rely on tags.
@@ -65,7 +66,6 @@ void AAIC_NPC::ClearTargetToFollow() const
 	BlackboardComp->SetValueAsObject("TargetToFollow", nullptr);
 	BlackboardComp->SetValueAsBool("NoticedPlayerBefore", false);
 }
-
 
 void AAIC_NPC::BeginPlay()
 {
@@ -102,24 +102,3 @@ AActor* AAIC_NPC::GetSeeingPawn() const
 {
 	return SensedActor ?  Cast<AActor>(SensedActor) : nullptr;
 }
-
-
-
-/*
-void AAIC_NPC::OnSenseUpdated(const TArray<AActor*>& DetectedActors)
-{
-	for (AActor* Actor : DetectedActors)
-	{
-		if (AEquipment* Equipment = Cast<AEquipment>(Actor))
-		{
-			SensedEquipment.AddUnique(Equipment);
-		}
-		if (Cast<APawn>(Actor))
-		{
-			SensedActor = Actor;
-			return;
-		}
-	}
-	//SensedActor = nullptr;
-}
-*/
