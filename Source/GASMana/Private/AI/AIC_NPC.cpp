@@ -51,8 +51,8 @@ void AAIC_NPC::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 		}
 		else
 		{
-			GetWorldTimerManager().SetTimer(PlayerPerceptionTimer, this, &AAIC_NPC::ClearTargetToFollow, 8.f, false);
-			BlackboardComp->SetValueAsBool("CanSeePlayer", true);
+			GetWorldTimerManager().SetTimer(PlayerPerceptionTimer, this, &AAIC_NPC::ClearTargetToFollow, TimeToLosePlayer, false);
+			BlackboardComp->SetValueAsBool("CanSeePlayer", false);
 		}
 	}
 	else if (AEquipment* Equipment = Cast<AEquipment>(Actor))

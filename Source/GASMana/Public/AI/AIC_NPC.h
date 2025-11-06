@@ -35,6 +35,9 @@ class GASMANA_API AAIC_NPC : public AAIController
 	UPROPERTY(EditAnywhere)
 	FBlackboardKeySelector PlayerKey;
 
+	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess = "true"))
+	float TimeToLosePlayer = 15.f;
+
 	/** The function that fires when the perception of our AI gets updated */
 	UFUNCTION()
 	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
