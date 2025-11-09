@@ -33,8 +33,6 @@ class GASMANA_API ABaseManaEnemy : public AGASManaCharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Patrol, meta = (AllowPrivateAccess = "true"))
 	TArray<FVector> PatrolPoints;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Patrol, meta = (AllowPrivateAccess = "true"))
-	int PatrolIndex = 0;
 	/* Flip this to change the direction of patrol */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Patrol, meta = (AllowPrivateAccess = "true"))
 	bool PatrolDir;
@@ -71,6 +69,10 @@ protected:
 	USphereComponent* LoadSphere;
 
 public:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Patrol, meta = (AllowPrivateAccess = "true"))
+	int PatrolIndex = 0;
+	
 	UFUNCTION()
 	static void ShowHealth();
 

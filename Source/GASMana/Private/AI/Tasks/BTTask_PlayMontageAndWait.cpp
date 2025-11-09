@@ -76,3 +76,17 @@ void UBTTask_PlayMontageAndWait::OnTaskFinished(UBehaviorTreeComponent& OwnerCom
 
 	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 }
+
+EBTNodeResult::Type UBTTask_PlayMontageAndWait::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+	if (AnimInstance)
+	{
+		AnimInstance->Montage_Stop(.25f, MontageToPlay);
+	}
+
+	AnimInstance = nullptr;
+	AIController = nullptr;
+	BehaviorTreeComp = nullptr;
+	
+	return EBTNodeResult::Aborted;
+}

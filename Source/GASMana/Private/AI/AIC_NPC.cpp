@@ -36,7 +36,6 @@ void AAIC_NPC::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
 	if (Actor->ActorHasTag("Player"))
 	{
-		GEngine->AddOnScreenDebugMessage(2, 10.f, FColor::Purple, FString::Printf(TEXT("Strength: %f"), Stimulus.Strength));
 		if (Stimulus.WasSuccessfullySensed())
 		{
 			//TODO: Stop using the sensed actor variable for attacks. Rely on tags.
