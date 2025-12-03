@@ -17,5 +17,4 @@ class GASMANA_API UBTTask_EvaluateChasePlayer : public UBTTaskNode
 	UBTTask_EvaluateChasePlayer();
 
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-
 };

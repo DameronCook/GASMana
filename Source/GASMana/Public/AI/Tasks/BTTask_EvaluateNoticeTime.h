@@ -27,6 +27,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Time")
 	float MaxTimeToWait = 12.f;
 
+	UPROPERTY(EditAnywhere, Category = "Time")
 	float MaxDistance = 5000.f;
 	
 };
