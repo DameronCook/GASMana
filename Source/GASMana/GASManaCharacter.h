@@ -54,9 +54,6 @@ class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, pub
 	UAnimMontage* EquipMontageRight;
 	UPROPERTY()
 	UAnimMontage* EquipMontageLeft;
-	/** Hit React Montage*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage, meta = (AllowPrivateAccess = "true"))
-	class UAnimMontage* HitReactMontage;
 
 	/////////////////////////////////////
 	///Combat
@@ -136,10 +133,22 @@ protected:
 
 	UPROPERTY()
 	FName NextAttackMontageSection = "Attack01";
+
+	/** Attack Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer HitReactTagContainer;
+
+	/** Hit React Montage*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* HitReactMontage;
 	
 	/** Attacking Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Attack", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> AttackingEffectClass;
+
+	/** Hit React Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Attack", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> HitReactEffectClass;
 
 	//UPROPERTY()
 	//AController* MyController;
@@ -151,7 +160,7 @@ public:
 	/////////////////////////////////////////////////////////////////////
 	///Combat
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual void HandleMelee();
+	virtual void MeleeAttackNotify(FVector AttackPosition);
 
 	virtual void SetDefaultCombos() override;
 	virtual void SetNextComboSegment(FName NextCombo) override;
@@ -162,6 +171,12 @@ public:
 	/**Called for attack by controller or by input */
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual bool Attack();
+	
+	/** Called whenever the character is hit */
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void DirectionalHitReact(const FVector& HitterLocation);
+
+	FName HitReactSection;
 
 	////////////////////////////////////////////////////////////////////
 	///Gear
@@ -219,7 +234,9 @@ public:
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetDamageEffectClass() const { return DamageEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetEquipEffectClass() const { return EquipClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetAttackingEffectClass() const { return AttackingEffectClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetHitReactEffectClass() const { return HitReactEffectClass; }
 	FORCEINLINE UAnimMontage* GetHitReactMontage() const { return HitReactMontage; }
+	FORCEINLINE FName GetHitReactSection() const { return HitReactSection; }
 	FORCEINLINE UGA_ManaPlayerAttack* GetAttackAbility() const { return ActiveAttackAbility; }
 	FORCEINLINE UAnimMontage* GetEquipRightMontage() const { return EquipMontageRight; }
 	FORCEINLINE UAnimMontage* GetEquipLeftMontage() const { return EquipMontageLeft; }
@@ -237,5 +254,6 @@ public:
 	FORCEINLINE EEquipmentState SetEquipmentState(const EEquipmentState State) { return EquipmentState = State; }
 	FORCEINLINE UGA_ManaPlayerAttack* SetAttackAbility(UGA_ManaPlayerAttack* Attack) { return ActiveAttackAbility = Attack; }
 	FORCEINLINE UAnimMontage* SetAttackMontage(UAnimMontage* UAttackMontage) { return CurrentAttackMontage = UAttackMontage; }
+	FORCEINLINE UAnimMontage* SetHitReactMontage(UAnimMontage* AHitReactMontage) { return HitReactMontage = AHitReactMontage; }
 
 };

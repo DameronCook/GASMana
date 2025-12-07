@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Item/LeftHandEquipment.h"
 #include "Item/RightHandEquipment.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
 #include "Public/ManaAttributeSet.h"
@@ -127,10 +128,14 @@ void AGASManaCharacter::GrabOverlappingItem()
 			{
 			case EItemType::EIT_RightHandedEquipment:
 				REquipment = Cast<ARightHandEquipment>(Equipment);
+				//TODO: Make sure to implement a drop equipment feature
+				if (RightHandEquipment) RightHandEquipment->Destroy();
 				if (REquipment) RightHandEquipment = REquipment;
 				break;
 			case EItemType::EIT_LeftHandedEquipment:
 				LEquipment = Cast<ALeftHandEquipment>(Equipment);
+				//TODO: Make sure to implement a drop equipment feature
+				if (LeftHandEquipment) LeftHandEquipment->Destroy();
 				LeftHandEquipment = LEquipment;
 				break;
 			default:
@@ -177,6 +182,39 @@ bool AGASManaCharacter::Attack()
 	return true;
 }
 
+void AGASManaCharacter::DirectionalHitReact(const FVector& HitterLocation)
+{
+	const FVector Forward = GetActorForwardVector();
+	const FVector ImpactLowered(HitterLocation.X, HitterLocation.Y, GetActorLocation().Z);
+	const FVector ToHit = (ImpactLowered - GetActorLocation()).GetSafeNormal();
+	
+	const double CosTheta = FVector::DotProduct(Forward, ToHit);
+	double Theta = FMath::Acos(CosTheta);
+	const FVector CrossProduct = FVector::CrossProduct(Forward, ToHit);
+	Theta = FMath::RadiansToDegrees(Theta);
+
+	if (CrossProduct.Z < 0)
+	{
+		Theta *= -1.f;
+	}
+
+	HitReactSection = FName("FromBack");
+
+	if (Theta >= -45.f && Theta < 45.f)
+	{
+		HitReactSection = FName("FromFront");
+	}
+	else if (Theta >= -135.f && Theta < -45.f)
+	{
+		HitReactSection = FName("FromLeft");
+	}
+	else if (Theta >= 45.f && Theta < 135.f)
+	{
+		HitReactSection = FName("FromRight");
+	}
+
+	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(HitReactTagContainer, true);
+}
 
 
 FGameplayTagContainer AGASManaCharacter::GetAttackType() const
@@ -200,9 +238,45 @@ void AGASManaCharacter::PlayFlashEffect(FVector InColor, float FlashLength) cons
 	}
 }
 
-void AGASManaCharacter::HandleMelee()
+void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition)
 {
 	//Empty for now. Whenever other actors inherit from this, they can override this function
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Melee Attack Read");
+	UWorld* World = GetWorld();
+	float Radius = 150.f;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
+	UClass* Class = AGASManaCharacter::StaticClass();
+	TArray<AActor*> IgnoreActors;
+	IgnoreActors.Add(this);
+
+	if (TArray<AActor*> OutActors; UKismetSystemLibrary::SphereOverlapActors(GetWorld(), AttackPosition, Radius, ObjectTypes, Class, IgnoreActors, OutActors))
+	{
+		for (AActor* HitActor : OutActors)
+		{
+			if (AGASManaCharacter* HitManaCharacter = Cast<AGASManaCharacter>(HitActor))
+			{
+				if (HitManaCharacter->GetAbilitySystemComponent())
+				{
+					FGameplayTag EventTag = FGameplayTag::RequestGameplayTag(FName("Character.Damaged"));
+					FGameplayEventData EventData;
+					EventData.Instigator = this;
+					EventData.Target = HitManaCharacter;
+					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Hit Character: " + HitManaCharacter->GetName());
+
+					//TODO: Apply Gameplay Effect to take damage
+					//TODO: Kill enemy/player if they are killed by damage
+
+					//Apply knockback
+					if (IsAlive())
+					{
+						HitManaCharacter->DirectionalHitReact(GetActorLocation());
+					}
+				}
+			}
+		}
+	}
+	DrawDebugSphere(World, AttackPosition, Radius, 12, FColor::Red, false, .25f);
 }
 
 void AGASManaCharacter::PossessedBy(AController* NewController)
@@ -313,6 +387,7 @@ void AGASManaCharacter::SetNextComboSegment(const FName NextCombo)
 
 bool AGASManaCharacter::IsAlive()
 {
+	//TODO: Implement death states
 	return true;
 }
 

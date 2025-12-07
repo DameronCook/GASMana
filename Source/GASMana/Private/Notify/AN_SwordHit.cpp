@@ -6,11 +6,12 @@
 
 void UAN_SwordHit::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-	AGASManaCharacter* AManaCharacter = Cast<AGASManaCharacter>(MeshComp->GetOwner());
-
-	if (AManaCharacter)
+	if (MeshComp)
 	{
-		AManaCharacter->HandleMelee();
+		if (AGASManaCharacter* AManaCharacter = Cast<AGASManaCharacter>(MeshComp->GetOwner()))
+		{
+			//TODO: Make this match with the sword attack socket instead
+			AManaCharacter->MeleeAttackNotify(MeshComp->GetSocketLocation(FName("SwordVFXSocket")));
+		}
 	}
-	//Character
 }

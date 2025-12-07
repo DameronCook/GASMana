@@ -291,39 +291,9 @@ void APlayerManaCharacter::FinishedBlocking()
 	}
 }
 
-void APlayerManaCharacter::HandleMelee()
+void APlayerManaCharacter::MeleeAttackNotify(FVector AttackPosition)
 {
-	Super::HandleMelee();
-
-	//if (GEngine && GetCharacterMovement()->IsFalling() == false) {
-	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "AttackSWING");
-	//}
-
-	FVector Position = GetMesh()->GetSocketLocation(FName("hand_rSocket"));
-	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
-	UClass* Enemy = BaseEnemy;
-	TArray<AActor*> IgnoreActors;
-	IgnoreActors.Add(this);
-
-	if (TArray<AActor*> OutActors; UKismetSystemLibrary::SphereOverlapActors(GetWorld(), Position, 40, ObjectTypes, Enemy, IgnoreActors, OutActors))
-	{
-		for (AActor* HitActor : OutActors)
-		{
-			if (ABaseManaEnemy* HitManaCharacter = Cast<ABaseManaEnemy>(HitActor))
-			{
-				if (HitManaCharacter->GetAbilitySystemComponent())
-				{
-					FGameplayTag EventTag = FGameplayTag::RequestGameplayTag(FName("Character.Damaged"));
-					FGameplayEventData EventData;
-					EventData.Instigator = this;
-					EventData.Target = HitManaCharacter;
-					UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, EventTag, EventData);
-					HitManaCharacter->ShowHealth();
-				}
-			}
-		}
-	}
+	Super::MeleeAttackNotify(AttackPosition);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -717,11 +687,14 @@ void APlayerManaCharacter::Hook(const FInputActionValue& Value)
 
 void APlayerManaCharacter::Equip(const FInputActionValue& Value)
 {
-	if (const FGameplayTag EquipTag = FGameplayTag::RequestGameplayTag("Character.IsEquipping"); !GetAbilitySystemComponent()->HasMatchingGameplayTag(EquipTag))
+	if (!LeftHandEquipment || !RightHandEquipment)
 	{
-		GrabOverlappingItem();
+		if (const FGameplayTag EquipTag = FGameplayTag::RequestGameplayTag("Character.IsEquipping"); !GetAbilitySystemComponent()->HasMatchingGameplayTag(EquipTag))
+		{
+			GrabOverlappingItem();
+		}
 	}
-
+	
 	if (!OverlappingItem)
 	{
 		if (RightHandEquipment || LeftHandEquipment)
