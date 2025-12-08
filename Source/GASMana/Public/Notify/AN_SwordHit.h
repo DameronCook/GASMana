@@ -16,4 +16,7 @@ class GASMANA_API UAN_SwordHit : public UAnimNotify
 	
     virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack, meta = (AllowPrivateAccess = "true"))
+	bool bIsFinisher = false;
 };

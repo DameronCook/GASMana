@@ -157,6 +157,11 @@ void ABaseManaEnemy::GetMontageToPlay()
 	if (MontageToPlay) SetAttackMontage(MontageToPlay);	
 }
 
+void ABaseManaEnemy::Die()
+{
+	Super::Die();
+}
+
 void ABaseManaEnemy::ShowHealth()
 {
 	//if (GEngine)

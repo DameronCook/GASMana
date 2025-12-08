@@ -16,6 +16,11 @@
 //////////////////////////////////////////////////////////////////////////
 // AGASManaCharacter
 
+void AGASManaCharacter::Die()
+{
+	
+}
+
 AGASManaCharacter::AGASManaCharacter()
 {
 	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
@@ -60,7 +65,6 @@ void AGASManaCharacter::SetEquipment(AEquipment* Equipment)
 		
 		if (Equipment->GetEquipTypeClass())
 		{
-			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Setting Equip Type Class");
 			GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(
 				Equipment->GetEquipTypeClass()->GetDefaultObject<UGameplayEffect>(), 1.0f,
 				GetAbilitySystemComponent()->MakeEffectContext());
@@ -108,7 +112,6 @@ bool AGASManaCharacter::GotMovementInput() const
 {
 	return false;
 }
-
 
 void AGASManaCharacter::SetOverlappingItem(class AItem* Item)
 {
@@ -182,8 +185,19 @@ bool AGASManaCharacter::Attack()
 	return true;
 }
 
-void AGASManaCharacter::DirectionalHitReact(const FVector& HitterLocation)
+void AGASManaCharacter::DirectionalHitReact(const FVector& HitterLocation, bool IsFinisher)
 {
+	if (IsFinisher)
+	{
+		SetHitReactMontage(MovingReactMontage);
+	}
+	else
+	{
+		SetHitReactMontage(StationaryReactMontage);
+	}
+
+	PlayFlashEffect(HitFlashColor, 0.5f);
+	
 	const FVector Forward = GetActorForwardVector();
 	const FVector ImpactLowered(HitterLocation.X, HitterLocation.Y, GetActorLocation().Z);
 	const FVector ToHit = (ImpactLowered - GetActorLocation()).GetSafeNormal();
@@ -216,7 +230,6 @@ void AGASManaCharacter::DirectionalHitReact(const FVector& HitterLocation)
 	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(HitReactTagContainer, true);
 }
 
-
 FGameplayTagContainer AGASManaCharacter::GetAttackType() const
 {
 	return AttackTagContainer;
@@ -238,15 +251,14 @@ void AGASManaCharacter::PlayFlashEffect(FVector InColor, float FlashLength) cons
 	}
 }
 
-void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition)
+void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinisher = false)
 {
-	//Empty for now. Whenever other actors inherit from this, they can override this function
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Melee Attack Read");
+	//->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Melee Attack Read");
 	UWorld* World = GetWorld();
-	float Radius = 150.f;
+	float Radius = 225.f;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
-	UClass* Class = AGASManaCharacter::StaticClass();
+	UClass* Class = StaticClass();
 	TArray<AActor*> IgnoreActors;
 	IgnoreActors.Add(this);
 
@@ -256,27 +268,23 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition)
 		{
 			if (AGASManaCharacter* HitManaCharacter = Cast<AGASManaCharacter>(HitActor))
 			{
-				if (HitManaCharacter->GetAbilitySystemComponent())
+				if (UAbilitySystemComponent* ASC = HitManaCharacter->GetAbilitySystemComponent())
 				{
 					FGameplayTag EventTag = FGameplayTag::RequestGameplayTag(FName("Character.Damaged"));
 					FGameplayEventData EventData;
 					EventData.Instigator = this;
 					EventData.Target = HitManaCharacter;
-					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Hit Character: " + HitManaCharacter->GetName());
-
-					//TODO: Apply Gameplay Effect to take damage
 					//TODO: Kill enemy/player if they are killed by damage
-
 					//Apply knockback
 					if (IsAlive())
 					{
-						HitManaCharacter->DirectionalHitReact(GetActorLocation());
+						HitManaCharacter->DirectionalHitReact(GetActorLocation(), IsFinisher);
 					}
 				}
 			}
 		}
 	}
-	DrawDebugSphere(World, AttackPosition, Radius, 12, FColor::Red, false, .25f);
+	//DrawDebugSphere(World, AttackPosition, Radius, 12, FColor::Red, false, .25f);
 }
 
 void AGASManaCharacter::PossessedBy(AController* NewController)

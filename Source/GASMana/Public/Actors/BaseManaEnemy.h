@@ -68,6 +68,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Load)
 	USphereComponent* LoadSphere;
 
+	virtual void Die() override;
+
 public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Patrol, meta = (AllowPrivateAccess = "true"))

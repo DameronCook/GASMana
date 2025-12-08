@@ -2,7 +2,6 @@
 
 
 #include "Ability/GA_ManaCharHitReact.h"
-
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "GASMana/GASManaCharacter.h"
 
@@ -17,25 +16,12 @@ UGA_ManaCharHitReact::UGA_ManaCharHitReact()
 
 	//Blocked Tags
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling")));
-
-	/* We must *not* block anything except rolling since that's how the player enters this state
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking")));
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirAttacking")));
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne")));
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning")));
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsBlocking")));
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsHooked")));
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsEquipping")));
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree")));
-	*/
 }
 
 void UGA_ManaCharHitReact::ActivateAbility(FGameplayAbilitySpecHandle Handle,
 	const FGameplayAbilityActorInfo* ActorInfo, FGameplayAbilityActivationInfo ActivationInfo,
 	const FGameplayEventData* TriggerEventData)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Activating Hit React Ability!"));
-
 	//Next, Commit the ability
 	if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
 	{
@@ -49,13 +35,16 @@ void UGA_ManaCharHitReact::ActivateAbility(FGameplayAbilitySpecHandle Handle,
 
 	
 	if (Character) {
+		Character->PlayFlashEffect(Character->HitFlashColor, 0.2f);
 		// Play the montage and bind delegates
 		if (Character->GetHitReactMontage() && ActorInfo->AvatarActor.IsValid())
 		{
-			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("Next Combo Section: %s"), *PlayerCharacter->GetNextAttackMontageSection().ToString()));
+			/* Hypothetically, it would be easy to switch the damage effect class in the character based on the equipment type we have. Just saying*/
+			AbilitySystemComponent->ApplyGameplayEffectToSelf(Character->GetDamageEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 
 			if (UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, Character->GetHitReactMontage(), 1.0f, Character->GetHitReactSection()))
 			{
+				//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, Character->GetHitReactMontage()->GetName());
 				MontageTask->OnCompleted.AddDynamic(this, &UGA_ManaCharHitReact::OnMontageEnded);
 				MontageTask->OnInterrupted.AddDynamic(this, &UGA_ManaCharHitReact::OnMontageEnded);
 				MontageTask->OnCancelled.AddDynamic(this, &UGA_ManaCharHitReact::OnMontageEnded);
@@ -69,7 +58,7 @@ void UGA_ManaCharHitReact::ActivateAbility(FGameplayAbilitySpecHandle Handle,
 			EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		}
 
-		AbilitySystemComponent->ApplyGameplayEffectToSelf(Character->GetHitReactEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+		//AbilitySystemComponent->ApplyGameplayEffectToSelf(Character->GetHitReactEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 		
 	}
 }

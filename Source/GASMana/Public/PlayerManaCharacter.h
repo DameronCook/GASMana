@@ -446,7 +446,7 @@ public:
 
 	virtual void Blocking() override;
 
-	virtual void MeleeAttackNotify(FVector AttackPosition) override;
+	virtual void MeleeAttackNotify(FVector AttackPosition, bool IsFinisher) override;
 
 	void UpdateStaminaRegen() const;
 

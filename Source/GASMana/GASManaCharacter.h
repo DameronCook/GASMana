@@ -138,9 +138,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer HitReactTagContainer;
 
-	/** Hit React Montage*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage, meta = (AllowPrivateAccess = "true"))
+	/** Current Hit React Montage*/
+	UPROPERTY()
 	UAnimMontage* HitReactMontage;
+
+	/** Stationary React Montage*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* StationaryReactMontage;
+
+	/** Stationary React Montage*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* MovingReactMontage;
 	
 	/** Attacking Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Attack", meta = (AllowPrivateAccess = "true"))
@@ -150,8 +158,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Attack", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> HitReactEffectClass;
 
-	//UPROPERTY()
-	//AController* MyController;
+	virtual void Die();
 
 
 public:
@@ -160,7 +167,7 @@ public:
 	/////////////////////////////////////////////////////////////////////
 	///Combat
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual void MeleeAttackNotify(FVector AttackPosition);
+	virtual void MeleeAttackNotify(FVector AttackPosition, bool IsFinisher);
 
 	virtual void SetDefaultCombos() override;
 	virtual void SetNextComboSegment(FName NextCombo) override;
@@ -174,9 +181,12 @@ public:
 	
 	/** Called whenever the character is hit */
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void DirectionalHitReact(const FVector& HitterLocation);
+	void DirectionalHitReact(const FVector& HitterLocation, bool IsFinisher);
 
 	FName HitReactSection;
+	
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	FVector HitFlashColor = FVector::ZeroVector;
 
 	////////////////////////////////////////////////////////////////////
 	///Gear

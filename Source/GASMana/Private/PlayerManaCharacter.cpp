@@ -291,9 +291,9 @@ void APlayerManaCharacter::FinishedBlocking()
 	}
 }
 
-void APlayerManaCharacter::MeleeAttackNotify(FVector AttackPosition)
+void APlayerManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinisher)
 {
-	Super::MeleeAttackNotify(AttackPosition);
+	Super::MeleeAttackNotify(AttackPosition, IsFinisher);
 }
 
 //////////////////////////////////////////////////////////////////////////
