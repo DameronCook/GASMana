@@ -47,45 +47,34 @@ void UGA_ManaPlayerWallJump::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 			PlayerCharacter->GetWallRunAbility()->OnWallRunFinished();
 
 			FVector Direction;
-			FVector InputDirection = PlayerCharacter->GetCachedInputDirection().GetSafeNormal();
-			FVector WallRunDirection = WallRunComponent->GetWallRunDirection().GetSafeNormal();
-			FVector WallNormal = WallRunComponent->GetWallRunImpactNormal().GetSafeNormal();
-			FVector Forward = PlayerCharacter->GetActorForwardVector().GetSafeNormal();
-			FVector Bisector = (WallNormal + Forward).GetSafeNormal();
+			float Strength = 600.f;
+			float Duration = 0.25f;
+			
+			const FVector InputDirection = PlayerCharacter->GetCachedInputDirection().GetSafeNormal();
+			const FVector WallNormal = WallRunComponent->GetWallRunImpactNormal().GetSafeNormal();
+			const FVector Forward = PlayerCharacter->GetActorForwardVector().GetSafeNormal();
+			const FVector Bisector = (WallNormal + Forward).GetSafeNormal();
 
 			float WallDot = FVector::DotProduct(InputDirection, WallNormal);
 
 			if (WallDot > 0.1f)
 			{
 				Direction = Bisector + InputDirection;
-
-				//if (GEngine)
-				//{
-				//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Used Input!"));
-				//}
 			}
 			else
 			{
 				Direction = Bisector;
-
-				/*		if (GEngine)
-						{
-							GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Didin't use Input!"));
-						}*/
 			}
 
 			Direction.Z = 0.45f;
-
-			float Strength = 600.f; // Adjust as needed
-			float Duration = 0.25f; // Duration in seconds
-			bool bIsAdditive = false;
-			bool bDisableDestinationReachedInterrupt = false;
+			
 			UCurveFloat* StrengthOverTime = WallRunComponent->GetWallJumpCurveFloat();
 			ERootMotionFinishVelocityMode VelocityOnFinishMode = ERootMotionFinishVelocityMode::MaintainLastRootMotionVelocity;
 			FVector SetVelocityOnFinish = PlayerCharacter->GetCharacterMovement()->Velocity;
-			float ClampVelocityOnFinish = 0.f;
-
-			UAbilityTask_ApplyRootMotionConstantForce* RootMotionTask = UAbilityTask_ApplyRootMotionConstantForce::ApplyRootMotionConstantForce(this, NAME_None, Direction, Strength, Duration, false, StrengthOverTime, VelocityOnFinishMode, SetVelocityOnFinish, false, false);
+			UAbilityTask_ApplyRootMotionConstantForce* RootMotionTask =
+				UAbilityTask_ApplyRootMotionConstantForce::ApplyRootMotionConstantForce(
+					this, NAME_None, Direction, Strength, Duration, false, StrengthOverTime, VelocityOnFinishMode,
+					SetVelocityOnFinish, false, false);
 
 			if (RootMotionTask)
 			{

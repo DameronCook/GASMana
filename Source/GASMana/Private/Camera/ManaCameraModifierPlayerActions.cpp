@@ -99,6 +99,13 @@ bool UManaCameraModifierPlayerActions::ProcessViewRotation(AActor* ViewTarget, f
 			}
 		}
 
+		if (IsSwing)
+		{
+			InterpRotationSpeed = 5.f;
+
+			NewCameraRotation = PlayerChar->GetActorForwardVector().Rotation();
+		}
+
 		UManaSpringArmComponent* PlayerSpringArm = PlayerChar->GetCameraBoom();
 		PlayerSpringArm->SocketOffset = FMath::VInterpTo(PlayerSpringArm->SocketOffset, TargetCamSocketOffset, DeltaTime, InterpRotationSpeed);
 
