@@ -157,9 +157,43 @@ void ABaseManaEnemy::GetMontageToPlay()
 	if (MontageToPlay) SetAttackMontage(MontageToPlay);	
 }
 
-void ABaseManaEnemy::Die()
+void ABaseManaEnemy::Die(const FVector& HitLocation)
 {
-	Super::Die();
+	Super::Die(HitLocation);
+
+	PlayFlashEffect(HitFlashColor, 0.5f);
+
+	const FVector Forward = GetActorForwardVector();
+	const FVector ImpactLowered(HitLocation.X, HitLocation.Y, GetActorLocation().Z);
+	const FVector ToHit = (ImpactLowered - GetActorLocation()).GetSafeNormal();
+	
+	const double CosTheta = FVector::DotProduct(Forward, ToHit);
+	double Theta = FMath::Acos(CosTheta);
+	const FVector CrossProduct = FVector::CrossProduct(Forward, ToHit);
+	Theta = FMath::RadiansToDegrees(Theta);
+
+	if (CrossProduct.Z < 0)
+	{
+		Theta *= -1.f;
+	}
+
+	DeathReactSection = FName("FromBack");
+
+	if (Theta >= -45.f && Theta < 45.f)
+	{
+		DeathReactSection = FName("FromFront");
+	}
+	else if (Theta >= -135.f && Theta < -45.f)
+	{
+		DeathReactSection = FName("FromLeft");
+	}
+	else if (Theta >= 45.f && Theta < 135.f)
+	{
+		DeathReactSection = FName("FromRight");
+		
+	}
+
+	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(DeathTagContainer, true);
 }
 
 void ABaseManaEnemy::ShowHealth()

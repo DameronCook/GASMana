@@ -165,6 +165,7 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	UpdateManaRegen();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -750,6 +751,28 @@ void APlayerManaCharacter::UpdateStaminaRegen() const
 		AbilitySystem->ApplyGameplayEffectToSelf(StaminaRegenEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
 	}
 }
+
+void APlayerManaCharacter::UpdateManaRegen()
+{
+	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
+	
+	const FGameplayTag WallRunTag = FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning"));
+	if (AbilitySystem->HasMatchingGameplayTag(WallRunTag)) return;	
+	if (!AbilitySystem || !ManaRegenEffectClass)
+	{ 
+		return;
+	}
+
+	AbilitySystem->RemoveActiveGameplayEffectBySourceEffect(ManaRegenEffectClass, AbilitySystem);
+
+	
+	bool bCanRegen = GetMana_Implementation() < ManaRegenThreshold;
+	if (bCanRegen)
+	{
+		AbilitySystem->ApplyGameplayEffectToSelf(ManaRegenEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
+	}
+}
+
 
 // Overrides
 void APlayerManaCharacter::LoadMe()

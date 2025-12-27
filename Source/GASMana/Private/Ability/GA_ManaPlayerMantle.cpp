@@ -47,6 +47,7 @@ void UGA_ManaPlayerMantle::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 		if (AbilitySystemComponent)
 		{
 			AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetMantleEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+			AbilitySystemComponent->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.HookBlocked")));
 
 		}
 	}

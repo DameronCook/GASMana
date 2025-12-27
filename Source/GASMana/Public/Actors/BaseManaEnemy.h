@@ -68,7 +68,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Load)
 	USphereComponent* LoadSphere;
 
-	virtual void Die() override;
+	virtual void Die(const FVector& HitLocation) override;
 
 public:
 

@@ -34,6 +34,7 @@ class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, pub
 	/** Ability Component */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	class UAbilitySystemComponent* AbilitySystemComponent;
+	
 	/** Attributes */
 	UPROPERTY()
 	class UManaAttributeSet* Attributes;
@@ -61,6 +62,8 @@ class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, pub
 	const FName DefaultComboName = "Attack01";
 	FName ComboAttackName = DefaultComboName;
 	bool bIsAttackWindowOpen;
+
+	bool AmIAlive = true;
 
 protected:
 
@@ -158,7 +161,19 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Attack", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> HitReactEffectClass;
 
-	virtual void Die();
+	/** Death Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer DeathTagContainer;
+
+	/** Death Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Death", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> DeathEffectClass;
+	
+	/** Death React Montage*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* DeathReactMontage;
+	
+	virtual void Die(const FVector& HitLocation);
 
 
 public:
@@ -173,7 +188,7 @@ public:
 	virtual void SetNextComboSegment(FName NextCombo) override;
 
 	UFUNCTION()
-	static bool IsAlive();
+	bool IsAlive() const;
 
 	/**Called for attack by controller or by input */
 	UFUNCTION(BlueprintCallable, Category = "Combat")
@@ -184,6 +199,8 @@ public:
 	void DirectionalHitReact(const FVector& HitterLocation, bool IsFinisher);
 
 	FName HitReactSection;
+
+	FName DeathReactSection;
 	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	FVector HitFlashColor = FVector::ZeroVector;
@@ -241,23 +258,32 @@ public:
 	FORCEINLINE class UAbilitySystemComponent* GetAbilitySystemComponent() const { return AbilitySystemComponent; }
 	FORCEINLINE ARightHandEquipment* GetRightHandEquipment() const { return RightHandEquipment; }
 	FORCEINLINE ALeftHandEquipment* GetLeftHandEquipment() const { return LeftHandEquipment; }
+	
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetDamageEffectClass() const { return DamageEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetEquipEffectClass() const { return EquipClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetAttackingEffectClass() const { return AttackingEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetHitReactEffectClass() const { return HitReactEffectClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetDeathEffectClass() const { return DeathEffectClass; }
+
+	
 	FORCEINLINE UAnimMontage* GetHitReactMontage() const { return HitReactMontage; }
 	FORCEINLINE FName GetHitReactSection() const { return HitReactSection; }
-	FORCEINLINE UGA_ManaPlayerAttack* GetAttackAbility() const { return ActiveAttackAbility; }
+	
 	FORCEINLINE UAnimMontage* GetEquipRightMontage() const { return EquipMontageRight; }
 	FORCEINLINE UAnimMontage* GetEquipLeftMontage() const { return EquipMontageLeft; }
 	FORCEINLINE EEquipmentState GetEquipmentState() const { return EquipmentState; }
 	FORCEINLINE FGameplayTagContainer GetEquipTag() const { return EquipTagContainer; }
+
+	FORCEINLINE UGA_ManaPlayerAttack* GetAttackAbility() const { return ActiveAttackAbility; }
 	FORCEINLINE FName GetComboAttackName() const { return ComboAttackName; }
 	FORCEINLINE UAnimMontage* GetCurrentAttackMontage() const { return CurrentAttackMontage; }
 	FORCEINLINE FName GetNextAttackMontageSection() const { return NextAttackMontageSection; }
+
+	
 	FORCEINLINE UAnimMontage* GetPickUpMontage() const { return PickUpMontage; }
 
-
+	FORCEINLINE UAnimMontage* GetDeathMontage() const { return DeathReactMontage; }
+	FORCEINLINE FName GetDeathMontageSection() const { return DeathReactSection; }
 	
 	FORCEINLINE UAnimMontage* SetEquipMontageRight(UAnimMontage* Montage) { return EquipMontageRight = Montage; }
 	FORCEINLINE UAnimMontage* SetEquipMontageLeft(UAnimMontage* Montage) { return EquipMontageLeft = Montage; }

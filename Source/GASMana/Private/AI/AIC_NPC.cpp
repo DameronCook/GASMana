@@ -44,7 +44,6 @@ void AAIC_NPC::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 			GetWorldTimerManager().ClearTimer(PlayerPerceptionTimer);
 			PlayerPerceptionTimer.Invalidate();
 
-			//TODO: Make the can see player only true if the enemy has full sight of the player
 			BlackboardComp->SetValueAsBool("CanSeePlayer", true);
 			BlackboardComp->SetValueAsObject("TargetToFollow", Actor);
 		}
@@ -74,20 +73,9 @@ void AAIC_NPC::BeginPlay()
 
 	if (BlackboardComp) BlackboardComp->SetValueAsBool("IsRanged", bIsRanged);
 
-	RunBehaviorTree(BehaviorTree);
-
-	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AAIC_NPC::OnTargetPerceptionUpdated);
-}
-
-void AAIC_NPC::Possess(APawn* InPawn)
-{
-	Super::Possess(InPawn);
-	
-	if (BlackboardAsset) UseBlackboard(BlackboardAsset, BlackboardComp);
-
-	if (BlackboardComp) BlackboardComp->SetValueAsBool("IsRanged", bIsRanged);
-
 	ActivateTree();
+	
+	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AAIC_NPC::OnTargetPerceptionUpdated);
 }
 
 void AAIC_NPC::ActivateTree()

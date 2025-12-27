@@ -99,6 +99,7 @@ void UGA_ManaPlayerLaunchUp::EndAbility(const FGameplayAbilitySpecHandle Handle,
 		FGameplayTagContainer Tags;
 		Tags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsLaunchUp")));
 		AbilitySystemComponent->RemoveActiveEffectsWithGrantedTags(Tags);
+		AbilitySystemComponent->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.HookBlocked")));
 	}
 }
 

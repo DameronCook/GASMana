@@ -16,9 +16,9 @@
 //////////////////////////////////////////////////////////////////////////
 // AGASManaCharacter
 
-void AGASManaCharacter::Die()
+void AGASManaCharacter::Die(const FVector& HitLocation)
 {
-	
+	//Nothing for now let this be overwritten
 }
 
 AGASManaCharacter::AGASManaCharacter()
@@ -280,6 +280,10 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 					{
 						HitManaCharacter->DirectionalHitReact(GetActorLocation(), IsFinisher);
 					}
+					else
+					{
+						HitManaCharacter->DirectionalHitReact(GetActorLocation(), IsFinisher);
+					}
 				}
 			}
 		}
@@ -393,9 +397,13 @@ void AGASManaCharacter::SetNextComboSegment(const FName NextCombo)
 	bIsAttackWindowOpen = true;
 }
 
-bool AGASManaCharacter::IsAlive()
+bool AGASManaCharacter::IsAlive() const
 {
-	//TODO: Implement death states
+	if (Attributes->GetHealth() < 0.f)
+	{
+		return false;
+	}
+
 	return true;
 }
 

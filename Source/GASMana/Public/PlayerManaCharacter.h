@@ -219,6 +219,11 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Stamina", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> StaminaRegenBlockEffectClass;
 
+	/** Mana Regen Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Mana", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> ManaRegenEffectClass;
+
+
 	/** Mana Drain Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Mana", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> ManaWallRunDrainClass;
@@ -450,9 +455,17 @@ public:
 
 	void UpdateStaminaRegen() const;
 
+	void UpdateManaRegen();
+
 	virtual void LoadMe() override;
 	virtual void UnloadMe() override;
+	/** How much mana will regen to before it stops */
+	UPROPERTY(EditAnywhere)
+	float ManaRegenThreshold = 15.f;
 
+	UPROPERTY()
+	FActiveGameplayEffectHandle ActiveChargeEffect;
+	
 	//Interface overrides
 	///////////////////////////////////////
 	virtual float GetHealth_Implementation() const override;

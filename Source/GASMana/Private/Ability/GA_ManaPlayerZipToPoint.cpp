@@ -106,6 +106,7 @@ void UGA_ManaPlayerZipToPoint::EndAbility(const FGameplayAbilitySpecHandle Handl
 		Tags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsZipToPoint")));
 		AbilitySystemComponent->RemoveActiveEffectsWithGrantedTags(Tags);
 
+		AbilitySystemComponent->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.HookBlocked")));
 	}
 
 	UCharacterMovementComponent* CharMove = PlayerCharacter->GetCharacterMovement();

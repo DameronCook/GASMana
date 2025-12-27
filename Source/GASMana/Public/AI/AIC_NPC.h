@@ -72,9 +72,7 @@ protected:
 	
 public:
 	virtual void BeginPlay() override;
-
-	virtual void Possess(APawn* InPawn) override;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	UBlackboardData* BlackboardAsset;
 
