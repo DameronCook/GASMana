@@ -39,13 +39,8 @@ void UGA_ManaCharHitReact::ActivateAbility(FGameplayAbilitySpecHandle Handle,
 		// Play the montage and bind delegates
 		if (Character->GetHitReactMontage() && ActorInfo->AvatarActor.IsValid())
 		{
-			/* Hypothetically, it would be easy to switch the damage effect class in the character based on the equipment type we have. Just saying*/
-			AbilitySystemComponent->ApplyGameplayEffectToSelf(Character->GetDamageEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
-
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Applied Damage Effect?"));
 			if (UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, Character->GetHitReactMontage(), 1.0f, Character->GetHitReactSection()))
 			{
-				//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, Character->GetHitReactMontage()->GetName());
 				MontageTask->OnCompleted.AddDynamic(this, &UGA_ManaCharHitReact::OnMontageEnded);
 				MontageTask->OnInterrupted.AddDynamic(this, &UGA_ManaCharHitReact::OnMontageEnded);
 				MontageTask->OnCancelled.AddDynamic(this, &UGA_ManaCharHitReact::OnMontageEnded);

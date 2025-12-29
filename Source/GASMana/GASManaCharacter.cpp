@@ -265,21 +265,27 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 		{
 			if (AGASManaCharacter* HitManaCharacter = Cast<AGASManaCharacter>(HitActor))
 			{
-				if (UAbilitySystemComponent* ASC = HitManaCharacter->GetAbilitySystemComponent())
+				if (!HitManaCharacter->bIsDead)
 				{
-					FGameplayTag EventTag = FGameplayTag::RequestGameplayTag(FName("Character.Damaged"));
-					FGameplayEventData EventData;
-					EventData.Instigator = this;
-					EventData.Target = HitManaCharacter;
-					//TODO: Kill enemy/player if they are killed by damage
-					//Apply knockback
-					if (HitManaCharacter->IsAlive())
+					if (UAbilitySystemComponent* ASC = HitManaCharacter->GetAbilitySystemComponent())
 					{
-						HitManaCharacter->DirectionalHitReact(GetActorLocation(), IsFinisher);
-					}
-					else
-					{
-						HitManaCharacter->Die(GetActorLocation());
+						/* Hypothetically, it would be easy to switch the damage effect class in the character based on the equipment type we have. Just saying*/
+						ASC->ApplyGameplayEffectToSelf(HitManaCharacter->GetDamageEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+						GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Applied Damage Effect?"));
+						
+						FGameplayTag EventTag = FGameplayTag::RequestGameplayTag(FName("Character.Damaged"));
+						FGameplayEventData EventData;
+						EventData.Instigator = this;
+						EventData.Target = HitManaCharacter;
+						//Apply knockback
+						if (HitManaCharacter->IsAlive())
+						{
+							HitManaCharacter->DirectionalHitReact(GetActorLocation(), IsFinisher);
+						}
+						else
+						{
+							HitManaCharacter->Die(GetActorLocation());
+						}
 					}
 				}
 			}
@@ -450,10 +456,7 @@ void AGASManaCharacter::Ragdoll()
 		Capsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		Capsule->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 		Capsule->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
-		// optionally ignore visibility traces
 		Capsule->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
-
-		// Do NOT call RecreatePhysicsState() here if it caused problems; engine usually updates automatically.
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Mesh parent: %s, Hidden:%d, Simulating:%d"), *GetNameSafe(MeshComp->GetAttachParent()), MeshComp->bHiddenInGame, MeshComp->IsSimulatingPhysics());
