@@ -172,9 +172,12 @@ protected:
 	/** Death React Montage*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* DeathReactMontage;
+
+	/** Death Direction */
+	UPROPERTY()
+	EDeathType DeathType;
 	
 	virtual void Die(const FVector& HitLocation);
-
 
 public:
 	AGASManaCharacter();
@@ -188,7 +191,13 @@ public:
 	virtual void SetNextComboSegment(FName NextCombo) override;
 
 	UFUNCTION()
-	bool IsAlive() const;
+	bool IsAlive();
+
+	UPROPERTY()
+	bool bIsDead;
+
+	UFUNCTION(BlueprintCallable)
+	void Ragdoll();
 
 	/**Called for attack by controller or by input */
 	UFUNCTION(BlueprintCallable, Category = "Combat")
@@ -284,6 +293,9 @@ public:
 
 	FORCEINLINE UAnimMontage* GetDeathMontage() const { return DeathReactMontage; }
 	FORCEINLINE FName GetDeathMontageSection() const { return DeathReactSection; }
+	FORCEINLINE EDeathType GetDeathType() const { return DeathType; }
+	FORCEINLINE bool GetIsDead() const { return bIsDead; }
+	FORCEINLINE EDeathType SetDeathType(const EDeathType NewType) { return DeathType = NewType; }
 	
 	FORCEINLINE UAnimMontage* SetEquipMontageRight(UAnimMontage* Montage) { return EquipMontageRight = Montage; }
 	FORCEINLINE UAnimMontage* SetEquipMontageLeft(UAnimMontage* Montage) { return EquipMontageLeft = Montage; }

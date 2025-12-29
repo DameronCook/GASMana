@@ -41,11 +41,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Blocking")
 	bool bIsFalling = false;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dead")
+	bool bIsDead = false;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Blocking")
 	float LeanAmount = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Blocking")
 	EEquipmentState EES;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dead")
+	EDeathType DeathType;
 
 public:
 	virtual void NativeInitializeAnimation() override;
@@ -69,6 +75,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Bools")
 	void SetIsEquipping(bool bEquipping);
+
+	UFUNCTION(BlueprintCallable, Category = "Bools")
+	void SetIsDead(bool bDead);
 	
 	UFUNCTION(BlueprintCallable, Category = "Lean")
 	float Get_LeanAmount();	

@@ -42,6 +42,7 @@ void UGA_ManaCharHitReact::ActivateAbility(FGameplayAbilitySpecHandle Handle,
 			/* Hypothetically, it would be easy to switch the damage effect class in the character based on the equipment type we have. Just saying*/
 			AbilitySystemComponent->ApplyGameplayEffectToSelf(Character->GetDamageEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Applied Damage Effect?"));
 			if (UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, Character->GetHitReactMontage(), 1.0f, Character->GetHitReactSection()))
 			{
 				//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, Character->GetHitReactMontage()->GetName());
@@ -57,9 +58,6 @@ void UGA_ManaCharHitReact::ActivateAbility(FGameplayAbilitySpecHandle Handle,
 			// If no montage, just end ability immediately
 			EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		}
-
-		//AbilitySystemComponent->ApplyGameplayEffectToSelf(Character->GetHitReactEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
-		
 	}
 }
 

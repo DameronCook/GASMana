@@ -3,6 +3,7 @@
 #include "GASManaCharacter.h"
 #include "AbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Item/LeftHandEquipment.h"
 #include "Item/RightHandEquipment.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -16,10 +17,6 @@
 //////////////////////////////////////////////////////////////////////////
 // AGASManaCharacter
 
-void AGASManaCharacter::Die(const FVector& HitLocation)
-{
-	//Nothing for now let this be overwritten
-}
 
 AGASManaCharacter::AGASManaCharacter()
 {
@@ -262,7 +259,7 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 	TArray<AActor*> IgnoreActors;
 	IgnoreActors.Add(this);
 
-	if (TArray<AActor*> OutActors; UKismetSystemLibrary::SphereOverlapActors(GetWorld(), AttackPosition, Radius, ObjectTypes, Class, IgnoreActors, OutActors))
+	if (TArray<AActor*> OutActors; UKismetSystemLibrary::SphereOverlapActors(World, AttackPosition, Radius, ObjectTypes, Class, IgnoreActors, OutActors))
 	{
 		for (AActor* HitActor : OutActors)
 		{
@@ -276,13 +273,13 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 					EventData.Target = HitManaCharacter;
 					//TODO: Kill enemy/player if they are killed by damage
 					//Apply knockback
-					if (IsAlive())
+					if (HitManaCharacter->IsAlive())
 					{
 						HitManaCharacter->DirectionalHitReact(GetActorLocation(), IsFinisher);
 					}
 					else
 					{
-						HitManaCharacter->DirectionalHitReact(GetActorLocation(), IsFinisher);
+						HitManaCharacter->Die(GetActorLocation());
 					}
 				}
 			}
@@ -315,23 +312,23 @@ void AGASManaCharacter::GiveDefaultAbilities()
 		}
 	}
 
-	//Uncomment below to see what abilities and specs the player is given
-	//
-	//if (GEngine && AbilitySystemComponent)
-	//{
-	//	int32 Key = 1; // Unique key for each message
-	//	for (const FGameplayAbilitySpec& Spec : AbilitySystemComponent->GetActivatableAbilities())
-	//	{
-	//		if (Spec.Ability)
-	//		{
-	//			FString AbilityName = Spec.Ability->GetClass()->GetName();
-	//			GEngine->AddOnScreenDebugMessage(Key++, 5.0f, FColor::Yellow, FString::Printf(TEXT("Granted Ability: %s"), *AbilityName));
+	/* 	Uncomment below to see what abilities and specs the player is given
+	
+	if (GEngine && AbilitySystemComponent)
+	{
+		int32 Key = 1;
+		for (const FGameplayAbilitySpec& Spec : AbilitySystemComponent->GetActivatableAbilities())
+		{
+			if (Spec.Ability)
+			{
+				FString AbilityName = Spec.Ability->GetClass()->GetName();
+				GEngine->AddOnScreenDebugMessage(Key++, 5.0f, FColor::Yellow, FString::Printf(TEXT("Granted Ability: %s"), *AbilityName));
 
-	//			// Optionally, show asset tags
-	//			GEngine->AddOnScreenDebugMessage(Key++, 5.0f, FColor::Cyan, FString::Printf(TEXT("Ability Asset Tags: %s"), *Spec.Ability->GetAssetTags().ToString()));
-	//		}
-	//	}
-	//}
+				GEngine->AddOnScreenDebugMessage(Key++, 5.0f, FColor::Cyan, FString::Printf(TEXT("Ability Asset Tags: %s"), *Spec.Ability->GetAssetTags().ToString()));
+			}
+		}
+	}
+	*/
 }
 
 void AGASManaCharacter::EquipLeftHandGear()
@@ -397,14 +394,69 @@ void AGASManaCharacter::SetNextComboSegment(const FName NextCombo)
 	bIsAttackWindowOpen = true;
 }
 
-bool AGASManaCharacter::IsAlive() const
+bool AGASManaCharacter::IsAlive() 
 {
+	float hp = GetAbilitySystemComponent()->GetNumericAttribute(UManaAttributeSet::GetHealthAttribute());
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Health: %f"), hp));
 	if (Attributes->GetHealth() < 0.f)
 	{
 		return false;
 	}
 
 	return true;
+}
+
+void AGASManaCharacter::Die(const FVector& HitLocation)
+{
+	//Nothing for now let this be overwritten
+}
+
+void AGASManaCharacter::Ragdoll()
+{
+	if (UCharacterMovementComponent* CharacterComp = Cast<UCharacterMovementComponent>(GetMovementComponent()))
+	{
+		CharacterComp->StopMovementImmediately();
+		CharacterComp->DisableMovement();
+		CharacterComp->SetComponentTickEnabled(false);
+	}
+
+	USkeletalMeshComponent* MeshComp = GetMesh();
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+	if (!MeshComp || !MeshComp->GetPhysicsAsset())
+	{
+		return;
+	}
+
+	MeshComp->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+
+	if (UAnimInstance* AnimInst = MeshComp->GetAnimInstance())
+	{
+		AnimInst->StopAllMontages(0.0f);
+	}
+
+	MeshComp->SetCollisionProfileName(TEXT("Ragdoll"));
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	MeshComp->SetAllBodiesSimulatePhysics(true);
+	MeshComp->SetSimulatePhysics(true);
+	MeshComp->WakeAllRigidBodies();
+	MeshComp->bBlendPhysics = true;
+	MeshComp->RecreatePhysicsState();
+	MeshComp->MarkRenderStateDirty();
+	MeshComp->SetVisibility(true, true);
+
+	if (Capsule)
+	{
+		// Keep collision enabled but ignore Pawn and Camera so players / projectiles don't block
+		Capsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		Capsule->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+		Capsule->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+		// optionally ignore visibility traces
+		Capsule->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+
+		// Do NOT call RecreatePhysicsState() here if it caused problems; engine usually updates automatically.
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Mesh parent: %s, Hidden:%d, Simulating:%d"), *GetNameSafe(MeshComp->GetAttachParent()), MeshComp->bHiddenInGame, MeshComp->IsSimulatingPhysics());
 }
 
 void AGASManaCharacter::RemoveFreeTag() const

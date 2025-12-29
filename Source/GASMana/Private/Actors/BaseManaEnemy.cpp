@@ -4,6 +4,7 @@
 #include "AI/ManaEnemyAnimInstance.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NavigationSystem.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/SplineComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Item/Equipment.h"
@@ -161,6 +162,10 @@ void ABaseManaEnemy::Die(const FVector& HitLocation)
 {
 	Super::Die(HitLocation);
 
+	if (bIsDead) return;
+
+	bIsDead = true;
+	
 	PlayFlashEffect(HitFlashColor, 0.5f);
 
 	const FVector Forward = GetActorForwardVector();
@@ -178,21 +183,35 @@ void ABaseManaEnemy::Die(const FVector& HitLocation)
 	}
 
 	DeathReactSection = FName("FromBack");
+	DeathType = EDeathType::Forward;
 
 	if (Theta >= -45.f && Theta < 45.f)
 	{
 		DeathReactSection = FName("FromFront");
+		DeathType = EDeathType::Backward;
 	}
 	else if (Theta >= -135.f && Theta < -45.f)
 	{
 		DeathReactSection = FName("FromLeft");
+		DeathType = EDeathType::Right;
 	}
 	else if (Theta >= 45.f && Theta < 135.f)
 	{
 		DeathReactSection = FName("FromRight");
-		
+		DeathType = EDeathType::Left;
 	}
 
+	if (EnemyController)
+	{
+		if (UBlackboardComponent* BlackboardComponent = EnemyController->GetBlackboardComponent())
+		{
+			BlackboardComponent->SetValueAsBool("IsAlive", false);
+		}
+	}
+
+	GetTargetedWidget()->Deactivate();
+	GetTargetedWidget()->SetVisibility(false);
+	
 	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(DeathTagContainer, true);
 }
 

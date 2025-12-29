@@ -24,7 +24,7 @@ void UGA_ManaCharDie::ActivateAbility(FGameplayAbilitySpecHandle Handle, const F
 	if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
 	{
 		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Couldn't Commit HitReact!"));
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Couldn't Commit DEATH!"));
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		return;
 	}

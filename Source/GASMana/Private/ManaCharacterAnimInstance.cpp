@@ -35,8 +35,8 @@ void UManaCharacterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		EES = ManaCharacter->GetEquipmentState();
 		//GEngine->AddOnScreenDebugMessage(101, 0.1f, FColor::Orange, FString::Printf(TEXT("Equipping: %s"), bIsEquipping ? TEXT("true") : TEXT("false")));
 
-		//Do this AFTER lean
-		//VelocityLastFrame = ManaMovementComponent->GetLastUpdateVelocity();
+		bIsDead = ManaCharacter->GetIsDead();
+		DeathType = ManaCharacter->GetDeathType();
 	}
 }
 
@@ -72,6 +72,11 @@ void UManaCharacterAnimInstance::SetIsRunning(bool bRunning)
 void UManaCharacterAnimInstance::SetIsEquipping(bool bEquipping)
 {
 	bIsEquipping = bEquipping;
+}
+
+void UManaCharacterAnimInstance::SetIsDead(bool bDead)
+{
+	bIsDead = bDead;
 }
 
 float UManaCharacterAnimInstance::Get_LeanAmount()

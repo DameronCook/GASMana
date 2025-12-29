@@ -16,3 +16,12 @@ enum class EPatrolType : uint8
 	Sentry UMETA(DisplayName = "Sentry"),
 	Stationary UMETA(DisplayName = "Stationary")
 };
+
+UENUM(BlueprintType)
+enum class EDeathType : uint8
+{
+	Right UMETA(DisplayName = "Right"),
+	Left UMETA(DisplayName = "Left"),
+	Forward UMETA(DisplayName = "Forward"),
+	Backward UMETA(DisplayName = "Backward")
+};
