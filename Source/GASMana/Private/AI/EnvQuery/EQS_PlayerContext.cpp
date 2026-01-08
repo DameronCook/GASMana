@@ -10,9 +10,6 @@
 void UEQS_PlayerContext::ProvideContext(FEnvQueryInstance& QueryInstance, FEnvQueryContextData& ContextData) const
 {
 	Super::ProvideContext(QueryInstance, ContextData);
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, "Provide Context Called");
-
-	
 
 	if (!GetWorld()) return;
 	
@@ -26,7 +23,6 @@ void UEQS_PlayerContext::ProvideContext(FEnvQueryInstance& QueryInstance, FEnvQu
 	{
 		if (const AActor* SeenPawn = AICon->GetSeeingPawn())
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Providing context: %s"), *SeenPawn->GetName()));
 			UEnvQueryItemType_Actor::SetContextHelper(ContextData, SeenPawn);
 		}
 		else

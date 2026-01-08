@@ -113,6 +113,10 @@ protected:
 	/** Sets the attack montage for the attack to play */
 	virtual void GetMontageToPlay();
 
+	UFUNCTION()
+	void PlayerCharacterDieMontage(const FVector& HitLocation);
+
+
 	UPROPERTY()
 	AItem* OverlappingItem = nullptr;
 

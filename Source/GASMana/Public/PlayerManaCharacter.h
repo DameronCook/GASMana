@@ -446,6 +446,8 @@ protected:
 	/** Called for Debug refill Mana input */
 	void DEBUG_RefillMana(const FInputActionValue& Value);
 
+	virtual void Die(const FVector& HitLocation) override;
+
 public:
 	APlayerManaCharacter();
 

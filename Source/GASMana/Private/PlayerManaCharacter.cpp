@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "ManaPlayerAnimInstance.h"
+#include "ManaPlayerController.h"
 #include "Ability/GA_ManaPlayerAirAttack.h"
 #include "Ability/GA_ManaPlayerAttack.h"
 #include "Ability/GA_ManaPlayerFocus.h"
@@ -15,6 +16,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "Camera/ManaCameraModifierPitchCurves.h"
+#include "Camera/ManaPlayerCamManager.h"
 #include "Camera/ManaSpringArmComponent.h"
 #include "Components/AC_HookShot.h"
 #include "Components/AC_WallRun.h"
@@ -27,6 +29,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "UI/FadeOutScreen.h"
 
 
 APlayerManaCharacter::APlayerManaCharacter()
@@ -718,6 +721,21 @@ void APlayerManaCharacter::DEBUG_RefillMana(const FInputActionValue& Value)
 {
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
 	AbilitySystem->ApplyGameplayEffectToSelf(ManaDebugRefillEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
+}
+
+void APlayerManaCharacter::Die(const FVector& HitLocation)
+{
+	Super::Die(HitLocation);
+	if (AManaPlayerController* ManaController = Cast<AManaPlayerController>(GetController()))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "Die called on player");
+		ManaController->GetFadeWidget()->StartFadeToBlack();
+	}
+
+	PlayerCharacterDieMontage(HitLocation);
+	
+	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(DeathTagContainer, true);
+
 }
 
 //////////////////// -- Ability Regen -- \\\\\\\\\\\\\\\\\\\\\\\

@@ -237,6 +237,48 @@ void AGASManaCharacter::GetMontageToPlay()
 	if (UAnimMontage* MontageToPlay = RightHandEquipment->GetAttackCombo()) SetAttackMontage(MontageToPlay);
 }
 
+void AGASManaCharacter::PlayerCharacterDieMontage(const FVector& HitLocation)
+{
+	if (bIsDead) return;
+
+	bIsDead = true;
+	
+	PlayFlashEffect(HitFlashColor, 0.5f);
+
+	const FVector Forward = GetActorForwardVector();
+	const FVector ImpactLowered(HitLocation.X, HitLocation.Y, GetActorLocation().Z);
+	const FVector ToHit = (ImpactLowered - GetActorLocation()).GetSafeNormal();
+	
+	const double CosTheta = FVector::DotProduct(Forward, ToHit);
+	double Theta = FMath::Acos(CosTheta);
+	const FVector CrossProduct = FVector::CrossProduct(Forward, ToHit);
+	Theta = FMath::RadiansToDegrees(Theta);
+
+	if (CrossProduct.Z < 0)
+	{
+		Theta *= -1.f;
+	}
+
+	DeathReactSection = FName("FromBack");
+	DeathType = EDeathType::Forward;
+
+	if (Theta >= -45.f && Theta < 45.f)
+	{
+		DeathReactSection = FName("FromFront");
+		DeathType = EDeathType::Backward;
+	}
+	else if (Theta >= -135.f && Theta < -45.f)
+	{
+		DeathReactSection = FName("FromLeft");
+		DeathType = EDeathType::Right;
+	}
+	else if (Theta >= 45.f && Theta < 135.f)
+	{
+		DeathReactSection = FName("FromRight");
+		DeathType = EDeathType::Left;
+	}
+}
+
 void AGASManaCharacter::PlayFlashEffect(FVector InColor, float FlashLength) const
 {
 	if (USkeletalMeshComponent* CharMesh = GetMesh())
