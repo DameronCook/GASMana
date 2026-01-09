@@ -6,6 +6,12 @@
 #include "Blueprint/UserWidget.h"
 #include "UI/DeathMenu.h"
 #include "UI/FadeOutScreen.h"
+#include "UI/PauseMenu.h"
+
+AManaPlayerController::AManaPlayerController()
+{
+	bShouldPerformFullTickWhenPaused = true;
+}
 
 void AManaPlayerController::BeginPlay()
 {
@@ -17,14 +23,21 @@ void AManaPlayerController::BeginPlay()
 	// Bind the delegates to the animation events if the animation is valid
 	if (FadeWidget->GetFadeInAnim())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Fade Delegates bound?");
 		FadeWidget->BindToAnimationStarted(FadeWidget->GetFadeInAnim(), FadeWidget->GetFadeInAnimStartDelegate());
 		FadeWidget->BindToAnimationFinished(FadeWidget->GetFadeInAnim(), FadeWidget->GetFadeInAnimEndDelegate());
 		FadeWidget->BindToAnimationStarted(FadeWidget->GetFadeOutAnim(), FadeWidget->GetFadeOutAnimStartDelegate());
 		FadeWidget->BindToAnimationFinished(FadeWidget->GetFadeOutAnim(), FadeWidget->GetFadeOutAnimEndDelegate());
 	}
 
-	DeathMenuWidget = CreateWidget<UDeathMenu>(this, DeathMenuWidgetBP);
+	DeathMenu = CreateWidget<UDeathMenu>(this, DeathMenuWidgetBP);
+
+	PauseMenu = CreateWidget<UPauseMenu>(this, PauseMenuWidgetBP);
+
+	if (PauseMenu->GetPauseAnimation())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Pause Delegates bound?");
+		PauseMenu->BindToAnimationFinished(PauseMenu->GetPauseAnimation(), PauseMenu->GetPauseAnimEndedDelegate());
+	}
 	
 	FSlateApplication::Get().OnApplicationActivationStateChanged().AddUObject(this, &AManaPlayerController::OnWindowFocusChanged);
 
@@ -62,4 +75,31 @@ void AManaPlayerController::OnLevelLoaded(UWorld* LoadedWorld)
 	}
 
 	SetInputMode(FInputModeGameOnly());
+}
+
+void AManaPlayerController::ShowPauseMenu()
+{
+	if (PauseMenu)
+	{
+		PauseMenu->AddToViewport();
+		bShowMouseCursor = true;
+		PauseMenu->PlayAnimation(PauseMenu->GetPauseAnimation());
+
+		FInputModeUIOnly InputModeData;
+		InputModeData.SetWidgetToFocus(PauseMenu->TakeWidget()); 
+		InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways); 
+		SetInputMode(InputModeData);
+		PauseMenu->SetUserFocus(this);
+		
+	}
+}
+
+void AManaPlayerController::HidePauseMenu()
+{
+	if (PauseMenu)
+	{
+		PauseMenu->RemoveFromParent();
+		SetInputMode(FInputModeGameOnly());
+		bShowMouseCursor = false;
+	}
 }

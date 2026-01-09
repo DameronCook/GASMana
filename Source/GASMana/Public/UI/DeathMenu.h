@@ -28,10 +28,16 @@ protected:
 
 	UPROPERTY(EditAnywhere, meta=(BindWidget))
 	UButton* QuitButton;
+	
+    UPROPERTY(Transient, BlueprintReadOnly, meta = (BindWidgetAnim))
+	UWidgetAnimation* StartAnim;
 
 	UFUNCTION()
 	void RestartClicked();
 
 	UFUNCTION()
 	void QuitClicked();
+
+public:
+	FORCEINLINE UWidgetAnimation* GetStartAnimation() const { return StartAnim; }
 };

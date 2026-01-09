@@ -48,15 +48,23 @@ void UFadeOutScreen::FadeOutEnded()
 	UGameplayStatics::SetGamePaused(GetWorld(), true);
 	if (AManaPlayerController* PlayerController = Cast<AManaPlayerController>(GetOwningPlayer()))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Got Player Controller");
-		if (PlayerController->GetDeathMenu())
+		if (UDeathMenu* Menu = PlayerController->GetDeathMenu())
 		{
-			PlayerController->GetDeathMenu()->AddToViewport();
-			PlayerController->SetInputMode(FInputModeUIOnly());
+			Menu->AddToViewport();
+
+			Menu->PlayAnimation(Menu->GetStartAnimation());
+
+			FInputModeUIOnly InputModeData;
+			InputModeData.SetWidgetToFocus(Menu->TakeWidget()); 
+			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways); 
+			
+			PlayerController->SetInputMode(InputModeData);
+
+			Menu->SetUserFocus(PlayerController);
+			
 			PlayerController->bShowMouseCursor = true;
 		}
 	}
-	//FadeToNothing();
 }
 
 void UFadeOutScreen::FadeInStarted()

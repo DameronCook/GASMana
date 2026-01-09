@@ -103,6 +103,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Hook Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* EquipAction;
+	
+	/** Hook Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* PauseAction;
 
 	/* RELOADING */
 
@@ -440,9 +444,13 @@ protected:
 
 	/**Called for Equip input */
 	void Equip(const FInputActionValue& Value);
+	
+	/**Called for Pause input */
+	void Pause(const FInputActionValue& Value);
 
 	/** Called for Debug reload input */
 	void DEBUG_ReloadLevel(const FInputActionValue& Value);
+	
 	/** Called for Debug refill Mana input */
 	void DEBUG_RefillMana(const FInputActionValue& Value);
 

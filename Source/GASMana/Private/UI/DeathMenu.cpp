@@ -12,6 +12,7 @@ void UDeathMenu::NativeConstruct()
 
 	QuitButton->OnClicked.AddUniqueDynamic(this, &UDeathMenu::QuitClicked);
 	RestartButton->OnClicked.AddUniqueDynamic(this, &UDeathMenu::RestartClicked);
+
 }
 
 void UDeathMenu::RestartClicked()

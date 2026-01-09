@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "ManaPlayerController.generated.h"
 
+class UPauseMenu;
 class UDeathMenu;
 class UFadeOutScreen;
 /**
@@ -15,6 +16,8 @@ UCLASS()
 class GASMANA_API AManaPlayerController : public APlayerController
 {
 	GENERATED_BODY()
+
+	AManaPlayerController();
 
 protected:
 	virtual void BeginPlay() override;
@@ -36,9 +39,24 @@ private:
 	TSubclassOf<UDeathMenu> DeathMenuWidgetBP;
 
 	UPROPERTY()
-	UDeathMenu* DeathMenuWidget;
+	UDeathMenu* DeathMenu;
+
+	UPROPERTY(EditAnywhere, Category="UI")
+	TSubclassOf<UPauseMenu> PauseMenuWidgetBP;
+
+	UPROPERTY()
+	UPauseMenu* PauseMenu;
 
 public:
+
+	UFUNCTION()
+	void ShowPauseMenu();
+
+	UFUNCTION()
+	void HidePauseMenu();
+
 	FORCEINLINE UFadeOutScreen* GetFadeWidget() const { return FadeWidget; }
-	FORCEINLINE UDeathMenu* GetDeathMenu() const { return DeathMenuWidget; }
+	FORCEINLINE UDeathMenu* GetDeathMenu() const { return DeathMenu; }
+	FORCEINLINE UPauseMenu* GetPauseMenu() const { return PauseMenu; }
+	
 };

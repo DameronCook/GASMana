@@ -454,6 +454,9 @@ void APlayerManaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		// Hooking
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &APlayerManaCharacter::Equip);
 
+		//Pausing
+		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Started, this, &APlayerManaCharacter::Pause);
+
 		/* DEBUGGING */
 		//Reload level
 		EnhancedInputComponent->BindAction(DEBUG_ReloadAction, ETriggerEvent::Completed, this, &APlayerManaCharacter::DEBUG_ReloadLevel);
@@ -708,6 +711,27 @@ void APlayerManaCharacter::Equip(const FInputActionValue& Value)
 				UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 				AnimInstance->SetIsEquipping(true);
 			}
+		}
+	}
+}
+
+void APlayerManaCharacter::Pause(const FInputActionValue& Value)
+{
+	if (UGameplayStatics::IsGamePaused(GetWorld()))
+	{
+		if (AManaPlayerController* ManaController = Cast<AManaPlayerController>(GetController()))
+		{
+			UGameplayStatics::SetGamePaused(GetWorld(), false);
+			ManaController->HidePauseMenu();
+		}
+	}
+	else
+	{
+		if (AManaPlayerController* ManaController = Cast<AManaPlayerController>(GetController()))
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "Pause called from player");
+			UGameplayStatics::SetGamePaused(GetWorld(), true);
+			ManaController->ShowPauseMenu();
 		}
 	}
 }
