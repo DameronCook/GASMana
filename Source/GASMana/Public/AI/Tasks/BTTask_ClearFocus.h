@@ -4,21 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTTask_SetFocus.generated.h"
+#include "BTTask_ClearFocus.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class GASMANA_API UBTTask_SetFocus : public UBTTaskNode
+class GASMANA_API UBTTask_ClearFocus : public UBTTaskNode
 {
 	GENERATED_BODY()
 
-	UBTTask_SetFocus();
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-
-public:
-	UPROPERTY(EditAnywhere, Category = "Blackboard")
-	FBlackboardKeySelector FocusTarget;
-	
 };
