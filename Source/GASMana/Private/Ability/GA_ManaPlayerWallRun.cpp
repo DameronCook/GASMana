@@ -24,6 +24,7 @@ UGA_ManaPlayerWallRun::UGA_ManaPlayerWallRun()
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsBlocking")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsMantling")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsHitReacting")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsShieldStun")));
 
 }
 

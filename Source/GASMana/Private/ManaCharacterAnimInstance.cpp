@@ -6,6 +6,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "KismetAnimationLibrary.h"
 #include "ManaPlayerAnimInstance.h"
 #include "PlayerManaCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -37,6 +38,7 @@ void UManaCharacterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 		bIsDead = ManaCharacter->GetIsDead();
 		DeathType = ManaCharacter->GetDeathType();
+		if (bShouldStrafe) StrafeDirection = UKismetAnimationLibrary::CalculateDirection(ManaMovementComponent->GetLastUpdateVelocity(), ManaCharacter->GetActorRotation());
 	}
 }
 
@@ -93,6 +95,12 @@ float UManaCharacterAnimInstance::Get_LeanAmount()
 	}
 	return fLeanAmount;
 }
+
+void UManaCharacterAnimInstance::SetShouldStrafe(bool bStrafe)
+{
+	bShouldStrafe = bStrafe;
+}
+
 
 FVector UManaCharacterAnimInstance::CalculateRelativeAccelerationAmount()
 {

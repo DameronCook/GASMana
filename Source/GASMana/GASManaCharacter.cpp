@@ -311,14 +311,23 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 				{
 					if (UAbilitySystemComponent* ASC = HitManaCharacter->GetAbilitySystemComponent())
 					{
+						//First, check if the hit mana character is blocking
+						if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsBlocking"))))
+						{
+							//Now check if the hit character is facing the attacked character
+							const FVector Forward = HitActor->GetActorForwardVector();
+							const FVector ImpactLowered(HitActor->GetActorLocation().X, HitActor->GetActorLocation().Y, GetActorLocation().Z);
+							const FVector ToHit = (ImpactLowered - GetActorLocation()).GetSafeNormal();
+							const double CosTheta = FVector::DotProduct(Forward, ToHit);
+							if (CosTheta <= 0)
+							{
+								//If they are, then THE ATTACKING character must activate their hit stun ability
+								this->GetAbilitySystemComponent()->TryActivateAbilitiesByTag(ShieldStunTagContainer, true);
+								return;	
+							}
+						}
 						/* Hypothetically, it would be easy to switch the damage effect class in the character based on the equipment type we have. Just saying*/
 						ASC->ApplyGameplayEffectToSelf(HitManaCharacter->GetDamageEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
-						GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Applied Damage Effect?"));
-						
-						FGameplayTag EventTag = FGameplayTag::RequestGameplayTag(FName("Character.Damaged"));
-						FGameplayEventData EventData;
-						EventData.Instigator = this;
-						EventData.Target = HitManaCharacter;
 						//Apply knockback
 						if (HitManaCharacter->IsAlive())
 						{
@@ -333,7 +342,6 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 			}
 		}
 	}
-	//DrawDebugSphere(World, AttackPosition, Radius, 12, FColor::Red, false, .25f);
 }
 
 void AGASManaCharacter::PossessedBy(AController* NewController)

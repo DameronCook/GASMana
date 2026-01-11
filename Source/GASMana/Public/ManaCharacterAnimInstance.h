@@ -53,6 +53,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dead")
 	EDeathType DeathType;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Strafe")
+	bool bShouldStrafe;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Strafe")
+	float StrafeDirection;
+
 public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
@@ -80,5 +86,8 @@ public:
 	void SetIsDead(bool bDead);
 	
 	UFUNCTION(BlueprintCallable, Category = "Lean")
-	float Get_LeanAmount();	
+	float Get_LeanAmount();
+	
+	UFUNCTION(BlueprintCallable, Category = "Bools")
+	void SetShouldStrafe(bool bStrafe);	
 };

@@ -3,8 +3,10 @@
 
 #include "AI/Tasks/BTTask_SetFocus.h"
 
+#include "ManaCharacterAnimInstance.h"
 #include "AI/AIC_NPC.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "GASMana/GASManaCharacter.h"
 
 UBTTask_SetFocus::UBTTask_SetFocus()
 {
@@ -19,6 +21,14 @@ EBTNodeResult::Type UBTTask_SetFocus::ExecuteTask(UBehaviorTreeComponent& OwnerC
 			if (AActor* TargetActor = Cast<AActor>(BlackboardComp->GetValueAsObject(FocusTarget.SelectedKeyName)))
 			{
 				AIController->SetFocus(TargetActor);
+
+				if (const AGASManaCharacter* Char = Cast<AGASManaCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("SelfActor")))
+				{
+					if (UManaCharacterAnimInstance* AnimInstance = Cast<UManaCharacterAnimInstance>(Char->GetMesh()->GetAnimInstance()))
+					{
+						AnimInstance->SetShouldStrafe(true);
+					}
+				}
 				return EBTNodeResult::Succeeded;
 			}
 		}

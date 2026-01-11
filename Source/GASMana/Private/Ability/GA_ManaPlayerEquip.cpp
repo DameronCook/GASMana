@@ -22,6 +22,7 @@ UGA_ManaPlayerEquip::UGA_ManaPlayerEquip()
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsZipToPoint")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirborne")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsHitReacting")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsShieldStun")));
 
 }
 

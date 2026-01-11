@@ -3,6 +3,7 @@
 
 #include "Ability/GA_ManaCharHitReact.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
+#include "Actors/BaseManaEnemy.h"
 #include "GASMana/GASManaCharacter.h"
 
 UGA_ManaCharHitReact::UGA_ManaCharHitReact()
@@ -30,11 +31,8 @@ void UGA_ManaCharHitReact::ActivateAbility(FGameplayAbilitySpecHandle Handle,
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		return;
 	}
-	AGASManaCharacter* Character = Cast<AGASManaCharacter>(ActorInfo->AvatarActor.Get());
-	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
 
-	
-	if (Character) {
+	if (const AGASManaCharacter* Character = Cast<AGASManaCharacter>(ActorInfo->AvatarActor.Get())) {
 		Character->PlayFlashEffect(Character->HitFlashColor, 0.2f);
 		// Play the montage and bind delegates
 		if (Character->GetHitReactMontage() && ActorInfo->AvatarActor.IsValid())
@@ -61,6 +59,17 @@ void UGA_ManaCharHitReact::EndAbility(const FGameplayAbilitySpecHandle Handle,
 	bool bReplicateEndAbility, bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+	if (const AGASManaCharacter* Character = Cast<ABaseManaEnemy>(ActorInfo->AvatarActor.Get()))
+	{
+		if (Character->GetLeftHandEquipment())
+		{
+			if (Character->GetAbilitySystemComponent())
+			{
+				const FGameplayTag BlockTag = FGameplayTag::RequestGameplayTag(FName("Character.IsBlocking"));
+				Character->GetAbilitySystemComponent()->AddLooseGameplayTag(BlockTag);
+			}	
+		}
+	}
 }
 
 void UGA_ManaCharHitReact::OnMontageEnded()

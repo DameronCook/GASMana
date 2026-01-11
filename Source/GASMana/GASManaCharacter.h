@@ -116,7 +116,6 @@ protected:
 	UFUNCTION()
 	void PlayerCharacterDieMontage(const FVector& HitLocation);
 
-
 	UPROPERTY()
 	AItem* OverlappingItem = nullptr;
 
@@ -127,7 +126,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* PickUpMontage;
 
-
+	
+	/** Shield Stun Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer ShieldStunTagContainer;
+	
 	/** Attack Tag Container */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer AttackTagContainer;
@@ -137,6 +140,9 @@ protected:
 	
 	UPROPERTY()
 	UGA_ManaPlayerAttack* ActiveAttackAbility;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* ShieldStunMontage;
 
 	UPROPERTY()
 	FName NextAttackMontageSection = "Attack01";
@@ -172,6 +178,10 @@ protected:
 	/** Death Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Death", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> DeathEffectClass;
+
+	/** Death Effect Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | ShieldStun", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> ShieldStunEffectClass;
 	
 	/** Death React Montage*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage, meta = (AllowPrivateAccess = "true"))
@@ -276,11 +286,14 @@ public:
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetEquipEffectClass() const { return EquipClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetAttackingEffectClass() const { return AttackingEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetHitReactEffectClass() const { return HitReactEffectClass; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetShieldStunEffectClass() const { return ShieldStunEffectClass; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetDeathEffectClass() const { return DeathEffectClass; }
 
 	
 	FORCEINLINE UAnimMontage* GetHitReactMontage() const { return HitReactMontage; }
 	FORCEINLINE FName GetHitReactSection() const { return HitReactSection; }
+
+	FORCEINLINE UAnimMontage* GetShieldStunMontage() const { return ShieldStunMontage; }
 	
 	FORCEINLINE UAnimMontage* GetEquipRightMontage() const { return EquipMontageRight; }
 	FORCEINLINE UAnimMontage* GetEquipLeftMontage() const { return EquipMontageLeft; }
