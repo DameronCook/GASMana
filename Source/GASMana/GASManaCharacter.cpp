@@ -327,15 +327,18 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 							}
 						}
 						/* Hypothetically, it would be easy to switch the damage effect class in the character based on the equipment type we have. Just saying*/
-						ASC->ApplyGameplayEffectToSelf(HitManaCharacter->GetDamageEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
-						//Apply knockback
-						if (HitManaCharacter->IsAlive())
+						if (!ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Player.IsRolling")))
 						{
-							HitManaCharacter->DirectionalHitReact(GetActorLocation(), IsFinisher);
-						}
-						else
-						{
-							HitManaCharacter->Die(GetActorLocation());
+							ASC->ApplyGameplayEffectToSelf(HitManaCharacter->GetDamageEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+							//Apply knockback
+							if (HitManaCharacter->IsAlive())
+							{
+								HitManaCharacter->DirectionalHitReact(GetActorLocation(), IsFinisher);
+							}
+							else
+							{
+								HitManaCharacter->Die(GetActorLocation());
+							}
 						}
 					}
 				}

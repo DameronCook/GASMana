@@ -3,7 +3,10 @@
 
 #include "Ability/GA_ManaCharacterHitShieldStun.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "PlayerManaCharacter.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
+#include "Ability/GA_ManaPlayerAirAttack.h"
+#include "Actors/BaseManaEnemy.h"
 #include "GASMana/GASManaCharacter.h"
 
 UGA_ManaCharacterHitShieldStun::UGA_ManaCharacterHitShieldStun()
@@ -52,6 +55,12 @@ void UGA_ManaCharacterHitShieldStun::ActivateAbility(FGameplayAbilitySpecHandle 
 		if (UAbilitySystemComponent* ASC = Cast<UAbilitySystemComponent>(Character->GetAbilitySystemComponent()))
 		{
 			ASC->ApplyGameplayEffectToSelf(Character->GetShieldStunEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ASC->MakeEffectContext());
+			ASC->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag("Player.IsAirAttacking"));
+			FGameplayTag BlockTag = FGameplayTag::RequestGameplayTag(FName("Character.IsBlocking"));
+			if (ASC->HasMatchingGameplayTag(BlockTag))
+			{
+				ASC->RemoveLooseGameplayTag(BlockTag);
+			}
 		}
 	}
 }
@@ -71,6 +80,20 @@ void UGA_ManaCharacterHitShieldStun::EndAbility(const FGameplayAbilitySpecHandle
 			FGameplayTag StunTag = FGameplayTag::RequestGameplayTag(FName("Character.IsShieldStun"));
 			ASC->AddLooseGameplayTag(FreeTag);
 			ASC->RemoveLooseGameplayTag(StunTag);
+
+			//If we're an enemy, we need to get our blocking tag back!
+			if (Character->GetLeftHandEquipment())
+			{
+				if (Cast<ABaseManaEnemy>(ActorInfo->AvatarActor.Get()))
+				{
+					GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Granting blocking tag!"));
+					FGameplayTag BlockTag = FGameplayTag::RequestGameplayTag(FName("Character.IsBlocking"));
+					if (!ASC->HasMatchingGameplayTag(BlockTag))
+					{
+						ASC->AddLooseGameplayTag(BlockTag);
+					}
+				}
+			}
 		}
 	}
 }

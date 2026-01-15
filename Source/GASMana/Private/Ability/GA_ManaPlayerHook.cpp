@@ -2,6 +2,7 @@
 
 #include "Ability/GA_ManaPlayerHook.h"
 #include "PlayerManaCharacter.h"
+#include "Ability/GA_ManaPlayerFocus.h"
 
 UGA_ManaPlayerHook::UGA_ManaPlayerHook()
 {
@@ -43,6 +44,11 @@ void UGA_ManaPlayerHook::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 		PlayerCharacter->GetHookShot()->AttemptGrapple();
 		PlayerCharacter->SetHookAbility(this);
 		PlayerCharacter->InstantlyUnequipGear();
+
+		if (PlayerCharacter->GetFocusAbility())
+		{
+			PlayerCharacter->GetFocusAbility()->EndFocusAbility();
+		}
 		/*
 		if (GEngine)
 		{

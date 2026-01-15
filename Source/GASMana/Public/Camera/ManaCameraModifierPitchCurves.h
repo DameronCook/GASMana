@@ -17,6 +17,7 @@ class GASMANA_API UManaCameraModifierPitchCurves : public UManaCameraModifier
 	
 	UManaCameraModifierPitchCurves();
 
+
 protected:
 	//Curve to convert changes in pitch to changes in distance
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Custom, meta = (AllowAbstract = "true"))
@@ -25,9 +26,6 @@ protected:
 	//Curve to convert changes in pitch to changes in FOV
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Custom, meta = (AllowAbstract = "true"))
 	UCurveFloat* PitchToFOVCurve;
-
-	UPROPERTY()
-	APlayerManaCharacter* PlayerChar;
 	
 private:
 	float CurrentPitchToDist;
@@ -35,7 +33,4 @@ private:
 	
 public:
 	virtual bool ModifyCamera(float DeltaTime, FMinimalViewInfo& InOutPOV) override;
-
-	FORCEINLINE APlayerManaCharacter* SetPlayerCharacter(APlayerManaCharacter* PlayerManaCharacter) { return PlayerChar = PlayerManaCharacter; };
-
 };

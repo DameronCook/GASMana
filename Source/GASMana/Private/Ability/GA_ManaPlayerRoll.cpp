@@ -46,6 +46,8 @@ void UGA_ManaPlayerRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 	if (PlayerCharacter && PlayerCharacter->GetRollingEffectClass() && PlayerCharacter->GetBlockMovementEffectClass() && AbilitySystemComponent)
 	{
 		PlayerCharacter->InstantlyUnequipGear();
+		PlayerCharacter->GetCharacterMovement()->bOrientRotationToMovement = true;
+		
 		//Cancel all abilities with the Player.IsAttacking tag
 		FGameplayTag AttackTag = FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking"));
 		FGameplayTag EquipTag = FGameplayTag::RequestGameplayTag(FName("Character.IsEquipping"));
@@ -145,6 +147,10 @@ void UGA_ManaPlayerRoll::EndAbility(const FGameplayAbilitySpecHandle Handle, con
 			PlayerCharacter->UpdateStaminaRegen();
 			ActorInfo->AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ActorInfo->AbilitySystemComponent->MakeEffectContext());
 			ActorInfo->AbilitySystemComponent->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsEquipping")));
+			if (PlayerCharacter->GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFocused"))))
+			{
+				PlayerCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
+			}
 		}
 	}
 }

@@ -98,8 +98,16 @@ void UGA_ManaPlayerAttack::EndAbility(const FGameplayAbilitySpecHandle Handle, c
 			{
 				//Apparently we don't need to do anything with the anim instance?
 				PlayerChar->UpdateStaminaRegen();
+
+				if (PlayerChar->GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsBlocking"))))
+				{
+					PlayerChar->GetAbilitySystemComponent()->TryActivateAbilitiesByTag(PlayerChar->GetBlockTag());
+				}
+				
 				//UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 				//AnimInstance->SetIsAttacking(false);
+				//PlayerChar->GetMesh()->GetAnimInstance()->Montage_Stop(0.0f, PlayerChar->GetShieldBlockMontage());
+				//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Stopped block montage!"));
 			}
 		}
 	}

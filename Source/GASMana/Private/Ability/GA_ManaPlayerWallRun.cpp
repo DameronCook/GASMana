@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "ManaPlayerAnimInstance.h"
+#include "Ability/GA_ManaPlayerFocus.h"
 
 
 UGA_ManaPlayerWallRun::UGA_ManaPlayerWallRun()
@@ -61,6 +62,11 @@ void UGA_ManaPlayerWallRun::ActivateAbility(const FGameplayAbilitySpecHandle Han
 		//PlayerCharacter->PlayFlashEffect(FVector(0.f, 0.f, 1.f), 2.f); Need to play SOME VFX here when the player is wall running but this ain't it
 
 		PlayerCharacter->InstantlyUnequipGear();
+
+		if (PlayerCharacter->GetFocusAbility())
+		{
+			PlayerCharacter->GetFocusAbility()->EndFocusAbility();
+		}
 
 		/*
 		if (GEngine)

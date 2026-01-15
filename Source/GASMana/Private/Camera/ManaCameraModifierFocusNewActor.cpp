@@ -90,19 +90,7 @@ bool UManaCameraModifierFocusNewActor::ProcessViewRotation(AActor* ViewTarget, f
 	}
 	else
 	{
-		//GEngine->AddOnScreenDebugMessage(1, .1f, FColor::Orange, "No current target");
-
 		LastTarget = nullptr;
-
-		/*
-		//No new target applied, Smoothly apply player input
-		FVector2D TargetSelectionInput = TargetingActor->GetCurrentTargetSelectionInput();
-
-		FRotator DeltaRot;
-		DeltaRot.Yaw = TargetSelectionInput.X * RotationSpeed * DeltaTime;
-		DeltaRot.Pitch = TargetSelectionInput.Y * RotationSpeed * DeltaTime;
-		DeltaRot.Roll = 0.0f;
-		*/
 	}
 
 	//This will prevent further modifiers from being applied... careful

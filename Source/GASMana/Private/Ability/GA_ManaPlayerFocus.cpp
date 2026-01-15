@@ -3,9 +3,11 @@
 
 #include "Ability/GA_ManaPlayerFocus.h"
 
+#include "ManaCharacterAnimInstance.h"
 #include "PlayerManaCharacter.h"
 #include "Actors/BaseManaEnemy.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 
@@ -120,11 +122,19 @@ void UGA_ManaPlayerFocus::ActivateAbility(FGameplayAbilitySpecHandle Handle, con
 				PlayerCharacter->SetCombatCameraTarget(BestActor);
 				if (const ABaseManaEnemy* BaseEnemy = Cast<ABaseManaEnemy>(BestActor)) BaseEnemy->SetTargetWidgetIcon(true, PlayerCharacter);
 				AbilitySystemComponent->ApplyGameplayEffectToSelf(
-			PlayerCharacter->GetFocusEffectClass()->GetDefaultObject<UGameplayEffect>(),
-			1.0f,
-			AbilitySystemComponent->MakeEffectContext()
-		);
+					PlayerCharacter->GetFocusEffectClass()->GetDefaultObject<UGameplayEffect>(),
+					1.0f,
+					AbilitySystemComponent->MakeEffectContext()
+					);
 				//GEngine->AddOnScreenDebugMessage(5, 5.f, FColor::Orange, FString::Printf(TEXT("Best Actor found: %s"), *BestActor->GetName()));
+			}
+
+			PlayerCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
+			PlayerCharacter->GetCharacterMovement()->MaxWalkSpeed = PlayerCharacter->LockedOnWalkSpeed;
+			
+			if (UManaCharacterAnimInstance* ManaAnim = Cast<UManaCharacterAnimInstance>(PlayerCharacter->GetMesh()->GetAnimInstance()))
+			{
+				ManaAnim->SetShouldStrafe(true);
 			}
 		}
 	}
@@ -140,6 +150,14 @@ void UGA_ManaPlayerFocus::EndAbility(const FGameplayAbilitySpecHandle Handle,
 	if (APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get()))
 	{
 		PlayerChar->SetFocusAbility(nullptr);
+
+		PlayerChar->GetCharacterMovement()->bOrientRotationToMovement = true;
+		PlayerChar->GetCharacterMovement()->MaxWalkSpeed = PlayerChar->DefaultWalkSpeed;
+
+		if (UManaCharacterAnimInstance* ManaAnim = Cast<UManaCharacterAnimInstance>(PlayerChar->GetMesh()->GetAnimInstance()))
+		{
+			ManaAnim->SetShouldStrafe(false);
+		}
 
 		if (UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get())
 		{

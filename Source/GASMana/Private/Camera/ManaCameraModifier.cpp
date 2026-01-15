@@ -81,6 +81,7 @@ bool UManaCameraModifier::ModifyCamera(float DeltaTime, FMinimalViewInfo& InOutP
             IsLaunchUp = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsLaunchUp")));
             IsRoll = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling")));
             IsAirAttack = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAirAttacking")));
+            IsFocused = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsFocused")));
         }
     }
     return false;

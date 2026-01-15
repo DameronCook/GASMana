@@ -115,6 +115,7 @@ void UGA_ManaPlayerAirAttack::EndAbility(const FGameplayAbilitySpecHandle Handle
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Air Attack Ability Ended");
 
 	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(CurrentActorInfo->AvatarActor.Get());
 
@@ -138,9 +139,6 @@ void UGA_ManaPlayerAirAttack::OnJumpLanded()
 			MontageTask->ReadyForActivation();
 		}
 	}
-
+	
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
-
 }
-
-

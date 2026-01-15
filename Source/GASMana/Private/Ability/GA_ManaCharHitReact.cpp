@@ -51,6 +51,12 @@ void UGA_ManaCharHitReact::ActivateAbility(FGameplayAbilitySpecHandle Handle,
 			// If no montage, just end ability immediately
 			EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		}
+
+		if (Character->GetAbilitySystemComponent())
+		{
+			Character->GetAbilitySystemComponent()->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag("Player.IsAirAttacking"));
+		}
+
 	}
 }
 
@@ -65,8 +71,11 @@ void UGA_ManaCharHitReact::EndAbility(const FGameplayAbilitySpecHandle Handle,
 		{
 			if (Character->GetAbilitySystemComponent())
 			{
-				const FGameplayTag BlockTag = FGameplayTag::RequestGameplayTag(FName("Character.IsBlocking"));
-				Character->GetAbilitySystemComponent()->AddLooseGameplayTag(BlockTag);
+				FGameplayTag BlockTag = FGameplayTag::RequestGameplayTag(FName("Character.IsBlocking"));
+				if (!Character->GetAbilitySystemComponent()->HasMatchingGameplayTag(BlockTag))
+				{
+					Character->GetAbilitySystemComponent()->AddLooseGameplayTag(BlockTag);
+				}
 			}	
 		}
 	}

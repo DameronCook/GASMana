@@ -18,6 +18,7 @@
 #include "PlayerManaCharacter.generated.h"
 
 
+class UManaPlayerAnimInstance;
 class UGA_ManaPlayerLaunchUp;
 class UGA_ManaPlayerFocus;
 class UManaSpringArmComponent;
@@ -390,6 +391,9 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY()
 	AActor* OverlappingItemActor = nullptr;
 
+	UPROPERTY()
+	UManaPlayerAnimInstance* ManaPlayerAnimInstance;
+
 	UFUNCTION()
 	void OnLoaderSphereOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	                           int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -415,6 +419,10 @@ protected:
 
 	virtual void Jump() override;
 
+	void UpdateFocusedCamera(float DeltaTime);
+	
+	FRotator GetCurrentFocusingDirection() const;
+
 	UFUNCTION(BlueprintCallable)
 	void OnMantleEnded();
 
@@ -434,7 +442,10 @@ protected:
 
 	/**Called for block input */
 	void Block(const FInputActionValue& Value);
+	void RemoveBlockEffect() const;
 	void StopBlock(const FInputActionValue& Value);
+	void UpdateBlockingState() const;
+
 
 	/**Called for roll input */
 	void Roll(const FInputActionValue& Value);
@@ -475,6 +486,13 @@ public:
 
 	UPROPERTY()
 	FActiveGameplayEffectHandle ActiveChargeEffect;
+
+
+	UPROPERTY(EditAnywhere)
+	float DefaultWalkSpeed = 700;
+	
+	UPROPERTY(EditAnywhere)
+	float LockedOnWalkSpeed = 300;
 	
 	//Interface overrides
 	///////////////////////////////////////
@@ -553,6 +571,7 @@ public:
 	FORCEINLINE UAnimMontage* GetZipToPointMontage() const { return ZipToPointMontage; }
 	FORCEINLINE UAnimMontage* GetSwingMontage() const { return SwingMontage; }
 	FORCEINLINE UAnimMontage* GetThrowHookMontage() const { return ThrowHookMontage; }
+	FORCEINLINE UAnimMontage* GetShieldBlockMontage() const { return ShieldBlockMontage; }
 
 	FORCEINLINE UCurveFloat* GetDiveRollCurveFloat() const { return DiveRollCurveFloat; }
 	FORCEINLINE UCurveFloat* GetZipToPointCurveFloat() const { return ZipToPointCurveFloat; }

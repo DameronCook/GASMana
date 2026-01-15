@@ -86,7 +86,6 @@ bool UManaCameraModifierPlayerActions::ProcessViewRotation(AActor* ViewTarget, f
 			TargetCamSocketOffset = FVector(0.f, 150.f, 0.f);
 
 		}
-
 		
 		if (IsFocused)
 		{

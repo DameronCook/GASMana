@@ -8,7 +8,7 @@
 #include "Kismet/KismetMathLibrary.h"
 
 UManaCameraModifierPitchCurves::UManaCameraModifierPitchCurves() : PitchToDistanceCurve(nullptr),
-                                                                   PitchToFOVCurve(nullptr), PlayerChar(nullptr),
+                                                                   PitchToFOVCurve(nullptr),
                                                                    CurrentPitchToDist(0),
                                                                    CurrentAddFOV(0)
 {
@@ -58,7 +58,6 @@ bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewI
 	{
 		TargetPitchToDist = 150.f;
 		InterpSpeed = 5.f;
-		AddFOV = 10.f;
 	}
 
 	if (IsAirAttack)
@@ -70,21 +69,33 @@ bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewI
 
 	if (IsFocused)
 	{
-		if (PlayerChar)
+		TargetPitchToDist = 300.f;
+		if (!IsRoll)
 		{
-			if (const AActor* Target = PlayerChar->GetCombatCameraTarget())
+			if (const APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(CameraOwner->GetViewTarget()))
 			{
-				TargetPitchToDist = 150.f;
-				//GEngine->AddOnScreenDebugMessage(8, 5.f, FColor::Purple, FString::Printf(TEXT("Dist: %f"), PlayerChar->GetDistanceTo(Target)));
-				InterpSpeed = 7.f;
+				if (AActor* Target = PlayerChar->GetCombatCameraTarget())
+				{
+					//Set pitch to dist to closer depending on the player to the combat target
+					const float Dist = PlayerChar->GetDistanceTo(Target);
+					TargetPitchToDist = UKismetMathLibrary::MapRangeClamped(Dist, 300.f, 3000.f, 275.f, 1200.f);
+					GEngine->AddOnScreenDebugMessage(9, 5.f, FColor::Purple, FString::Printf(TEXT("Dist: %f"), Dist));
+				}
 			}
 		}
+		else
+		{
+			TargetPitchToDist = 400.f;
+		}
+		 
+		InterpSpeed = 5.f;
 	}
 
 	CurrentPitchToDist = FMath::FInterpTo(CurrentPitchToDist, TargetPitchToDist, DeltaTime, InterpSpeed);
 	CurrentAddFOV = FMath::FInterpTo(CurrentAddFOV, AddFOV, DeltaTime, InterpSpeed);
 
-	//GEngine->AddOnScreenDebugMessage(7, 5.f, FColor::Purple, FString::Printf(TEXT("Pitch to dist: %f"), CurrentPitchToDist));
+	GEngine->AddOnScreenDebugMessage(7, 5.f, FColor::Purple, FString::Printf(TEXT("Pitch to dist: %f"), CurrentPitchToDist));
+	GEngine->AddOnScreenDebugMessage(8, 5.f, FColor::Purple, FString::Printf(TEXT("TargetPitch to dist: %f"), TargetPitchToDist));
 	FVector DesiredLocation = CamLocation - CamRotation.RotateVector(FVector::ForwardVector) * CurrentPitchToDist;
 
 	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(SpringArm), false, GetViewTarget());

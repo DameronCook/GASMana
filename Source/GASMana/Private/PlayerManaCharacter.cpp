@@ -16,7 +16,6 @@
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "Camera/ManaCameraModifierPitchCurves.h"
-#include "Camera/ManaPlayerCamManager.h"
 #include "Camera/ManaSpringArmComponent.h"
 #include "Components/AC_HookShot.h"
 #include "Components/AC_WallRun.h"
@@ -28,7 +27,6 @@
 #include "Item/RightHandEquipment.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "UI/FadeOutScreen.h"
 
 
@@ -51,7 +49,7 @@ APlayerManaCharacter::APlayerManaCharacter()
 	// instead of recompiling to adjust them
 	GetCharacterMovement()->JumpZVelocity = 700.f;
 	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
@@ -86,6 +84,10 @@ APlayerManaCharacter::APlayerManaCharacter()
 	LoaderSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
 	LoaderSphere->SetCollisionObjectType(ECC_WorldDynamic);
 	LoaderSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+
+	//Blocking
+	CurrentBlockingMontage = ShieldBlockMontage; //In the future, set this based on cur equipment
+
 }
 
 void APlayerManaCharacter::OnLoaderSphereOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -145,16 +147,7 @@ void APlayerManaCharacter::BeginPlay()
 			PlayerHUD = CreateWidget<UUserWidget>(PlayerController, PlayerHUDClass);
 			PlayerHUD->AddToViewport();
 		}
-
-		if (APlayerCameraManager* CameraManager = PlayerController->PlayerCameraManager)
-		{
-			// Add the modifier and pass a reference to this character.
-
-			if (UManaCameraModifierPitchCurves* Modifier = Cast<UManaCameraModifierPitchCurves>(CameraManager->AddNewCameraModifier(UManaCameraModifierPitchCurves::StaticClass())))
-			{
-				Modifier->SetPlayerCharacter(this);
-			}
-		}
+		
 	}
 
 	if (LoaderSphere)
@@ -162,13 +155,21 @@ void APlayerManaCharacter::BeginPlay()
 		LoaderSphere->OnComponentBeginOverlap.AddDynamic(this, &APlayerManaCharacter::OnLoaderSphereOverlap);
 		LoaderSphere->OnComponentEndOverlap.AddDynamic(this, &APlayerManaCharacter::OnLoaderEndOverlap);
 	}
+
+	ManaPlayerAnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 }
+
 
 void APlayerManaCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 	UpdateManaRegen();
+
+	UpdateFocusedCamera(DeltaTime);
+	
+	UpdateBlockingState();
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -271,27 +272,59 @@ void APlayerManaCharacter::Blocking()
 {
 	Super::Blocking();
 
-	if (UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance()))
+	CurrentBlockingMontage = ShieldBlockMontage; //In the future, set this based on cur equipment
+
+
+	bool bHasBlockingTag = GetAbilitySystemComponent()->HasMatchingGameplayTag(
+		FGameplayTag::RequestGameplayTag(FName("Player.IsBlocking"))
+	);
+
+	if (!ManaPlayerAnimInstance) return;
+
+	if (bHasBlockingTag)
 	{
-		AnimInstance->SetIsBlocking(true);
-		CurrentBlockingMontage = ShieldBlockMontage; //In the future, set this based on cur equipment
-		if (!AnimInstance->Montage_IsPlaying(CurrentBlockingMontage)) {
-			//do something here, maybe it's overwriting itself above???
+		ManaPlayerAnimInstance->SetIsBlocking(true);
+
+		if (!ManaPlayerAnimInstance->Montage_IsPlaying(CurrentBlockingMontage))
+		{
+			ManaPlayerAnimInstance->SetIsBlocking(true);
+
+
+			float Duration = ManaPlayerAnimInstance->Montage_Play(CurrentBlockingMontage, 1.0f);
+			UE_LOG(LogTemp, Log, TEXT("Block montage play returned %f"), Duration);
+		}
+	}
+	else
+	{
+		ManaPlayerAnimInstance->SetIsBlocking(false);
+
+		if (ManaPlayerAnimInstance->Montage_IsPlaying(CurrentBlockingMontage))
+		{
+			ManaPlayerAnimInstance->Montage_Stop(0.05f, CurrentBlockingMontage);
+		}
+	}
+		/*
+	if (ManaPlayerAnimInstance)
+	{
+		if (!ManaPlayerAnimInstance->Montage_IsPlaying(CurrentAttackMontage)) {
 			//AnimInstance->Montage_Play(CurrentBlockingMontage);
+			ManaPlayerAnimInstance->SetIsBlocking(true);
 			PlayAnimMontage(CurrentBlockingMontage);
 		}
 	}
+	*/
 }
-
 
 void APlayerManaCharacter::FinishedBlocking()
 {
 	Super::FinishedBlocking();
 
-	if (UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance()))
+	RemoveBlockEffect();
+
+	if (ManaPlayerAnimInstance)
 	{
-		AnimInstance->SetIsBlocking(false);
-		AnimInstance->Montage_Stop(.2f, CurrentBlockingMontage);
+		ManaPlayerAnimInstance->SetIsBlocking(false);
+		ManaPlayerAnimInstance->Montage_Stop(.2f, CurrentBlockingMontage);
 	}
 }
 
@@ -299,6 +332,18 @@ void APlayerManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFini
 {
 	Super::MeleeAttackNotify(AttackPosition, IsFinisher);
 }
+
+void APlayerManaCharacter::UpdateBlockingState() const
+{
+	if (GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Character.IsBlocking")))
+	{
+		if (!ManaPlayerAnimInstance->Montage_IsPlaying(CurrentBlockingMontage))
+		{
+			float Duration = ManaPlayerAnimInstance->Montage_Play(CurrentBlockingMontage, 1.0f);
+		}
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 //Implementation
@@ -403,6 +448,22 @@ void APlayerManaCharacter::OnBlockingTagChanged(const FGameplayTag Tag, int32 Ne
     }
 }
 
+void APlayerManaCharacter::UpdateFocusedCamera(float DeltaTime)
+{
+	if (GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsFocused"))))
+	{
+		const FRotator DesiredFocusRot = GetCurrentFocusingDirection() - FRotator(15, 0, 0);
+
+		const FRotator CurrentFocusRot = FMath::RInterpTo(Controller->GetControlRotation(), DesiredFocusRot, DeltaTime, 3.f);
+		
+		Controller->SetControlRotation(CurrentFocusRot);
+		
+		if (!GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling"))))
+		{
+			SetActorRotation(FRotator(0, CurrentFocusRot.Yaw, 0));
+		}
+	}
+}
 
 //////////////////// -- Input -- \\\\\\\\\\\\\\\\\\\\\\\
 
@@ -486,10 +547,6 @@ void APlayerManaCharacter::Jump()
 		AbilitySystem->TryActivateAbilitiesByTag(SwingJumpTagContainer, true);
 		return;
 	}
-
-	//if (GEngine) {
-	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, "Jump!");
-	//}
 }
 
 void APlayerManaCharacter::OnMantleEnded()
@@ -497,11 +554,21 @@ void APlayerManaCharacter::OnMantleEnded()
 	GetMantleAbility()->OnMantleEnded();
 }
 
+FRotator APlayerManaCharacter::GetCurrentFocusingDirection() const
+{
+	if (CombatCameraTarget)
+	{
+		return UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), CombatCameraTarget->GetActorLocation());
+	}
+	return GetActorRotation();
+}
+
 void APlayerManaCharacter::Move(const FInputActionValue& Value)
 {
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
 	bool IsFree = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFree")));
 	bool IsSwinging = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwinging")));
+	bool IsFocusing = AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsFocused")));
 	
 	if (AbilitySystem)
 	{
@@ -510,16 +577,15 @@ void APlayerManaCharacter::Move(const FInputActionValue& Value)
 
 		// Add or remove the running tag based on input
 		FGameplayTag RunningTag = FGameplayTag::RequestGameplayTag(FName("Character.IsRunning"));
-		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 		if (!MovementVector.IsNearlyZero())
 		{
 			if (!AbilitySystem->HasMatchingGameplayTag(RunningTag))
 			{
 				AbilitySystem->AddLooseGameplayTag(RunningTag);
 			}
-			if (AnimInstance)
+			if (ManaPlayerAnimInstance)
 			{
-				AnimInstance->SetIsRunning(true);
+				ManaPlayerAnimInstance->SetIsRunning(true);
 			}
 		}
 		else
@@ -528,23 +594,33 @@ void APlayerManaCharacter::Move(const FInputActionValue& Value)
 			{
 				AbilitySystem->RemoveLooseGameplayTag(RunningTag);
 			}
-			if (AnimInstance)
+			if (ManaPlayerAnimInstance)
 			{
-				AnimInstance->SetIsRunning(false);
+				ManaPlayerAnimInstance->SetIsRunning(false);
 			}
 		}
 
 		if (Controller != nullptr)
 		{
-			// find out which way is forward
-			const FRotator Rotation = Controller->GetControlRotation();
-			const FRotator YawRotation(0, Rotation.Yaw, 0);
-
 			// get forward vector
-			const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-
-			// get right vector 
-			const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+			FVector ForwardDirection;
+			FVector RightDirection;
+			if (IsFocusing)
+			{
+				// find out which way is forward
+				const FRotator Rotation = GetCurrentFocusingDirection();
+				const FRotator YawRotation(0, Rotation.Yaw, 0);
+				ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+				RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+			}
+			else
+			{
+				// find out which way is forward
+				const FRotator Rotation = Controller->GetControlRotation();
+				const FRotator YawRotation(0, Rotation.Yaw, 0);
+				ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+				RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+			}
 
 			CachedInputDirection = (ForwardDirection * MovementVector.Y + RightDirection * MovementVector.X).GetSafeNormal();
 
@@ -559,7 +635,6 @@ void APlayerManaCharacter::Move(const FInputActionValue& Value)
 			{
 				GetCharacterMovement()->AddForce(GamepadRightSwingForce(MovementVector.X));
 				GetCharacterMovement()->AddForce(GamepadForwardSwingForce(MovementVector.Y));
-				//GEngine->AddOnScreenDebugMessage(6, .1f, FColor::Purple, "Applying Swinging Force and input!");
 			}
 		}
 	}
@@ -584,8 +659,10 @@ bool APlayerManaCharacter::Attack()
 {
 	if (Super::Attack())
 	{
-		UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-		AnimInstance->SetIsAttacking(true);
+		if (ManaPlayerAnimInstance)
+		{
+			ManaPlayerAnimInstance->SetIsAttacking(true);
+		}
 		return true;
 	}
 	return false;
@@ -661,15 +738,20 @@ void APlayerManaCharacter::Block(const FInputActionValue& Value)
 	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(FocusTagContainer, true);
 }
 
+void APlayerManaCharacter::RemoveBlockEffect() const
+{
+	FGameplayTagContainer Tag;
+	Tag.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsBlocking")));
+	GetAbilitySystemComponent()->RemoveActiveEffectsWithGrantedTags(Tag);
+}
+
 void APlayerManaCharacter::StopBlock(const FInputActionValue& Value)
 {
 	//if (GEngine && GetCharacterMovement()->IsFalling() == false) {
 	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "StopBlock");
 	//}
 
-	FGameplayTagContainer Tag;
-	Tag.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsBlocking")));
-	GetAbilitySystemComponent()->RemoveActiveEffectsWithGrantedTags(Tag);
+	RemoveBlockEffect();
 	
 	if (ActiveFocusAbility) ActiveFocusAbility->EndFocusAbility();
 	
@@ -688,7 +770,7 @@ void APlayerManaCharacter::Hook(const FInputActionValue& Value)
 	{
 		GetAbilitySystemComponent()->TryActivateAbilitiesByTag(HookTagContainer, true);
 		PlayFlashEffect(FVector(0.f, 0.f, 1.f), .5f);
-		GetMesh()->GetAnimInstance()->Montage_Play(GetThrowHookMontage());
+		ManaPlayerAnimInstance->Montage_Play(GetThrowHookMontage());
 	}
 }
 
@@ -708,8 +790,11 @@ void APlayerManaCharacter::Equip(const FInputActionValue& Value)
 		{
 			if (GetAbilitySystemComponent()->TryActivateAbilitiesByTag(EquipTagContainer, true))
 			{
-				UManaPlayerAnimInstance* AnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-				AnimInstance->SetIsEquipping(true);
+				if (ManaPlayerAnimInstance)
+				{
+					ManaPlayerAnimInstance->SetIsEquipping(true);
+
+				}
 			}
 		}
 	}
@@ -761,6 +846,7 @@ void APlayerManaCharacter::Die(const FVector& HitLocation)
 	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(DeathTagContainer, true);
 
 }
+
 
 //////////////////// -- Ability Regen -- \\\\\\\\\\\\\\\\\\\\\\\
 
@@ -814,7 +900,6 @@ void APlayerManaCharacter::UpdateManaRegen()
 		AbilitySystem->ApplyGameplayEffectToSelf(ManaRegenEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
 	}
 }
-
 
 // Overrides
 void APlayerManaCharacter::LoadMe()
