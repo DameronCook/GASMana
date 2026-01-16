@@ -3,13 +3,12 @@
 #include "AI/AIC_NPC.h"
 #include "AI/ManaEnemyAnimInstance.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "NavigationSystem.h"
-#include "Components/CapsuleComponent.h"
 #include "Components/SplineComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Item/Equipment.h"
 #include "Item/RightHandEquipment.h"
 #include "Item/LeftHandEquipment.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "UI/CameraTarget.h"
 
 ABaseManaEnemy::ABaseManaEnemy()
@@ -137,6 +136,30 @@ void ABaseManaEnemy::UnloadMe()
 	if (UBlackboardComponent* BlackboardComponent = EnemyController->GetBlackboardComponent()) BlackboardComponent->SetValueAsBool("AmILoaded", false);
 }
 
+void ABaseManaEnemy::DirectionalHitReact(const FVector& HitterLocation, bool IsFinisher)
+{
+	Super::DirectionalHitReact(HitterLocation, IsFinisher);
+
+	/*
+	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), HitterLocation));
+	
+	if (EnemyController)
+	{
+		if (UBlackboardComponent* BlackboardComponent = EnemyController->GetBlackboardComponent())
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "Got controller and blackboard component!");
+
+			if (EnemyController->GetSensedActor())
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "Setting target to follow!");
+
+				BlackboardComponent->SetValueAsObject("TargetToFollow", EnemyController->GetSensedActor());
+			}
+		}
+	}
+	*/
+}
+
 void ABaseManaEnemy::GetMontageToPlay()
 {
 	UAnimMontage* MontageToPlay;
@@ -191,16 +214,6 @@ bool ABaseManaEnemy::DoMeleeAttack()
 
 void ABaseManaEnemy::SetTargetWidgetIcon(const bool IsTargeted, const AActor* Caller) const
 {
-	/*
-	if (GetDistanceTo(Caller) >= 5000.f)
-	{
-		if (UCameraTarget* CamTarget = Cast<UCameraTarget>(TargetedWidget->GetUserWidgetObject()))
-		{
-			CamTarget->SetTargetBrush(EmptyTexture);
-			return;
-		}
-	}
-	*/
 	if (TargetedWidget)
 	{
 		if (UCameraTarget* CamTarget = Cast<UCameraTarget>(TargetedWidget->GetUserWidgetObject()))

@@ -2,6 +2,10 @@
 
 #include "GASManaCharacter.h"
 #include "AbilitySystemComponent.h"
+#include "PlayerManaCharacter.h"
+#include "Actors/BaseManaEnemy.h"
+#include "AI/AIC_NPC.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Item/LeftHandEquipment.h"
@@ -223,7 +227,7 @@ void AGASManaCharacter::DirectionalHitReact(const FVector& HitterLocation, bool 
 	{
 		HitReactSection = FName("FromRight");
 	}
-
+	
 	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(HitReactTagContainer, true);
 }
 
@@ -326,18 +330,32 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 								return;	
 							}
 						}
-						/* Hypothetically, it would be easy to switch the damage effect class in the character based on the equipment type we have. Just saying*/
+
+						//If our hit mana character is rolling don't apply anything below
 						if (!ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Player.IsRolling")))
 						{
 							ASC->ApplyGameplayEffectToSelf(HitManaCharacter->GetDamageEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
-							//Apply knockback
+							
+							//After applying damager, if we're alive apply knockback
 							if (HitManaCharacter->IsAlive())
 							{
+								if (ABaseManaEnemy* HitEnemyCharacter = Cast<ABaseManaEnemy>(HitManaCharacter))
+								{
+									HitEnemyCharacter->GetEnemyController()->GetBlackboardComponent()->SetValueAsObject("TargetToFollow", this);
+									HitEnemyCharacter->GetEnemyController()->GetBlackboardComponent()->SetValueAsBool("CanSeePlayer", true);
+								}
 								HitManaCharacter->DirectionalHitReact(GetActorLocation(), IsFinisher);
 							}
+							//If we're dead, die
 							else
 							{
 								HitManaCharacter->Die(GetActorLocation());
+
+								//If the attacker is a player, clear the combat camera target.
+								if (APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(this))
+								{
+									PlayerChar->SetCombatCameraTarget(nullptr);
+								}
 							}
 						}
 					}

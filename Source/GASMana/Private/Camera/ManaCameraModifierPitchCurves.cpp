@@ -85,7 +85,7 @@ bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewI
 		}
 		else
 		{
-			TargetPitchToDist = 400.f;
+			TargetPitchToDist = 475.f;
 		}
 		 
 		InterpSpeed = 5.f;
@@ -93,9 +93,9 @@ bool UManaCameraModifierPitchCurves::ModifyCamera(float DeltaTime, FMinimalViewI
 
 	CurrentPitchToDist = FMath::FInterpTo(CurrentPitchToDist, TargetPitchToDist, DeltaTime, InterpSpeed);
 	CurrentAddFOV = FMath::FInterpTo(CurrentAddFOV, AddFOV, DeltaTime, InterpSpeed);
-
-	GEngine->AddOnScreenDebugMessage(7, 5.f, FColor::Purple, FString::Printf(TEXT("Pitch to dist: %f"), CurrentPitchToDist));
-	GEngine->AddOnScreenDebugMessage(8, 5.f, FColor::Purple, FString::Printf(TEXT("TargetPitch to dist: %f"), TargetPitchToDist));
+	
+	// GEngine->AddOnScreenDebugMessage(7, 5.f, FColor::Purple, FString::Printf(TEXT("Pitch to dist: %f"), CurrentPitchToDist));
+	// GEngine->AddOnScreenDebugMessage(8, 5.f, FColor::Purple, FString::Printf(TEXT("TargetPitch to dist: %f"), TargetPitchToDist));
 	FVector DesiredLocation = CamLocation - CamRotation.RotateVector(FVector::ForwardVector) * CurrentPitchToDist;
 
 	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(SpringArm), false, GetViewTarget());

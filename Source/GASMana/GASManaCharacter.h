@@ -219,7 +219,7 @@ public:
 	
 	/** Called whenever the character is hit */
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void DirectionalHitReact(const FVector& HitterLocation, bool IsFinisher);
+	virtual void DirectionalHitReact(const FVector& HitterLocation, bool IsFinisher);
 
 	FName HitReactSection;
 

@@ -15,7 +15,6 @@
 #include "Actors/ManaHookParent.h"
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
-#include "Camera/ManaCameraModifierPitchCurves.h"
 #include "Camera/ManaSpringArmComponent.h"
 #include "Components/AC_HookShot.h"
 #include "Components/AC_WallRun.h"
@@ -170,6 +169,7 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 	
 	UpdateBlockingState();
 
+	//comment
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -454,11 +454,11 @@ void APlayerManaCharacter::UpdateFocusedCamera(float DeltaTime)
 	{
 		const FRotator DesiredFocusRot = GetCurrentFocusingDirection() - FRotator(15, 0, 0);
 
-		const FRotator CurrentFocusRot = FMath::RInterpTo(Controller->GetControlRotation(), DesiredFocusRot, DeltaTime, 3.f);
+		const FRotator CurrentFocusRot = FMath::RInterpTo(Controller->GetControlRotation(), DesiredFocusRot, DeltaTime, .5f);
 		
 		Controller->SetControlRotation(CurrentFocusRot);
 		
-		if (!GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling"))))
+		if (!GetMesh()->GetAnimInstance()->Montage_IsPlaying(GetRollMontage()))
 		{
 			SetActorRotation(FRotator(0, CurrentFocusRot.Yaw, 0));
 		}

@@ -27,6 +27,15 @@ EBTNodeResult::Type UBTTask_SetFocus::ExecuteTask(UBehaviorTreeComponent& OwnerC
 					if (UManaCharacterAnimInstance* AnimInstance = Cast<UManaCharacterAnimInstance>(Char->GetMesh()->GetAnimInstance()))
 					{
 						AnimInstance->SetShouldStrafe(true);
+						FGameplayTag BlockTag = FGameplayTag::RequestGameplayTag(FName("Character.IsBlocking"));
+						
+						if (Char->GetLeftHandEquipment() && !AnimInstance->Montage_IsPlaying(Char->GetShieldStunMontage()) && Char->GetAbilitySystemComponent())
+						{
+							if (!Char->GetAbilitySystemComponent()->HasMatchingGameplayTag(BlockTag))
+							{
+								Char->GetAbilitySystemComponent()->AddLooseGameplayTag(BlockTag);
+							}
+						}
 					}
 				}
 				return EBTNodeResult::Succeeded;

@@ -96,7 +96,11 @@ public:
 	UFUNCTION(Category = "Loading")
 	virtual void UnloadMe() override;
 
+	virtual void DirectionalHitReact(const FVector& HitterLocation, bool IsFinisher) override;
+
 	UFUNCTION()
 	FVector GetNextPatrolPoint();
+
+	FORCEINLINE AAIC_NPC* GetEnemyController() const { return EnemyController; }
 };
 
