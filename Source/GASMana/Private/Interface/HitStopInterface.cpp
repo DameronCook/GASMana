@@ -3,7 +3,6 @@
 
 #include "Interface/HitStopInterface.h"
 
-// Add default functionality here for any IHitStopInterface functions that are not pure virtual.
 void IHitStopInterface::StartHitStop(float Duration, AActor* HitStopActor)
 {
 	if (HitStopActor)

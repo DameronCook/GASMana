@@ -193,6 +193,9 @@ protected:
 	
 	virtual void Die(const FVector& HitLocation);
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Cam, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UCameraShakeBase> HitPlayerShieldCameraShake;
+
 public:
 	AGASManaCharacter();
 

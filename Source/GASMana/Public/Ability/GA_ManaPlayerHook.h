@@ -23,4 +23,7 @@ class GASMANA_API UGA_ManaPlayerHook : public UGameplayAbility
 
 public:
 	virtual void EndHook();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cam")
+	TSubclassOf<UCameraShakeBase> HookShake;
 };

@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "PauseMenu.generated.h"
 
+class UCheckBox;
 class UButton;
 class UTextBlock;
 /**
@@ -32,11 +33,14 @@ protected:
 	UPROPERTY(EditAnywhere, meta=(BindWidget))
 	UButton* ResumeButton;
 
+	UPROPERTY(EditAnywhere, meta=(BindWidget))
+	UCheckBox* ScreenShakeCheckBox; 
+
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidgetAnim))
 	UWidgetAnimation* PauseStartedAnimation;
 
 	FWidgetAnimationDynamicEvent PauseAnimEndedDelegate;
-
+	
 	UFUNCTION()
 	void RestartClicked();
 
@@ -48,6 +52,9 @@ protected:
 
 	UFUNCTION()
 	void PauseAnimEnded();
+
+	UFUNCTION()
+	void ScreenShakeCheckBoxStateChanged(bool bIsChecked);
 
 public:
 

@@ -63,6 +63,8 @@ void UGA_ManaPlayerWallRun::ActivateAbility(const FGameplayAbilitySpecHandle Han
 
 		PlayerCharacter->InstantlyUnequipGear();
 
+		CurrentWallRunShakeCameraShake = PlayerCharacter->ActivateCamShake(WallRunShake);
+
 		if (PlayerCharacter->GetFocusAbility())
 		{
 			PlayerCharacter->GetFocusAbility()->EndFocusAbility();
@@ -132,6 +134,8 @@ void UGA_ManaPlayerWallRun::EndAbility(const FGameplayAbilitySpecHandle Handle, 
 
 		if (PlayerCharacter)
 		{
+			PlayerCharacter->EndCameraShake(CurrentWallRunShakeCameraShake);
+			
 			UAC_WallRun* WallRunComponent = PlayerCharacter->GetWallRun();
 			
 			if (WallRunComponent)

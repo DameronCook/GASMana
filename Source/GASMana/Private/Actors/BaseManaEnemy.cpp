@@ -57,6 +57,8 @@ void ABaseManaEnemy::BeginPlay()
 			}
 		}
 	}
+
+	SetTargetWidgetIcon(false, this);
 }
 
 void ABaseManaEnemy::IterateNextPoint()

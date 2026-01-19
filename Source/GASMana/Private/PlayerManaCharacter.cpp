@@ -452,18 +452,49 @@ void APlayerManaCharacter::UpdateFocusedCamera(float DeltaTime)
 {
 	if (GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsFocused"))))
 	{
+		if (!ManaPlayerAnimInstance) return;
+		
 		const FRotator DesiredFocusRot = GetCurrentFocusingDirection() - FRotator(15, 0, 0);
 
-		const FRotator CurrentFocusRot = FMath::RInterpTo(Controller->GetControlRotation(), DesiredFocusRot, DeltaTime, .5f);
+		const FRotator CurrentFocusRot = FMath::RInterpTo(Controller->GetControlRotation(), DesiredFocusRot, DeltaTime, .2f);
 		
 		Controller->SetControlRotation(CurrentFocusRot);
+
+		//ManaPlayerAnimInstance->SetTurnAxis(Directino);
 		
-		if (!GetMesh()->GetAnimInstance()->Montage_IsPlaying(GetRollMontage()))
+		if (!ManaPlayerAnimInstance->Montage_IsPlaying(GetRollMontage()))
 		{
 			SetActorRotation(FRotator(0, CurrentFocusRot.Yaw, 0));
 		}
 	}
 }
+
+UCameraShakeBase* APlayerManaCharacter::ActivateCamShake(const TSubclassOf<UCameraShakeBase> ShakeType) const
+{
+	if (bCanCameraShake)
+	{
+		if (const AManaPlayerController* ManaController = Cast<AManaPlayerController>(GetController()))
+		{
+			if (ShakeType)
+			{
+				return ManaController->PlayerCameraManager->StartCameraShake(ShakeType);
+			}
+		}
+	}
+	return nullptr;
+}
+
+void APlayerManaCharacter::EndCameraShake(UCameraShakeBase* Shake) const
+{
+	if (Shake)
+	{
+		if (const AManaPlayerController* ManaController = Cast<AManaPlayerController>(GetController()))
+		{
+			ManaController->PlayerCameraManager->StopCameraShake(Shake);
+		}
+	}
+}
+
 
 //////////////////// -- Input -- \\\\\\\\\\\\\\\\\\\\\\\
 
@@ -563,6 +594,14 @@ FRotator APlayerManaCharacter::GetCurrentFocusingDirection() const
 	return GetActorRotation();
 }
 
+FVector APlayerManaCharacter::GetDirectionVectorToCombatTarget() const
+{
+	if (CombatCameraTarget)
+	{
+		return (CombatCameraTarget->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+	}
+	return FVector::ZeroVector;
+}
 void APlayerManaCharacter::Move(const FInputActionValue& Value)
 {
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();

@@ -4,7 +4,9 @@
 #include "UI/PauseMenu.h"
 
 #include "ManaPlayerController.h"
+#include "PlayerManaCharacter.h"
 #include "Components/Button.h"
+#include "Components/CheckBox.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -16,6 +18,8 @@ void UPauseMenu::NativeConstruct()
 	QuitButton->OnClicked.AddUniqueDynamic(this, &UPauseMenu::QuitClicked);
 	RestartButton->OnClicked.AddUniqueDynamic(this, &UPauseMenu::RestartClicked);
 	ResumeButton->OnClicked.AddUniqueDynamic(this, &UPauseMenu::ResumeClicked);
+
+	ScreenShakeCheckBox->OnCheckStateChanged.AddUniqueDynamic(this, &UPauseMenu::ScreenShakeCheckBoxStateChanged);
 
 	PauseAnimEndedDelegate.BindDynamic(this, &UPauseMenu::PauseAnimEnded);
 }
@@ -46,4 +50,15 @@ void UPauseMenu::ResumeClicked()
 void UPauseMenu::PauseAnimEnded()
 {
 	//Nothing for now. Isn't bound correctly.
+}
+
+void UPauseMenu::ScreenShakeCheckBoxStateChanged(bool bIsChecked)
+{
+	if (const AManaPlayerController* PlayerController = Cast<AManaPlayerController>(GetOwningPlayer()))
+	{
+		if (APlayerManaCharacter* PChar = Cast<APlayerManaCharacter>(PlayerController->GetCharacter()))
+		{
+			PChar->bCanCameraShake = bIsChecked;
+		}
+	}
 }

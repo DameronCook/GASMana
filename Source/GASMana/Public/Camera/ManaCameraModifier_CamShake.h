@@ -16,11 +16,23 @@ class GASMANA_API UManaCameraModifier_CamShake : public UManaCameraModifier
 
 	UManaCameraModifier_CamShake();
 
-	float ShakeTime;
+	
+	float ShakeDecay = 0.f;
+
+	float Trauma = 0;
+
+	float ShakeAmplitude = 5.f;
+
+	float ShakeFrequency = 10.f;
+
+	bool ShakeRunning = false;
+
+	float SharedSamplingPoint;
 
 	virtual bool ProcessViewRotation(class AActor* ViewTarget, float DeltaTime, FRotator& OutViewRotation, FRotator& OutDeltaRot) override;
 public:
-	void UpdateShake(float nShakeTime);
+	void UpdateShake(float nShakeTime, float nTrauma, float nAmplitude, float nFrequency);
+	
 	FRotator GetDeltaCameraRotation(float DeltaTime, float InterpSpeed, const FRotator& CurrentRotation,
 	                                const FRotator& FinalRotation);
 };

@@ -2,6 +2,8 @@
 
 
 #include "Ability/GA_ManaCharHitReact.h"
+
+#include "PlayerManaCharacter.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Actors/BaseManaEnemy.h"
 #include "GASMana/GASManaCharacter.h"
@@ -44,6 +46,11 @@ void UGA_ManaCharHitReact::ActivateAbility(FGameplayAbilitySpecHandle Handle,
 				MontageTask->OnCancelled.AddDynamic(this, &UGA_ManaCharHitReact::OnMontageEnded);
 				MontageTask->OnBlendOut.AddDynamic(this, &UGA_ManaCharHitReact::OnMontageEnded);
 				MontageTask->ReadyForActivation();
+			}
+
+			if (APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get()))
+			{
+				PlayerChar->ActivateCamShake(HitReactCameraShake);
 			}
 		}
 		else

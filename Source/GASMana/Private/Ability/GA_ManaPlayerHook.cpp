@@ -59,6 +59,7 @@ void UGA_ManaPlayerHook::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 		{
 			AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetHookEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 		}
+
 	}
 }
 
@@ -69,6 +70,10 @@ void UGA_ManaPlayerHook::EndAbility(const FGameplayAbilitySpecHandle Handle, con
 	if (APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get()))
 	{
 		PlayerCharacter->SetHookAbility(nullptr);
+
+		PlayerCharacter->ActivateCamShake(HookShake);
+
+		
 		//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Purple, FString("End Ability Called!"));
 
 		UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();

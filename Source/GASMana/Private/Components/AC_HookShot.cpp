@@ -613,8 +613,6 @@ void UAC_HookShot::BeginPlay()
 	Super::BeginPlay();
 }
 
-
-
 ///////////////////////////////
 ///	Swing Functions
 

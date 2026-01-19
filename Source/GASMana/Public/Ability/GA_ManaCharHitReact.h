@@ -23,4 +23,7 @@ class GASMANA_API UGA_ManaCharHitReact : public UGameplayAbility
 
 	UFUNCTION()
 	void OnMontageEnded();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cam", meta = (AllowPrivateAccess = true))
+	TSubclassOf<UCameraShakeBase> HitReactCameraShake;
 };

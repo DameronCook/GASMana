@@ -25,5 +25,8 @@ class GASMANA_API UGA_ManaPlayerAirAttack : public UGameplayAbility
 public:
 	UFUNCTION()
 	void OnJumpLanded();
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UCameraShakeBase> AirAttackShake;
 	
 };

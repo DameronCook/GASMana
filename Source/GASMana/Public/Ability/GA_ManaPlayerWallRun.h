@@ -24,11 +24,17 @@ class GASMANA_API UGA_ManaPlayerWallRun : public UGameplayAbility
 	FActiveGameplayEffectHandle ManaDrainEffectHandle;
 	FActiveGameplayEffectHandle WallRunEffectHandle;
 
+	UPROPERTY()
+	UCameraShakeBase* CurrentWallRunShakeCameraShake;
 
 public:
 	UFUNCTION()
 	void OnWallRunFinished();
 	
 	FORCEINLINE FActiveGameplayEffectHandle GetWallRunEffectHandle() { return WallRunEffectHandle; }
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cam")
+	TSubclassOf<UCameraShakeBase> WallRunShake;
 
 };

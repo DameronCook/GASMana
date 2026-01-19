@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ManaCharacterAnimInstance.h"
+#include "PlayerManaCharacter.h"
 #include "Animation/AnimInstance.h"
 #include "Character/CharacterTypes.h"
 #include "ManaPlayerAnimInstance.generated.h"
@@ -15,4 +16,10 @@ UCLASS()
 class GASMANA_API UManaPlayerAnimInstance : public UManaCharacterAnimInstance
 {
 	GENERATED_BODY()
+	virtual void NativeInitializeAnimation() override;
+
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+
+	UPROPERTY()
+	APlayerManaCharacter* ManaPlayer;
 };

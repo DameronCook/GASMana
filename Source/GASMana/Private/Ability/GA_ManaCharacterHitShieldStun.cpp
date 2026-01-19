@@ -45,6 +45,10 @@ void UGA_ManaCharacterHitShieldStun::ActivateAbility(FGameplayAbilitySpecHandle 
 				MontageTask->OnBlendOut.AddDynamic(this, &UGA_ManaCharacterHitShieldStun::OnMontageEnded);
 				MontageTask->ReadyForActivation();
 			}
+			if (APlayerManaCharacter* PC = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get()))
+			{
+				PC->ActivateCamShake(ShieldStunShake);
+			}
 		}
 		else
 		{
@@ -86,7 +90,7 @@ void UGA_ManaCharacterHitShieldStun::EndAbility(const FGameplayAbilitySpecHandle
 			{
 				if (Cast<ABaseManaEnemy>(ActorInfo->AvatarActor.Get()))
 				{
-					GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Granting blocking tag!"));
+					//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Granting blocking tag!"));
 					FGameplayTag BlockTag = FGameplayTag::RequestGameplayTag(FName("Character.IsBlocking"));
 					if (!ASC->HasMatchingGameplayTag(BlockTag))
 					{

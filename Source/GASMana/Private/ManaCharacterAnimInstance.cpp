@@ -39,6 +39,7 @@ void UManaCharacterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		bIsDead = ManaCharacter->GetIsDead();
 		DeathType = ManaCharacter->GetDeathType();
 		if (bShouldStrafe) StrafeDirection = UKismetAnimationLibrary::CalculateDirection(ManaMovementComponent->GetLastUpdateVelocity(), ManaCharacter->GetActorRotation());
+
 	}
 }
 
@@ -74,6 +75,11 @@ void UManaCharacterAnimInstance::SetIsRunning(bool bRunning)
 void UManaCharacterAnimInstance::SetIsEquipping(bool bEquipping)
 {
 	bIsEquipping = bEquipping;
+}
+
+void UManaCharacterAnimInstance::SetTurnAxis(float NewTurnAxis)
+{
+	TurnAxis = NewTurnAxis;
 }
 
 void UManaCharacterAnimInstance::SetIsDead(bool bDead)

@@ -325,6 +325,13 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 							const double CosTheta = FVector::DotProduct(Forward, ToHit);
 							if (CosTheta <= 0)
 							{
+								//If we hit a blocking player, do a little screenshake
+								if (APlayerManaCharacter* PChar = Cast<APlayerManaCharacter>(HitManaCharacter))
+								{
+									GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Enemy Hit Shield Shake");
+									PChar->ActivateCamShake(HitPlayerShieldCameraShake);
+								}
+								
 								//If they are, then THE ATTACKING character must activate their hit stun ability
 								this->GetAbilitySystemComponent()->TryActivateAbilitiesByTag(ShieldStunTagContainer, true);
 								return;	
@@ -339,6 +346,8 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 							//After applying damager, if we're alive apply knockback
 							if (HitManaCharacter->IsAlive())
 							{
+								HitManaCharacter->StartHitStop(0.1f, HitManaCharacter);
+								StartHitStop(0.1f, this);
 								if (ABaseManaEnemy* HitEnemyCharacter = Cast<ABaseManaEnemy>(HitManaCharacter))
 								{
 									HitEnemyCharacter->GetEnemyController()->GetBlackboardComponent()->SetValueAsObject("TargetToFollow", this);

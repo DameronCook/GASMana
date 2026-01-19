@@ -421,8 +421,6 @@ protected:
 
 	void UpdateFocusedCamera(float DeltaTime);
 	
-	FRotator GetCurrentFocusingDirection() const;
-
 	UFUNCTION(BlueprintCallable)
 	void OnMantleEnded();
 
@@ -478,6 +476,7 @@ public:
 
 	void UpdateManaRegen();
 
+
 	virtual void LoadMe() override;
 	virtual void UnloadMe() override;
 	/** How much mana will regen to before it stops */
@@ -509,17 +508,23 @@ public:
 	virtual void SetNextComboSegment(FName NextCombo) override;
 
 	//////////////////////////////////////
-	//Camera Functions
+	//Camera
 
 	virtual AManaCameraModificationVolume* GetCurrentCameraModificationVolume() const override;
-	virtual void
-	SetCurrentCameraModificationVolume(AManaCameraModificationVolume* InCurrentCameraModificationVolume) override;
+	virtual void SetCurrentCameraModificationVolume(AManaCameraModificationVolume* InCurrentCameraModificationVolume) override;
 	virtual bool GotMovementInput() const override;
 
 	virtual bool SelectTarget(bool SelectTarget) override;
 	virtual AActor* SetCurrentTarget(AActor* CurrentTarget) override;
 	virtual AActor* GetCurrentTarget() const override;
 	virtual bool IsSelectingTarget() const override;
+	FORCEINLINE AActor* GetCombatCameraTarget() const { return CombatCameraTarget; }
+	FRotator GetCurrentFocusingDirection() const;
+	FVector GetDirectionVectorToCombatTarget() const;
+	UCameraShakeBase* ActivateCamShake(TSubclassOf<UCameraShakeBase> ShakeType) const;
+	void EndCameraShake(UCameraShakeBase* Shake) const;
+	bool bCanCameraShake = true;
+
 
 
 	//////////////////////////////////////
@@ -596,9 +601,7 @@ public:
 	//Move to another component?
 	FORCEINLINE float GetSwingSpeedBalancer() const { return SwingSpeedBalancer; }
 	FORCEINLINE float GetOriginalGravityScale() const { return OriginalGravityScale; }
-
-
-	FORCEINLINE AActor* GetCombatCameraTarget() const { return CombatCameraTarget; }
+	
 
 
 	///////////////////////////////////// -- Setters

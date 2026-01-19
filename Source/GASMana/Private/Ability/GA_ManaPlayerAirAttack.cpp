@@ -131,6 +131,7 @@ void UGA_ManaPlayerAirAttack::OnJumpLanded()
 
 	if (PlayerCharacter)
 	{
+		PlayerCharacter->ActivateCamShake(AirAttackShake);
 		UAnimMontage* MontageToPlay = PlayerCharacter->GetAirAttackMontage();
 		UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, MontageToPlay, 1.0f, "End", false, 0.0f);
 

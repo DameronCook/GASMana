@@ -45,7 +45,10 @@ protected:
 	bool bIsDead = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Blocking")
-	float LeanAmount = false;
+	float LeanAmount;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Turn")
+	float TurnAxis = 0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Blocking")
 	EEquipmentState EES;
@@ -81,6 +84,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Bools")
 	void SetIsEquipping(bool bEquipping);
+
+	
+	UFUNCTION(BlueprintCallable, Category = "Turn")
+	void SetTurnAxis(float NewTurnAxis);
 
 	UFUNCTION(BlueprintCallable, Category = "Bools")
 	void SetIsDead(bool bDead);

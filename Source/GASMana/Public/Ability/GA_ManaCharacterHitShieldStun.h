@@ -23,5 +23,9 @@ class GASMANA_API UGA_ManaCharacterHitShieldStun : public UGameplayAbility
 
 	UFUNCTION()
 	void OnMontageEnded();
+
+public:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UCameraShakeBase> ShieldStunShake;
 	
 };
