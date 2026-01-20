@@ -19,7 +19,17 @@ void UManaPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		if (bShouldStrafe)
 		{
-			TurnAxis = FMath::RadiansToDegrees(acosf(FVector::DotProduct(ManaPlayer->GetActorForwardVector(), ManaPlayer->GetDirectionVectorToCombatTarget())));
+			const FVector ActorForward = ManaPlayer->GetActorForwardVector();
+			const FVector ToFocus = ManaPlayer->GetDirectionVectorToCombatTarget();
+			float TurnAngle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(ActorForward, ToFocus)));
+			const FVector CrossProduct = FVector::CrossProduct(ActorForward, ToFocus);
+
+			if (CrossProduct.Z < 0)
+			{
+				TurnAngle *= -1.f;
+			}
+
+			TurnAxis = TurnAngle;
 			GEngine->AddOnScreenDebugMessage(5, 1.f, FColor::Purple, FString::Printf(TEXT("Turn Axis: %f"), TurnAxis));
 		}
 	}

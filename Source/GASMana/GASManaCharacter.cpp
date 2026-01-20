@@ -328,8 +328,15 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 								//If we hit a blocking player, do a little screenshake
 								if (APlayerManaCharacter* PChar = Cast<APlayerManaCharacter>(HitManaCharacter))
 								{
-									GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Enemy Hit Shield Shake");
 									PChar->ActivateCamShake(HitPlayerShieldCameraShake);
+								}
+								//If we're a player who hit a blocking enemy, then let them know we're vulnerable
+								else if (Cast<APlayerManaCharacter>(this))
+								{
+									if (ABaseManaEnemy* EChar = Cast<ABaseManaEnemy>(HitManaCharacter))
+									{
+										EChar->GetEnemyController()->GetBlackboardComponent()->SetValueAsBool("PlayerIsVulnerable", true);
+									}
 								}
 								
 								//If they are, then THE ATTACKING character must activate their hit stun ability

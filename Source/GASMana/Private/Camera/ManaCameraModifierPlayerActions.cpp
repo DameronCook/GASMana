@@ -25,27 +25,7 @@ bool UManaCameraModifierPlayerActions::ProcessViewRotation(AActor* ViewTarget, f
 		FVector TargetCamSocketOffset = FVector(0.f, 40.f, 40.f);
 		float InterpRotationSpeed = 3.f;
 
-		if (WallRunning)
-		{
-			InterpRotationSpeed = 4.f;
 
-			const bool bWallRunRight = (PlayerChar->GetWallRun()->GetWallRunSide() == EWallRunSide::Right);
-
-			TargetCamSocketOffset = bWallRunRight ? FVector(0.f, -150.f, 0.f): FVector(0.f, 150.f, 0.f);
-
-			const float NewRoll = bWallRunRight ? -15.f : 15.f;
-			const float NewYaw = bWallRunRight ? -20.f : 20.f;
-			constexpr float NewPitch = -10.f;
-
-			NewCameraRotation = PlayerChar->GetActorRotation();
-
-			NewCameraRotation.Roll = NewRoll;
-			NewCameraRotation.Yaw += NewYaw;
-			NewCameraRotation.Pitch += NewPitch;
-
-			//Strings for debugging
-			//GEngine->AddOnScreenDebugMessage(1, 0.1f, FColor::Red, FString::Printf(TEXT("Roll amount is: %f"), OutViewRotation.Roll));
-		}
 
 		if (IsZipToPoint)
 		{
@@ -76,16 +56,6 @@ bool UManaCameraModifierPlayerActions::ProcessViewRotation(AActor* ViewTarget, f
 
 			NewCameraRotation.Pitch -= 15.f;
 		}
-
-		if (IsAirAttack)
-		{
-			InterpRotationSpeed = 7.f;
-			NewCameraRotation = PlayerChar->GetActorForwardVector().Rotation();
-			NewCameraRotation.Pitch -= 25.f;
-
-			TargetCamSocketOffset = FVector(0.f, 150.f, 0.f);
-
-		}
 		
 		if (IsFocused)
 		{
@@ -98,11 +68,43 @@ bool UManaCameraModifierPlayerActions::ProcessViewRotation(AActor* ViewTarget, f
 			}
 		}
 
+		if (IsAirAttack)
+		{
+			InterpRotationSpeed = 7.f;
+			NewCameraRotation = PlayerChar->GetActorForwardVector().Rotation();
+			NewCameraRotation.Pitch -= 25.f;
+
+			TargetCamSocketOffset = FVector(0.f, 150.f, 0.f);
+
+		}
+
 		if (IsSwing)
 		{
 			InterpRotationSpeed = 5.f;
 
 			NewCameraRotation = PlayerChar->GetActorForwardVector().Rotation();
+		}
+
+		if (WallRunning)
+		{
+			InterpRotationSpeed = 4.f;
+
+			const bool bWallRunRight = (PlayerChar->GetWallRun()->GetWallRunSide() == EWallRunSide::Right);
+
+			TargetCamSocketOffset = bWallRunRight ? FVector(0.f, -150.f, 0.f): FVector(0.f, 150.f, 0.f);
+
+			const float NewRoll = bWallRunRight ? -15.f : 15.f;
+			const float NewYaw = bWallRunRight ? -20.f : 20.f;
+			constexpr float NewPitch = -10.f;
+
+			NewCameraRotation = PlayerChar->GetActorRotation();
+
+			NewCameraRotation.Roll = NewRoll;
+			NewCameraRotation.Yaw += NewYaw;
+			NewCameraRotation.Pitch += NewPitch;
+
+			//Strings for debugging
+			//GEngine->AddOnScreenDebugMessage(1, 0.1f, FColor::Red, FString::Printf(TEXT("Roll amount is: %f"), OutViewRotation.Roll));
 		}
 
 		UManaSpringArmComponent* PlayerSpringArm = PlayerChar->GetCameraBoom();
@@ -111,6 +113,8 @@ bool UManaCameraModifierPlayerActions::ProcessViewRotation(AActor* ViewTarget, f
 		const FRotator CameraDelta = GetDeltaCameraRotation(DeltaTime, InterpRotationSpeed, OutViewRotation, NewCameraRotation);
 		OutViewRotation += CameraDelta;
 	}
+
+	
 	return false;
 }
 

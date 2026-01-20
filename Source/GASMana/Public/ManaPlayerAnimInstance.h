@@ -6,7 +6,6 @@
 #include "ManaCharacterAnimInstance.h"
 #include "PlayerManaCharacter.h"
 #include "Animation/AnimInstance.h"
-#include "Character/CharacterTypes.h"
 #include "ManaPlayerAnimInstance.generated.h"
 
 /**
