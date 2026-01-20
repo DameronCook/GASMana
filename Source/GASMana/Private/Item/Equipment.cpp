@@ -13,6 +13,7 @@ AEquipment::AEquipment()
 	SkeletalMesh->SetupAttachment(RootComponent);
 
 	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
+
 }
 
 void AEquipment::BeginPlay()
@@ -25,4 +26,18 @@ void AEquipment::AttachMeshToSocket(USceneComponent* InParent, const FName InSoc
 {
 	const FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 	SkeletalMesh->AttachToComponent(InParent, TransformRules, InSocketName);
+}
+
+void AEquipment::BreakEquipment()
+{
+	Destroy();
+}
+
+void AEquipment::SetCurDurability(const int NewDurability)
+{
+	CurDurability = NewDurability;
+	if (CurDurability <= 0)
+	{
+		BreakEquipment();
+	}
 }

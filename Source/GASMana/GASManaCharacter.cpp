@@ -21,7 +21,6 @@
 //////////////////////////////////////////////////////////////////////////
 // AGASManaCharacter
 
-
 AGASManaCharacter::AGASManaCharacter()
 {
 	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
@@ -73,6 +72,45 @@ void AGASManaCharacter::SetEquipment(AEquipment* Equipment)
 	}
 }
 
+void AGASManaCharacter::UnSetEquipment(AGASManaCharacter* Char, AEquipment* Equipment)
+{
+	UAbilitySystemComponent* ASC = Char->GetAbilitySystemComponent();
+	if (!ASC) return;
+
+	if (Equipment)
+	{
+		FGameplayTagContainer LeftEquipTag;
+		FGameplayTagContainer RightEquipTag;
+		FGameplayTagContainer BlockTag;
+		FGameplayTagContainer ShieldTag;
+		LeftEquipTag.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Equipped.OneHanded.Left")));
+		RightEquipTag.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Equipped.OneHanded.Right")));
+		BlockTag.AddTag(FGameplayTag::RequestGameplayTag("Character.IsBlocking"));
+		ShieldTag.AddTag(FGameplayTag::RequestGameplayTag("Character.Action.ShieldStun"));
+
+		switch (Equipment->GetItemType())
+		{
+		case EItemType::EIT_LeftHandedEquipment:
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Setting Left Hand Equipment to NullPtr");
+			Char->LeftHandEquipment = nullptr;
+			ASC->RemoveActiveEffectsWithGrantedTags(LeftEquipTag);
+			if (APlayerManaCharacter* PChar = Cast<APlayerManaCharacter>(Char))
+			{
+				PChar->FinishedBlocking();
+			}
+			ASC->TryActivateAbilitiesByTag(ShieldTag);
+			break;
+		case EItemType::EIT_RightHandedEquipment:
+			EquipmentState = EEquipmentState::EES_Unequipped;
+			Char->RightHandEquipment = nullptr;
+			ASC->RemoveActiveEffectsWithGrantedTags(RightEquipTag);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 void AGASManaCharacter::AttachWeaponToBack() const
 {
 
@@ -106,7 +144,6 @@ void AGASManaCharacter::RemoveAnyEquipClass() const
 
 	// Remove all active effects that granted any tag under Character.Equipped.*
 	AbilitySystemComponent->RemoveActiveEffectsWithGrantedTags(EquipTags);
-
 }
 
 bool AGASManaCharacter::GotMovementInput() const
@@ -294,6 +331,21 @@ void AGASManaCharacter::PlayFlashEffect(FVector InColor, float FlashLength) cons
 	}
 }
 
+void AGASManaCharacter::ChangeEquipmentDurability(AGASManaCharacter* Char, AEquipment* Equipment, const int Amount)
+{
+	if (Equipment)
+	{
+		const int NewAmount = Equipment->GetCurDurability() + Amount;
+		Equipment->SetCurDurability(NewAmount);
+
+		if (NewAmount <= 0)
+		{
+			UnSetEquipment(Char, Equipment);
+			Equipment->BreakEquipment();
+		}
+	}
+}
+
 void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinisher = false)
 {
 	//->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Melee Attack Read");
@@ -318,6 +370,8 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 						//First, check if the hit mana character is blocking
 						if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsBlocking"))))
 						{
+							//First, decrease the durability of the shield
+							ChangeEquipmentDurability(HitManaCharacter, HitManaCharacter->GetLeftHandEquipment(), -1);
 							//Now check if the hit character is facing the attacked character
 							const FVector Forward = HitActor->GetActorForwardVector();
 							const FVector ImpactLowered(HitActor->GetActorLocation().X, HitActor->GetActorLocation().Y, GetActorLocation().Z);

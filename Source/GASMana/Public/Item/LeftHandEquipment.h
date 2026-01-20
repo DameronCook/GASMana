@@ -43,15 +43,10 @@ UCLASS()
 class GASMANA_API ALeftHandEquipment : public AEquipment
 {
 	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
-	int Durability;
-
+	
 public:
 	// Sets default values for this actor's properties
 	ALeftHandEquipment();
 	
 	virtual void SetItem() override;
-
-	FORCEINLINE int GetDurability() const { return Durability; }
 };

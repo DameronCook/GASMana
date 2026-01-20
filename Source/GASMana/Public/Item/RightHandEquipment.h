@@ -21,6 +21,9 @@ struct FWeaponItemData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Damage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Durability;
 	
 	/** Montage for equipping **/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

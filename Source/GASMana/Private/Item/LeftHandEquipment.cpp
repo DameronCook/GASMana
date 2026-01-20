@@ -29,9 +29,9 @@ void ALeftHandEquipment::SetItem()
 	{
 		SkeletalMesh->SetSkeletalMesh(LeftHandEquippedItemData->SkeletalMesh);
 		EquipmentType = LeftHandEquippedItemData->EquipmentType;
-		Durability = LeftHandEquippedItemData->Durability;
 		EquipMontage = LeftHandEquippedItemData->EquipMontage;
 		EquipmentTypeClass = LeftHandEquippedItemData->EquipmentTypeClass;
 		EquipmentSocket = LeftHandEquippedItemData->EquipmentSocket;
+		CurDurability = LeftHandEquippedItemData->Durability;
 	}
 }

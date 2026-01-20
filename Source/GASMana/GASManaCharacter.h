@@ -70,13 +70,13 @@ protected:
 	/////////////////////////////////////////////////////////////////////
 	///Equipment
 	/**What Equipment the character has */
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere)
 	EEquipmentState EquipmentState;
 	
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	ARightHandEquipment* RightHandEquipment;
 	
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	ALeftHandEquipment* LeftHandEquipment;
 
 	/** Type of Equipment that the player is equipping*/
@@ -89,12 +89,17 @@ protected:
 	
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
 	void SetEquipment(AEquipment* Equipment);
+	
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
+	void UnSetEquipment(AGASManaCharacter* Char, AEquipment* Equipment);
 
 	void RemoveAnyEquipClass() const;
 
 	virtual bool GotMovementInput() const;
 	
 	virtual void SetOverlappingItem(class AItem* Item) override;
+
+	void ChangeEquipmentDurability(AGASManaCharacter* Char, AEquipment* Equipment, int Amount);
 
 	/////////////////////////////////////////////////////////////////////////
 	///Combat
@@ -268,7 +273,6 @@ public:
 	///Other
 	UFUNCTION(BlueprintCallable)
 	void PlayFlashEffect(FVector InColor, float FlashLength) const;
-	
 
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;

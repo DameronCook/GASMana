@@ -414,9 +414,7 @@ protected:
 	virtual void NotifyControllerChanged() override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	virtual void FinishedBlocking() override;
-
+	
 	virtual void Jump() override;
 
 	void UpdateFocusedCamera(float DeltaTime);
@@ -492,6 +490,8 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	float LockedOnWalkSpeed = 300;
+
+	virtual void FinishedBlocking() override;
 	
 	//Interface overrides
 	///////////////////////////////////////

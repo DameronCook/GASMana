@@ -27,6 +27,7 @@ void ARightHandEquipment::SetItem()
 		SkeletalMesh->SetSkeletalMesh(WeaponItemData->SkeletalMesh);
 		EquipmentType = WeaponItemData->EquipmentType;
 		Damage = WeaponItemData->Damage;
+		CurDurability = WeaponItemData->Durability;
 		EquipMontage = WeaponItemData->EquipMontage;
 		AttackCombo = WeaponItemData->AttackCombo;
 		AttackComboMovement = WeaponItemData->AttackComboMovement;

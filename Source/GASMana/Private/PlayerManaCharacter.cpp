@@ -459,8 +459,6 @@ void APlayerManaCharacter::UpdateFocusedCamera(float DeltaTime)
 		const FRotator CurrentFocusRot = FMath::RInterpTo(Controller->GetControlRotation(), DesiredFocusRot, DeltaTime, .2f);
 		
 		Controller->SetControlRotation(CurrentFocusRot);
-
-		//ManaPlayerAnimInstance->SetTurnAxis(Directino);
 		
 		if (!ManaPlayerAnimInstance->Montage_IsPlaying(GetRollMontage()))
 		{
@@ -493,6 +491,24 @@ void APlayerManaCharacter::EndCameraShake(UCameraShakeBase* Shake) const
 			ManaController->PlayerCameraManager->StopCameraShake(Shake);
 		}
 	}
+}
+
+FRotator APlayerManaCharacter::GetCurrentFocusingDirection() const
+{
+	if (CombatCameraTarget)
+	{
+		return UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), CombatCameraTarget->GetActorLocation());
+	}
+	return GetActorForwardVector().Rotation();
+}
+
+FVector APlayerManaCharacter::GetDirectionVectorToCombatTarget() const
+{
+	if (CombatCameraTarget)
+	{
+		return (CombatCameraTarget->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+	}
+	return GetActorForwardVector();
 }
 
 
@@ -571,13 +587,15 @@ void APlayerManaCharacter::Jump()
 		AbilitySystem->TryActivateAbilitiesByTag(WallJumpTagContainer, true);
 		return;
 	}
-	AbilitySystem->TryActivateAbilitiesByTag(JumpTagContainer, true);
 
 	if (AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwinging"))))
 	{
 		AbilitySystem->TryActivateAbilitiesByTag(SwingJumpTagContainer, true);
 		return;
 	}
+
+	AbilitySystem->TryActivateAbilitiesByTag(JumpTagContainer, true);
+
 }
 
 void APlayerManaCharacter::OnMantleEnded()
@@ -585,23 +603,6 @@ void APlayerManaCharacter::OnMantleEnded()
 	GetMantleAbility()->OnMantleEnded();
 }
 
-FRotator APlayerManaCharacter::GetCurrentFocusingDirection() const
-{
-	if (CombatCameraTarget)
-	{
-		return UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), CombatCameraTarget->GetActorLocation());
-	}
-	return GetActorRotation();
-}
-
-FVector APlayerManaCharacter::GetDirectionVectorToCombatTarget() const
-{
-	if (CombatCameraTarget)
-	{
-		return (CombatCameraTarget->GetActorLocation() - GetActorLocation()).GetSafeNormal();
-	}
-	return FVector::ZeroVector;
-}
 void APlayerManaCharacter::Move(const FInputActionValue& Value)
 {
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();

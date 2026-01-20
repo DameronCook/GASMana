@@ -43,6 +43,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
 	UAIPerceptionStimuliSourceComponent* StimuliSource;
 
+	UPROPERTY(BlueprintReadOnly)
+	int CurDurability;
+
 public:
 	AEquipment();
 
@@ -50,9 +53,13 @@ public:
 
 	void AttachMeshToSocket(USceneComponent* InParent, FName InSocketName) const;
 
+	virtual void BreakEquipment();
+
 	FORCEINLINE EEquipmentState GetEquipmentType() const { return EquipmentType; }
 	FORCEINLINE UAnimMontage* GetEquipMontage() const { return EquipMontage; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetEquipTypeClass() const { return EquipmentTypeClass; }
 	FORCEINLINE FName GetEquipmentSocket() const { return EquipmentSocket; }
 	FORCEINLINE UAIPerceptionStimuliSourceComponent* GetStimuliSource() const { return StimuliSource; }
+	FORCEINLINE int GetCurDurability() const { return CurDurability; }
+	void SetCurDurability(const int NewDurability);
 };

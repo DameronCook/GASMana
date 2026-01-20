@@ -14,6 +14,7 @@ UGA_ManaCharDie::UGA_ManaCharDie()
 	SetAssetTags(Tags);
 
 	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsDying")));
+
 }
 
 void UGA_ManaCharDie::ActivateAbility(FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -30,10 +31,10 @@ void UGA_ManaCharDie::ActivateAbility(FGameplayAbilitySpecHandle Handle, const F
 	}
 	const AGASManaCharacter* Character = Cast<AGASManaCharacter>(ActorInfo->AvatarActor.Get());
 	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
-
 	
 	if (Character) {
 		Character->PlayFlashEffect(Character->HitFlashColor, 0.2f);
+		Character->RemoveFreeTag();
 		// Play the montage and bind delegates
 		if (Character->GetDeathMontage() && ActorInfo->AvatarActor.IsValid())
 		{
