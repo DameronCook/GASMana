@@ -19,8 +19,9 @@ struct FWeaponItemData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EEquipmentState EquipmentType;
 
+	/** Gameplay Effect put on the weapon that controls the amount of damage */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int Damage;
+	TSubclassOf<UGameplayEffect> DamageEffectClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Durability;
@@ -68,7 +69,7 @@ class GASMANA_API ARightHandEquipment : public AEquipment
 {
 	GENERATED_BODY()
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
-	int Damage;
+	TSubclassOf<UGameplayEffect> DamageClass;
 	
 	/** Montage for Attack Combos **/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment | Montage", meta = (AllowPrivateAccess = "true"))
@@ -91,7 +92,7 @@ public:
 
 	virtual void SetItem() override;
 
-	FORCEINLINE int GetDamage() const { return Damage; }
+	FORCEINLINE TSubclassOf<UGameplayEffect> GetDamageTypeClass() const { return DamageClass; }
 	FORCEINLINE UAnimMontage* GetAttackCombo() const { return AttackCombo; }
 	FORCEINLINE UAnimMontage* GetAttackComboMovement() const { return AttackComboMovement; }
 	FORCEINLINE UAnimMontage* GetEquipAttack() const { return EquipAttack; }

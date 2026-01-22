@@ -101,13 +101,16 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* HookAction;
 
-	/** Hook Input Action */
+	/** Equip Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* EquipAction;
 	
-	/** Hook Input Action */
+	/** Pause Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* PauseAction;
+	/** Pause Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* DropAction;
 
 	/* RELOADING */
 
@@ -454,6 +457,9 @@ protected:
 	
 	/**Called for Pause input */
 	void Pause(const FInputActionValue& Value);
+	
+	/**Called for Pause input */
+	void Drop(const FInputActionValue& Value);
 
 	/** Called for Debug reload input */
 	void DEBUG_ReloadLevel(const FInputActionValue& Value);
@@ -462,6 +468,14 @@ protected:
 	void DEBUG_RefillMana(const FInputActionValue& Value);
 
 	virtual void Die(const FVector& HitLocation) override;
+
+	/* Handle to manage the timer */
+	FTimerHandle FlashTimerHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Other", meta = (AllowPrivateAccess = "true"))
+	float LowHealthFlashTimeInterval = 5.f;
+
+	bool bAlreadyFlashing = false;
 
 public:
 	APlayerManaCharacter();
@@ -473,6 +487,8 @@ public:
 	void UpdateStaminaRegen() const;
 
 	void UpdateManaRegen();
+	
+	void LowHealthFlashing();
 
 
 	virtual void LoadMe() override;

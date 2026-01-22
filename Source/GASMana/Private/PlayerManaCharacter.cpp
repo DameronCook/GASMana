@@ -5,6 +5,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GraphEditorDragDropAction.h"
 #include "InputActionValue.h"
 #include "ManaPlayerAnimInstance.h"
 #include "ManaPlayerController.h"
@@ -565,6 +566,8 @@ void APlayerManaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		//Pausing
 		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Started, this, &APlayerManaCharacter::Pause);
 
+		EnhancedInputComponent->BindAction(DropAction, ETriggerEvent::Started, this, &APlayerManaCharacter::Drop);
+
 		/* DEBUGGING */
 		//Reload level
 		EnhancedInputComponent->BindAction(DEBUG_ReloadAction, ETriggerEvent::Completed, this, &APlayerManaCharacter::DEBUG_ReloadLevel);
@@ -861,6 +864,33 @@ void APlayerManaCharacter::Pause(const FInputActionValue& Value)
 	}
 }
 
+void APlayerManaCharacter::Drop(const FInputActionValue& Value)
+{
+	if (RightHandEquipment)
+	{
+		SetEquipmentState(EEquipmentState::EES_Unequipped);
+		RightHandEquipment->SetPickedUp(false);
+		const FGameplayTag Tag = FGameplayTag::RequestGameplayTag("Item.NotPickedUp");
+		RightHandEquipment->GetTagContainer().AddTag(Tag);
+		RightHandEquipment->SetItemState(EItemState::EIS_Hovering);
+		
+		RightHandEquipment->EnableSphereCollision();
+		RightHandEquipment->DetachMeshFromSocket(FDetachmentTransformRules::KeepRelativeTransform);
+		
+		const FVector NewLocation = GetActorLocation() + (GetActorForwardVector().GetSafeNormal() * 100.f);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, FString::Printf(TEXT("New Location: %s"), *NewLocation.ToString()));
+		RightHandEquipment->SetActorLocation(NewLocation);
+		RightHandEquipment->SetActorRotation(FRotator(0, 0, 0));
+
+		if (RightHandEquipment->GetEquipTypeClass())
+		{
+			GetAbilitySystemComponent()->RemoveActiveGameplayEffectBySourceEffect(RightHandEquipment->GetEquipTypeClass(), GetAbilitySystemComponent());
+		}
+		
+		RightHandEquipment = nullptr;
+	}
+}
+
 void APlayerManaCharacter::DEBUG_ReloadLevel(const FInputActionValue& Value)
 {
 	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
@@ -875,6 +905,9 @@ void APlayerManaCharacter::DEBUG_RefillMana(const FInputActionValue& Value)
 void APlayerManaCharacter::Die(const FVector& HitLocation)
 {
 	Super::Die(HitLocation);
+
+	GetWorld()->GetTimerManager().ClearTimer(FlashTimerHandle);
+
 	if (AManaPlayerController* ManaController = Cast<AManaPlayerController>(GetController()))
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "Die called on player");
@@ -938,6 +971,17 @@ void APlayerManaCharacter::UpdateManaRegen()
 	if (bCanRegen)
 	{
 		AbilitySystem->ApplyGameplayEffectToSelf(ManaRegenEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
+	}
+}
+
+void APlayerManaCharacter::LowHealthFlashing()
+{
+	PlayFlashEffect(FVector(1,0,0), 1);
+
+	if (!bAlreadyFlashing)
+	{
+		bAlreadyFlashing = true;
+		GetWorld()->GetTimerManager().SetTimer(FlashTimerHandle, this, &APlayerManaCharacter::LowHealthFlashing, LowHealthFlashTimeInterval, true);
 	}
 }
 

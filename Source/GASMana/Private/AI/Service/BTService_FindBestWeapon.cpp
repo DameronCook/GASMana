@@ -43,16 +43,23 @@ void UBTService_FindBestWeapon::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 		float ClosestDistance = BIG_NUMBER;
 		for (AEquipment* Equipment : NPCController->GetSensedEquipment())
 		{
-			if (Equipment->GetClass() == ItemClass)
+			if (Equipment != nullptr)
 			{
-				if (!Equipment->IsPickedUp())
+				if (Equipment->GetClass() == ItemClass)
 				{
-					if (const float TempDist = OwnerActor->GetDistanceTo(Equipment); TempDist < ClosestDistance)
+					if (!Equipment->IsPickedUp())
 					{
-						ClosestDistance = TempDist;
-						NearestTarget = Equipment;
+						if (const float TempDist = OwnerActor->GetDistanceTo(Equipment); TempDist < ClosestDistance)
+						{
+							ClosestDistance = TempDist;
+							NearestTarget = Equipment;
+						}
 					}
 				}
+			}
+			else
+			{
+				NPCController->GetSensedEquipment().Remove(Equipment);
 			}
 		}
 

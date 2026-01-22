@@ -46,6 +46,20 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	int CurDurability;
 
+	/* Handle to manage the timer */
+	FTimerHandle FlashTimerHandle;
+	
+	float FlashTime = 2.f;
+
+	bool bAlreadyFlashing = false;
+
+	int DurabilityFlashThreshold = 0;
+	
+	UFUNCTION()
+	void LowDurabilityFlashing();
+
+	void PlayFlashEffect(const FVector& InColor, float FlashLength) const;
+
 public:
 	AEquipment();
 
@@ -53,6 +67,8 @@ public:
 
 	void AttachMeshToSocket(USceneComponent* InParent, FName InSocketName) const;
 
+	void DetachMeshFromSocket(FDetachmentTransformRules Rules) const;
+	
 	virtual void BreakEquipment();
 
 	FORCEINLINE EEquipmentState GetEquipmentType() const { return EquipmentType; }

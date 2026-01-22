@@ -58,7 +58,7 @@ void AGASManaCharacter::SetEquipment(AEquipment* Equipment)
 				break;
 		}
 
-		Equipment->DisablePickUpCollision();
+		Equipment->DisableSphereCollision();
 		
 		const FName& EquipSocket = Equipment->GetEquipmentSocket(); 
 		EquipGearToSocket(Equipment, EquipSocket);
@@ -363,47 +363,57 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 		{
 			if (AGASManaCharacter* HitManaCharacter = Cast<AGASManaCharacter>(HitActor))
 			{
+				
 				if (!HitManaCharacter->bIsDead)
 				{
 					if (UAbilitySystemComponent* ASC = HitManaCharacter->GetAbilitySystemComponent())
 					{
-						//First, check if the hit mana character is blocking
-						if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsBlocking"))))
-						{
-							//First, decrease the durability of the shield
-							ChangeEquipmentDurability(HitManaCharacter, HitManaCharacter->GetLeftHandEquipment(), -1);
-							//Now check if the hit character is facing the attacked character
-							const FVector Forward = HitActor->GetActorForwardVector();
-							const FVector ImpactLowered(HitActor->GetActorLocation().X, HitActor->GetActorLocation().Y, GetActorLocation().Z);
-							const FVector ToHit = (ImpactLowered - GetActorLocation()).GetSafeNormal();
-							const double CosTheta = FVector::DotProduct(Forward, ToHit);
-							if (CosTheta <= 0)
-							{
-								//If we hit a blocking player, do a little screenshake
-								if (APlayerManaCharacter* PChar = Cast<APlayerManaCharacter>(HitManaCharacter))
-								{
-									PChar->ActivateCamShake(HitPlayerShieldCameraShake);
-								}
-								//If we're a player who hit a blocking enemy, then let them know we're vulnerable
-								else if (Cast<APlayerManaCharacter>(this))
-								{
-									if (ABaseManaEnemy* EChar = Cast<ABaseManaEnemy>(HitManaCharacter))
-									{
-										EChar->GetEnemyController()->GetBlackboardComponent()->SetValueAsBool("PlayerIsVulnerable", true);
-									}
-								}
-								
-								//If they are, then THE ATTACKING character must activate their hit stun ability
-								this->GetAbilitySystemComponent()->TryActivateAbilitiesByTag(ShieldStunTagContainer, true);
-								return;	
-							}
-						}
-
-						//If our hit mana character is rolling don't apply anything below
+						//First check if our hit character isn't rolling. We don't want to apply anything in this case
 						if (!ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Player.IsRolling")))
 						{
-							ASC->ApplyGameplayEffectToSelf(HitManaCharacter->GetDamageEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
-							
+							//For every actor we hit, change the durability of the right hand equipment on THIS character
+							if (GetRightHandEquipment())
+							{
+								GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Changing durability");
+								ChangeEquipmentDurability(this, GetRightHandEquipment(), -1);
+								//if (GetRightHandEquipment()) GEngine->AddOnScreenDebugMessage(3, 5.f, FColor::Purple, FString::Printf(TEXT("Durability: %d"), GetRightHandEquipment()->GetCurDurability()));
+							}
+						
+							//First, check if the hit mana character is blocking
+							if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsBlocking"))))
+							{
+								//First, decrease the durability of the shield
+								ChangeEquipmentDurability(HitManaCharacter, HitManaCharacter->GetLeftHandEquipment(), -1);
+								//Now check if the hit character is facing the attacked character
+								const FVector Forward = HitActor->GetActorForwardVector();
+								const FVector ImpactLowered(HitActor->GetActorLocation().X, HitActor->GetActorLocation().Y, GetActorLocation().Z);
+								const FVector ToHit = (ImpactLowered - GetActorLocation()).GetSafeNormal();
+								const double CosTheta = FVector::DotProduct(Forward, ToHit);
+								if (CosTheta <= 0)
+								{
+									//If we hit a blocking player, do a little screenshake
+									if (APlayerManaCharacter* PChar = Cast<APlayerManaCharacter>(HitManaCharacter))
+									{
+										PChar->ActivateCamShake(HitPlayerShieldCameraShake);
+									}
+									//If we're a player who hit a blocking enemy, then let them know we're vulnerable
+									else if (Cast<APlayerManaCharacter>(this))
+									{
+										if (ABaseManaEnemy* EChar = Cast<ABaseManaEnemy>(HitManaCharacter))
+										{
+											EChar->GetEnemyController()->GetBlackboardComponent()->SetValueAsBool("PlayerIsVulnerable", true);
+										}
+									}
+									//If they are, then THE ATTACKING character must activate their hit stun ability
+									this->GetAbilitySystemComponent()->TryActivateAbilitiesByTag(ShieldStunTagContainer, true);
+									return;	
+								}
+							}
+							if (GetRightHandEquipment())
+							{
+								GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Damage Effect Class: %s"), *GetRightHandEquipment()->GetDamageTypeClass()->GetName()));
+								ASC->ApplyGameplayEffectToSelf(GetRightHandEquipment()->GetDamageTypeClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+							}
 							//After applying damager, if we're alive apply knockback
 							if (HitManaCharacter->IsAlive())
 							{
@@ -413,6 +423,13 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 								{
 									HitEnemyCharacter->GetEnemyController()->GetBlackboardComponent()->SetValueAsObject("TargetToFollow", this);
 									HitEnemyCharacter->GetEnemyController()->GetBlackboardComponent()->SetValueAsBool("CanSeePlayer", true);
+								}
+								if (APlayerManaCharacter* HitPlayerCharacter = Cast<APlayerManaCharacter>(HitManaCharacter))
+								{
+									if (HitPlayerCharacter->GetHealthAsRatio_Implementation() <= 0.33f)
+									{
+										HitPlayerCharacter->LowHealthFlashing();
+									}
 								}
 								HitManaCharacter->DirectionalHitReact(GetActorLocation(), IsFinisher);
 							}

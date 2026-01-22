@@ -85,7 +85,11 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION()
 	void DisableSphereCollision() const;
+
+	UFUNCTION()
+	void EnableSphereCollision() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sine Parameters")
 	float Amplitude = 0.25f;
@@ -98,14 +102,13 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	virtual void SetItem();
-
-	UFUNCTION()
-	void DisablePickUpCollision() const;
+	
 
 	FORCEINLINE EItemType GetItemType() const { return ItemData.ItemType; }
 	FORCEINLINE FGameplayTagContainer GetTagContainer() const { return TagContainer; }
 	FORCEINLINE bool SetPickedUp(const bool bPickedUp) { return bIsPickedUp = bPickedUp; }
 	FORCEINLINE bool IsPickedUp() const { return bIsPickedUp; }
+	FORCEINLINE EItemState SetItemState(EItemState MyItemState) { return ItemState = MyItemState; }
 
 	
 protected:

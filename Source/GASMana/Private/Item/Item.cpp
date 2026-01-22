@@ -47,12 +47,6 @@ void AItem::SetItem()
 		}
 	}
 }
-
-void AItem::DisablePickUpCollision() const
-{
-	SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-}
-
 // Called when the game starts or when spawned
 void AItem::BeginPlay()
 {
@@ -110,6 +104,14 @@ void AItem::DisableSphereCollision() const
 	if (SphereComponent)
 	{
 		SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+void AItem::EnableSphereCollision() const
+{
+	if (SphereComponent)
+	{
+		SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
 }
 
