@@ -108,9 +108,14 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Pause Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* PauseAction;
-	/** Pause Action */
+	
+	/** Drop Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* DropAction;
+	UInputAction* DropRightAction;
+	
+	/** Drop Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* DropLeftAction;
 
 	/* RELOADING */
 
@@ -180,6 +185,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer FocusTagContainer;
 
+	/** Drop Tag Container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer DropTagContainer;
+
 	//////////////////////////////////////////////////////////////////////////
 	// Effect Classes
 
@@ -230,7 +239,6 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Mana Regen Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Mana", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> ManaRegenEffectClass;
-
 
 	/** Mana Drain Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abilities | Mana", meta = (AllowPrivateAccess = "true"))
@@ -299,9 +307,20 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Throw Hook Montage to play */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Hooks, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* ThrowHookMontage;
+	
+	/** Drop Right Montage to play */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montage, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* DropRightMontage;
+	
+	/** Drop Left Montage to play */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montage, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* DropLeftMontage;
 
 	UPROPERTY()
 	UAnimMontage* CurrentBlockingMontage;
+	
+	UPROPERTY()
+	UAnimMontage* CurrentDropMontage;
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -458,8 +477,11 @@ protected:
 	/**Called for Pause input */
 	void Pause(const FInputActionValue& Value);
 	
-	/**Called for Pause input */
-	void Drop(const FInputActionValue& Value);
+	/**Called for Drop right input */
+	void DropRightInput(const FInputActionValue& Value);
+
+	/**Called for Drop left  input */
+	void DropLeftInput(const FInputActionValue& Value);
 
 	/** Called for Debug reload input */
 	void DEBUG_ReloadLevel(const FInputActionValue& Value);
@@ -489,8 +511,7 @@ public:
 	void UpdateManaRegen();
 	
 	void LowHealthFlashing();
-
-
+	
 	virtual void LoadMe() override;
 	virtual void UnloadMe() override;
 	/** How much mana will regen to before it stops */
@@ -593,6 +614,7 @@ public:
 	FORCEINLINE UAnimMontage* GetSwingMontage() const { return SwingMontage; }
 	FORCEINLINE UAnimMontage* GetThrowHookMontage() const { return ThrowHookMontage; }
 	FORCEINLINE UAnimMontage* GetShieldBlockMontage() const { return ShieldBlockMontage; }
+	FORCEINLINE UAnimMontage* GetCurrentDropMontage() const { return CurrentDropMontage; }
 
 	FORCEINLINE UCurveFloat* GetDiveRollCurveFloat() const { return DiveRollCurveFloat; }
 	FORCEINLINE UCurveFloat* GetZipToPointCurveFloat() const { return ZipToPointCurveFloat; }

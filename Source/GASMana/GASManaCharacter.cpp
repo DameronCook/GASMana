@@ -511,6 +511,59 @@ void AGASManaCharacter::EquipRightHandGear()
 	}
 }
 
+void AGASManaCharacter::DropRightEquipment(ARightHandEquipment* Equipment)
+{
+	if (Equipment)
+	{
+		SetEquipmentState(EEquipmentState::EES_Unequipped);
+		Equipment->SetPickedUp(false);
+		const FGameplayTag Tag = FGameplayTag::RequestGameplayTag("Item.NotPickedUp");
+		Equipment->GetTagContainer().AddTag(Tag);
+		Equipment->SetItemState(EItemState::EIS_Hovering);
+		
+		Equipment->EnableSphereCollision();
+		Equipment->DetachMeshFromSocket(FDetachmentTransformRules::KeepRelativeTransform);
+		
+		const FVector NewLocation = GetActorLocation() + (GetActorForwardVector().GetSafeNormal() * 40.f);
+		Equipment->SetActorLocation(NewLocation);
+		FRotator EquipRot = Equipment->GetActorRotation();
+		Equipment->SetActorRotation(FRotator(0, EquipRot.Yaw, 0));
+
+		if (Equipment->GetEquipTypeClass())
+		{
+			GetAbilitySystemComponent()->RemoveActiveGameplayEffectBySourceEffect(Equipment->GetEquipTypeClass(), GetAbilitySystemComponent());
+		}
+		RightHandEquipment = nullptr;
+	}
+}
+
+void AGASManaCharacter::DropLeftEquipment(ALeftHandEquipment* Equipment)
+{
+	if (Equipment)
+	{
+		SetEquipmentState(EEquipmentState::EES_Unequipped);
+		Equipment->SetPickedUp(false);
+		const FGameplayTag Tag = FGameplayTag::RequestGameplayTag("Item.NotPickedUp");
+		Equipment->GetTagContainer().AddTag(Tag);
+		Equipment->SetItemState(EItemState::EIS_Hovering);
+		
+		Equipment->EnableSphereCollision();
+		Equipment->DetachMeshFromSocket(FDetachmentTransformRules::KeepRelativeTransform);
+		
+		const FVector NewLocation = GetActorLocation() + (GetActorForwardVector().GetSafeNormal() * 40.f);
+		Equipment->SetActorLocation(NewLocation);
+		FRotator EquipRot = Equipment->GetActorRotation();
+		Equipment->SetActorRotation(FRotator(0, EquipRot.Yaw, 0));
+
+		if (Equipment->GetEquipTypeClass())
+		{
+			GetAbilitySystemComponent()->RemoveActiveGameplayEffectBySourceEffect(Equipment->GetEquipTypeClass(), GetAbilitySystemComponent());
+		}
+		LeftHandEquipment = nullptr;
+	}
+}
+
+
 void AGASManaCharacter::InitializeAttributes()
 {
 	if (AbilitySystemComponent && DefaultAttributeEffect)

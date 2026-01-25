@@ -248,7 +248,13 @@ public:
 	/** Instantly Equips Gear to Right hand*/
 	UFUNCTION(BlueprintCallable)
 	void EquipRightHandGear();
-	
+
+	UFUNCTION()
+	void DropRightEquipment(ARightHandEquipment* Equipment);
+
+	UFUNCTION()
+	void DropLeftEquipment(ALeftHandEquipment* Equipment);
+
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
 	void AttachWeaponToBack() const;
 	

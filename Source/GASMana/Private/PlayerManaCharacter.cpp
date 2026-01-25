@@ -566,7 +566,9 @@ void APlayerManaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		//Pausing
 		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Started, this, &APlayerManaCharacter::Pause);
 
-		EnhancedInputComponent->BindAction(DropAction, ETriggerEvent::Started, this, &APlayerManaCharacter::Drop);
+		//Dropping
+		EnhancedInputComponent->BindAction(DropRightAction, ETriggerEvent::Started, this, &APlayerManaCharacter::DropRightInput);
+		EnhancedInputComponent->BindAction(DropLeftAction, ETriggerEvent::Started, this, &APlayerManaCharacter::DropLeftInput);
 
 		/* DEBUGGING */
 		//Reload level
@@ -864,30 +866,32 @@ void APlayerManaCharacter::Pause(const FInputActionValue& Value)
 	}
 }
 
-void APlayerManaCharacter::Drop(const FInputActionValue& Value)
+void APlayerManaCharacter::DropRightInput(const FInputActionValue& Value)
 {
-	if (RightHandEquipment)
+	if (GetRightHandEquipment())
 	{
-		SetEquipmentState(EEquipmentState::EES_Unequipped);
-		RightHandEquipment->SetPickedUp(false);
-		const FGameplayTag Tag = FGameplayTag::RequestGameplayTag("Item.NotPickedUp");
-		RightHandEquipment->GetTagContainer().AddTag(Tag);
-		RightHandEquipment->SetItemState(EItemState::EIS_Hovering);
-		
-		RightHandEquipment->EnableSphereCollision();
-		RightHandEquipment->DetachMeshFromSocket(FDetachmentTransformRules::KeepRelativeTransform);
-		
-		const FVector NewLocation = GetActorLocation() + (GetActorForwardVector().GetSafeNormal() * 100.f);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, FString::Printf(TEXT("New Location: %s"), *NewLocation.ToString()));
-		RightHandEquipment->SetActorLocation(NewLocation);
-		RightHandEquipment->SetActorRotation(FRotator(0, 0, 0));
-
-		if (RightHandEquipment->GetEquipTypeClass())
+		if (GetAbilitySystemComponent())
 		{
-			GetAbilitySystemComponent()->RemoveActiveGameplayEffectBySourceEffect(RightHandEquipment->GetEquipTypeClass(), GetAbilitySystemComponent());
+			const FName& EquipSocket = GetRightHandEquipment()->GetEquipmentSocket(); 
+			EquipGearToSocket(GetRightHandEquipment(), EquipSocket);
+			
+			CurrentDropMontage = DropRightMontage;
+			GetAbilitySystemComponent()->TryActivateAbilitiesByTag(DropTagContainer);
 		}
-		
-		RightHandEquipment = nullptr;
+	}
+}
+
+void APlayerManaCharacter::DropLeftInput(const FInputActionValue& Value)
+{
+	if (GetLeftHandEquipment())
+	{
+		if (GetAbilitySystemComponent())
+		{
+			const FName& EquipSocket = GetLeftHandEquipment()->GetEquipmentSocket(); 
+			EquipGearToSocket(GetLeftHandEquipment(), EquipSocket);
+			CurrentDropMontage = DropLeftMontage;
+			GetAbilitySystemComponent()->TryActivateAbilitiesByTag(DropTagContainer);
+		}
 	}
 }
 

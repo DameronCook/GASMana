@@ -141,25 +141,7 @@ void ABaseManaEnemy::UnloadMe()
 void ABaseManaEnemy::DirectionalHitReact(const FVector& HitterLocation, bool IsFinisher)
 {
 	Super::DirectionalHitReact(HitterLocation, IsFinisher);
-
-	/*
-	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), HitterLocation));
 	
-	if (EnemyController)
-	{
-		if (UBlackboardComponent* BlackboardComponent = EnemyController->GetBlackboardComponent())
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "Got controller and blackboard component!");
-
-			if (EnemyController->GetSensedActor())
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "Setting target to follow!");
-
-				BlackboardComponent->SetValueAsObject("TargetToFollow", EnemyController->GetSensedActor());
-			}
-		}
-	}
-	*/
 }
 
 void ABaseManaEnemy::GetMontageToPlay()
@@ -201,6 +183,9 @@ void ABaseManaEnemy::Die(const FVector& HitLocation)
 	GetTargetedWidget()->SetVisibility(false);
 	
 	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(DeathTagContainer, true);
+
+	if (GetRightHandEquipment()) DropRightEquipment(GetRightHandEquipment());
+	if (GetLeftHandEquipment()) DropLeftEquipment(GetLeftHandEquipment());
 }
 
 void ABaseManaEnemy::ShowHealth()
