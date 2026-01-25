@@ -1,6 +1,6 @@
 # GASMana
 
-You CAN use these assets in your free and commercial projects (exceptions mentioned below).
+You CAN use these assets in your free and commercial projects (exceptions mentioned below). As far as I'm concerned, all code in this project is open source and may be used for any project. The asset packs used for this project are listed below. These will have different licenses than my project.
 You CAN modify these assets for your projects.
 There is no need to credit, but it is appreciated.
 
