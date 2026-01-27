@@ -6,6 +6,7 @@
 #include "../../GASManaCharacter.h"
 #include "BaseManaEnemy.generated.h"
 
+class AManaPickUp;
 class AAIC_NPC;
 class USplineComponent;
 class UImage;
@@ -69,6 +70,15 @@ protected:
 	USphereComponent* LoadSphere;
 
 	virtual void Die(const FVector& HitLocation) override;
+
+	virtual void DeathDrops();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Drops)
+	TSubclassOf<AItem> ItemDropClass;
+
+	/* List of rows of items that this enemy could drop */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Drops)
+	TArray<FPlayerItemSlot> ItemRows;
 
 public:
 

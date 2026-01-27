@@ -109,6 +109,7 @@ public:
 	FORCEINLINE bool SetPickedUp(const bool bPickedUp) { return bIsPickedUp = bPickedUp; }
 	FORCEINLINE bool IsPickedUp() const { return bIsPickedUp; }
 	FORCEINLINE EItemState SetItemState(EItemState MyItemState) { return ItemState = MyItemState; }
+	FORCEINLINE FPlayerItemSlot SetItemData(FPlayerItemSlot NewData) { return ItemData = NewData; }
 
 	
 protected:

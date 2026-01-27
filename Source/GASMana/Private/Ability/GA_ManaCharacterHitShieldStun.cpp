@@ -16,7 +16,7 @@ UGA_ManaCharacterHitShieldStun::UGA_ManaCharacterHitShieldStun()
 	Tags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.Action.ShieldStun")));
 	SetAssetTags(Tags);
 
-	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.ShieldStun")));
+	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsShieldStun")));
 
 }
 

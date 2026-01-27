@@ -62,8 +62,9 @@ class GASMANA_API AManaPickUp : public AItem
 	float FlashLength = 1.f;
 	
 public:
-	
 	AManaPickUp();
+	
+	void SpawnManaNiagara();
 
 	virtual void BeginPlay() override;
 
@@ -71,5 +72,6 @@ public:
 	virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	                             const FHitResult& SweepResult) override;
+
 
 };

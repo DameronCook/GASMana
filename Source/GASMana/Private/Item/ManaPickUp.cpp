@@ -10,20 +10,29 @@
 
 AManaPickUp::AManaPickUp()
 {
+
+}
+
+void AManaPickUp::SpawnManaNiagara()
+{
+	if (!ManaComponent)
+	{
+		ManaComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ManaEffect, GetActorLocation(), FRotator::ZeroRotator);
+		ManaComponent->Activate();
+	}
 }
 
 void AManaPickUp::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ManaComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ManaEffect, GetActorLocation(), FRotator::ZeroRotator);
-	ManaComponent->Activate();
+	SpawnManaNiagara();
 }
 
 void AManaPickUp::SetItem()
 {
 	//Super::SetItem();
-	//DON'T Call super on this we don't want it. That will set a static mesh when weapons need skeletal ones :)
+	//DON'T Call super on this we don't want it. 
 	const FManaData*  ManaItemData = nullptr;
 
 	if (ItemData.ItemID.DataTable)
@@ -56,29 +65,36 @@ void AManaPickUp::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 {
 	Super::OnSphereOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 
-	if (const AGASManaCharacter* Char = Cast<AGASManaCharacter>(OtherActor))
+	if (AGASManaCharacter* Char = Cast<AGASManaCharacter>(OtherActor))
 	{
-		UAbilitySystemComponent* AbilitySystem = Char->GetAbilitySystemComponent();
-		if (AbilitySystem && PickUpEffect)
+		if (Char->IsAlive())
 		{
-			FGameplayEffectContextHandle EffectContext = AbilitySystem->MakeEffectContext();
-			EffectContext.AddSourceObject(this);
-
-			FGameplayEffectSpecHandle SpecHandle = AbilitySystem->MakeOutgoingSpec(PickUpEffect, 1.0f, EffectContext);
-			if (SpecHandle.IsValid())
+			UAbilitySystemComponent* AbilitySystem = Char->GetAbilitySystemComponent();
+			if (AbilitySystem && PickUpEffect)
 			{
-				AbilitySystem->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+				FGameplayEffectContextHandle EffectContext = AbilitySystem->MakeEffectContext();
+				EffectContext.AddSourceObject(this);
+
+				FGameplayEffectSpecHandle SpecHandle = AbilitySystem->MakeOutgoingSpec(PickUpEffect, 1.0f, EffectContext);
+				if (SpecHandle.IsValid())
+				{
+					AbilitySystem->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+				}
 			}
-		}
 
-		if (!FlashColor.IsNearlyZero())
-		{
-			//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, "Playing Material Effect");
-			Char->PlayFlashEffect(FlashColor, FlashLength);
-		}
+			if (!FlashColor.IsNearlyZero())
+			{
+				//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, "Playing Material Effect");
+				Char->PlayFlashEffect(FlashColor, FlashLength);
+			}
 
-		ManaComponent->Deactivate();
-		Destroy();
+			if (ManaComponent)
+			{
+				ManaComponent->Deactivate();
+			}
+
+			Destroy();
+		}
 	}
 }
 

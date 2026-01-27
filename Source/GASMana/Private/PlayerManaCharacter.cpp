@@ -170,7 +170,8 @@ void APlayerManaCharacter::BeginPlay()
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Stamina Delegates bound?");
 			StaminaBarInstance->BindToAnimationFinished(StaminaBarInstance->GetEndAnimation(), StaminaBarInstance->GetFadeOutAnimEndedDelegate());
-		}
+			StaminaBarInstance->PlayAnimation(StaminaBarInstance->GetEndAnimation());
+			bAlreadyShowing = false;		}
 	}
 }
 

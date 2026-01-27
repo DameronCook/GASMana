@@ -145,7 +145,7 @@ void UGA_ManaPlayerRoll::EndAbility(const FGameplayAbilitySpecHandle Handle, con
 			PlayerCharacter->UpdateStaminaRegen();
 			ActorInfo->AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ActorInfo->AbilitySystemComponent->MakeEffectContext());
 			ActorInfo->AbilitySystemComponent->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsEquipping")));
-			if (PlayerCharacter->GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Character.IsFocused"))))
+			if (PlayerCharacter->GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsFocused"))))
 			{
 				PlayerCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 			}

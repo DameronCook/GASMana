@@ -8,6 +8,7 @@
 #include "Item/Equipment.h"
 #include "Item/RightHandEquipment.h"
 #include "Item/LeftHandEquipment.h"
+#include "Item/ManaPickUp.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "UI/CameraTarget.h"
 
@@ -186,6 +187,34 @@ void ABaseManaEnemy::Die(const FVector& HitLocation)
 
 	if (GetRightHandEquipment()) DropRightEquipment(GetRightHandEquipment());
 	if (GetLeftHandEquipment()) DropLeftEquipment(GetLeftHandEquipment());
+
+	DeathDrops();
+}
+
+void ABaseManaEnemy::DeathDrops()
+{
+	const int NumberOfDrops = UKismetMathLibrary::RandomIntegerInRange(1,3);
+	for (int i = 0; i < NumberOfDrops; i++)
+	{
+		const FVector ActorLocation = GetActorLocation();
+		const float RandX = UKismetMathLibrary::RandomFloatInRange(-150.f, 150.f);
+		const float RandY = UKismetMathLibrary::RandomFloatInRange(-150.f, 150.f);
+		const float RandZ = UKismetMathLibrary::RandomFloatInRange(0.f, 150.f);
+		FVector SpawnLocation = FVector(ActorLocation.X + RandX, ActorLocation.Y + RandY, ActorLocation.Z + RandZ);
+		FTransform SpawnTransform(FRotator::ZeroRotator, SpawnLocation);
+		AItem* Drop = GetWorld()->SpawnActorDeferred<AItem>(ItemDropClass, SpawnTransform);
+
+		const int32 RandomIndex = FMath::RandRange(0, ItemRows.Num() - 1);
+
+		const FPlayerItemSlot DroppedItemSlot = ItemRows[RandomIndex];
+
+		if (Drop)
+		{
+			Drop->SetItemData(DroppedItemSlot);
+			Drop->SetItem();
+			Drop->FinishSpawning(SpawnTransform);
+		}
+	}
 }
 
 void ABaseManaEnemy::ShowHealth()

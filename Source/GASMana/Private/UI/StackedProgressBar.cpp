@@ -20,12 +20,9 @@ void UStackedProgressBar::UpdateProgressBar(float DeltaTime, float TopProgress)
 	{
 		const float NewBottomProgress = (TopProgress - PreviousTopProgress) * -1;
 		BottomProgress = NewBottomProgress + BottomProgress;
-		GEngine->AddOnScreenDebugMessage(3, 1.f, FColor::Green, FString::Printf(TEXT("New Bottom Progress:  %f"), BottomProgress));
 
 		PreviousTopProgress = TopProgress;
 
-		GEngine->AddOnScreenDebugMessage(1, 1.f, FColor::Green, FString::Printf(TEXT("Top Progress: %f"), TopProgress));
-		GEngine->AddOnScreenDebugMessage(2, 1.f, FColor::Green, FString::Printf(TEXT("Bottom Progress: %f"), BottomProgress));
 
 		DynamicMaterial->SetScalarParameterValue("Top Progress", TopProgress);
 		DynamicMaterial->SetScalarParameterValue("Bottom Progress", BottomProgress);
