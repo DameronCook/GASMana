@@ -35,7 +35,6 @@ void AManaPlayerController::BeginPlay()
 
 	if (PauseMenu->GetPauseAnimation())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Pause Delegates bound?");
 		PauseMenu->BindToAnimationFinished(PauseMenu->GetPauseAnimation(), PauseMenu->GetPauseAnimEndedDelegate());
 	}
 	

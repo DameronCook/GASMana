@@ -139,11 +139,8 @@ void UGA_ManaPlayerRoll::EndAbility(const FGameplayAbilitySpecHandle Handle, con
 		RollingTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsAttacking")));
 		ActorInfo->AbilitySystemComponent->RemoveActiveEffectsWithGrantedTags(RollingTags);
 
-		
 
-		APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
-
-		if (PlayerCharacter)
+		if (APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get()))
 		{
 			PlayerCharacter->UpdateStaminaRegen();
 			ActorInfo->AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetFreeEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, ActorInfo->AbilitySystemComponent->MakeEffectContext());

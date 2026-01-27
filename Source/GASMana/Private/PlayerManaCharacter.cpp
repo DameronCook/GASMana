@@ -5,7 +5,6 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "GraphEditorDragDropAction.h"
 #include "InputActionValue.h"
 #include "ManaPlayerAnimInstance.h"
 #include "ManaPlayerController.h"
@@ -20,6 +19,7 @@
 #include "Components/AC_HookShot.h"
 #include "Components/AC_WallRun.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Effect/GE_ManaPlayerGrounded.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
@@ -28,6 +28,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "UI/FadeOutScreen.h"
+#include "UI/StackedProgressBar.h"
+#include "UI/StaminaBar.h"
 
 
 APlayerManaCharacter::APlayerManaCharacter()
@@ -88,6 +90,9 @@ APlayerManaCharacter::APlayerManaCharacter()
 	//Blocking
 	CurrentBlockingMontage = ShieldBlockMontage; //In the future, set this based on cur equipment
 
+	StaminaBarWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("StamBarWidget"));
+	StaminaBarWidgetComponent->SetWidgetClass(StamBarClass);
+	StaminaBarWidgetComponent->SetupAttachment(RootComponent);
 }
 
 void APlayerManaCharacter::OnLoaderSphereOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -157,6 +162,16 @@ void APlayerManaCharacter::BeginPlay()
 	}
 
 	ManaPlayerAnimInstance = Cast<UManaPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+
+	if (StaminaBarWidgetComponent)
+	{
+		StaminaBarInstance = Cast<UStaminaBar>(StaminaBarWidgetComponent->GetWidget());
+		if (StaminaBarInstance)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Stamina Delegates bound?");
+			StaminaBarInstance->BindToAnimationFinished(StaminaBarInstance->GetEndAnimation(), StaminaBarInstance->GetFadeOutAnimEndedDelegate());
+		}
+	}
 }
 
 
@@ -170,7 +185,7 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 	
 	UpdateBlockingState();
 
-	//comment
+	UpdateStaminaBar(DeltaTime);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -927,7 +942,7 @@ void APlayerManaCharacter::Die(const FVector& HitLocation)
 
 //////////////////// -- Ability Regen -- \\\\\\\\\\\\\\\\\\\\\\\
 
-void APlayerManaCharacter::UpdateStaminaRegen() const
+void APlayerManaCharacter::UpdateStaminaRegen() 
 {
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
 	if (!AbilitySystem|| !StaminaRegenBlockEffectClass || !StaminaRegenEffectClass)
@@ -942,6 +957,16 @@ void APlayerManaCharacter::UpdateStaminaRegen() const
 	AbilitySystem->RemoveActiveGameplayEffectBySourceEffect(StaminaRegenEffectClass, AbilitySystem);
 	AbilitySystem->RemoveActiveGameplayEffectBySourceEffect(StaminaRegenBlockEffectClass, AbilitySystem);
 
+	if (StaminaBarWidgetComponent && StaminaBarInstance)
+	{
+		ShowStaminaTimer = ShowStaminaTimerMax;
+		if (!bAlreadyShowing)
+		{
+			bAlreadyShowing = true;
+			StaminaBarInstance->PlayAnimation(StaminaBarInstance->GetStartAnimation());
+		}
+	}
+	
 	if (bIsAttacking || bIsRolling)
 	{
 		return;
@@ -955,6 +980,24 @@ void APlayerManaCharacter::UpdateStaminaRegen() const
 	{
 		AbilitySystem->ApplyGameplayEffectToSelf(StaminaRegenEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
 	}
+}
+
+void APlayerManaCharacter::UpdateStaminaBar(float DeltaTime)
+{
+	//Stamina Bar
+	if (StaminaBarInstance && ShowStaminaTimer > 0.0f)
+	{
+		StaminaBarInstance->UpdateProgressBar(DeltaTime, GetStaminaAsRatio_Implementation());
+
+		ShowStaminaTimer -= DeltaTime;
+
+		if (ShowStaminaTimer <= 0.0f)
+		{
+			StaminaBarInstance->PlayAnimation(StaminaBarInstance->GetEndAnimation());
+			bAlreadyShowing = false;
+		}
+	}
+	
 }
 
 void APlayerManaCharacter::UpdateManaRegen()

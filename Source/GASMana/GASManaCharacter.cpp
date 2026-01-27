@@ -374,7 +374,6 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 							//For every actor we hit, change the durability of the right hand equipment on THIS character
 							if (GetRightHandEquipment())
 							{
-								GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Changing durability");
 								ChangeEquipmentDurability(this, GetRightHandEquipment(), -1);
 								//if (GetRightHandEquipment()) GEngine->AddOnScreenDebugMessage(3, 5.f, FColor::Purple, FString::Printf(TEXT("Durability: %d"), GetRightHandEquipment()->GetCurDurability()));
 							}
@@ -411,7 +410,6 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 							}
 							if (GetRightHandEquipment())
 							{
-								GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Damage Effect Class: %s"), *GetRightHandEquipment()->GetDamageTypeClass()->GetName()));
 								ASC->ApplyGameplayEffectToSelf(GetRightHandEquipment()->GetDamageTypeClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 							}
 							//After applying damager, if we're alive apply knockback
@@ -613,9 +611,9 @@ void AGASManaCharacter::SetNextComboSegment(const FName NextCombo)
 
 bool AGASManaCharacter::IsAlive() 
 {
-	float hp = GetAbilitySystemComponent()->GetNumericAttribute(UManaAttributeSet::GetHealthAttribute());
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Health: %f"), hp));
-	if (Attributes->GetHealth() < 0.f)
+	//float hp = GetAbilitySystemComponent()->GetNumericAttribute(UManaAttributeSet::GetHealthAttribute());
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Health: %f"), hp));
+	if (Attributes->GetHealth() <= 0.f)
 	{
 		return false;
 	}

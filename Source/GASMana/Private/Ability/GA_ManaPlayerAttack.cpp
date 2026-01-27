@@ -71,7 +71,7 @@ void UGA_ManaPlayerAttack::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 		AbilitySystemComponent->ApplyGameplayEffectToSelf(Character->GetAttackingEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 
 		//Update Stamina Regen if player
-		if (const APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(Character))
+		if (APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(Character))
 		{
 			PlayerChar->UpdateStaminaRegen();
 		}
@@ -95,7 +95,7 @@ void UGA_ManaPlayerAttack::EndAbility(const FGameplayAbilitySpecHandle Handle, c
 			Character->SetAttackAbility(nullptr);
 
 			//Update Stamina Regen if player
-			if (const APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(Character))
+			if (APlayerManaCharacter* PlayerChar = Cast<APlayerManaCharacter>(Character))
 			{
 				PlayerChar->UpdateStaminaRegen();
 

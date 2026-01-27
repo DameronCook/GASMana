@@ -18,6 +18,9 @@
 #include "PlayerManaCharacter.generated.h"
 
 
+class UStackedProgressBar;
+class UWidgetComponent;
+class UStaminaBar;
 class UManaPlayerAnimInstance;
 class UGA_ManaPlayerLaunchUp;
 class UGA_ManaPlayerFocus;
@@ -62,6 +65,16 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Player HUD Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UUserWidget> PlayerHUDClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, meta = (AllowPrivateAccess = "true"))
+	UWidgetComponent* StaminaBarWidgetComponent;
+
+	/** Default class of the stamina bar */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Widget, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UUserWidget> StamBarClass;
+
+	UPROPERTY()
+	UStaminaBar* StaminaBarInstance;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Loading, meta = (AllowPrivateAccess = "true"))
 	USphereComponent* LoaderSphere;
@@ -426,6 +439,7 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 
 protected:
 	virtual void BeginPlay() override;
+	void UpdateStaminaBar(float DeltaTime);
 
 	virtual void Tick(float DeltaTime) override;
 
@@ -499,6 +513,13 @@ protected:
 
 	bool bAlreadyFlashing = false;
 
+	bool bAlreadyShowing = false;
+	
+	float ShowStaminaTimer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina", meta = (AllowPrivateAccess = "true"))
+	float ShowStaminaTimerMax = 10.f;
+
 public:
 	APlayerManaCharacter();
 
@@ -506,7 +527,7 @@ public:
 
 	virtual void MeleeAttackNotify(FVector AttackPosition, bool IsFinisher) override;
 
-	void UpdateStaminaRegen() const;
+	void UpdateStaminaRegen();
 
 	void UpdateManaRegen();
 	
