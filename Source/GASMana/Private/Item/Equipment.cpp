@@ -42,6 +42,11 @@ void AEquipment::BreakEquipment()
 	Destroy();
 }
 
+void AEquipment::RegisterAsSource()
+{
+	if (StimuliSource) StimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
+}
+
 void AEquipment::SetCurDurability(const int NewDurability)
 {
 	CurDurability = NewDurability;

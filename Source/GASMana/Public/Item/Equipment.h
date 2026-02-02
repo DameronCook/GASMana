@@ -71,6 +71,9 @@ public:
 	
 	virtual void BreakEquipment();
 
+	UFUNCTION()
+	void RegisterAsSource();
+
 	FORCEINLINE EEquipmentState GetEquipmentType() const { return EquipmentType; }
 	FORCEINLINE UAnimMontage* GetEquipMontage() const { return EquipMontage; }
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetEquipTypeClass() const { return EquipmentTypeClass; }

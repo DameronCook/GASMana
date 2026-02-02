@@ -18,8 +18,9 @@ void AManaPickUp::SpawnManaNiagara()
 	if (!ManaComponent)
 	{
 		ManaComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ManaEffect, GetActorLocation(), FRotator::ZeroRotator);
-		ManaComponent->Activate();
 	}
+	ManaComponent->Activate();
+
 }
 
 void AManaPickUp::BeginPlay()

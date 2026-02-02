@@ -513,6 +513,7 @@ void AGASManaCharacter::DropRightEquipment(ARightHandEquipment* Equipment)
 {
 	if (Equipment)
 	{
+		Equipment->RegisterAsSource();
 		SetEquipmentState(EEquipmentState::EES_Unequipped);
 		Equipment->SetPickedUp(false);
 		const FGameplayTag Tag = FGameplayTag::RequestGameplayTag("Item.NotPickedUp");
@@ -539,6 +540,7 @@ void AGASManaCharacter::DropLeftEquipment(ALeftHandEquipment* Equipment)
 {
 	if (Equipment)
 	{
+		Equipment->RegisterAsSource();
 		SetEquipmentState(EEquipmentState::EES_Unequipped);
 		Equipment->SetPickedUp(false);
 		const FGameplayTag Tag = FGameplayTag::RequestGameplayTag("Item.NotPickedUp");

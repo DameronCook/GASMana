@@ -54,7 +54,7 @@ class GASMANA_API AAIC_NPC : public AAIController
 	UPROPERTY()
 	AActor* SensedActor;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess))
 	TArray<AEquipment*> SensedEquipment;
 
 	UPROPERTY()
