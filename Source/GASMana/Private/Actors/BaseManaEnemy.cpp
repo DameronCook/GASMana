@@ -60,6 +60,9 @@ void ABaseManaEnemy::BeginPlay()
 	}
 
 	SetTargetWidgetIcon(false, this);
+
+	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &ABaseManaEnemy::UnloadMeOnRestart);
+
 }
 
 void ABaseManaEnemy::IterateNextPoint()
@@ -97,6 +100,27 @@ FVector ABaseManaEnemy::GetNextPatrolPoint()
 	UE_LOG(LogTemp, Warning, TEXT("Next Patrol Point: %s"), *PatrolPoints[PatrolIndex].ToString());
 	return PatrolPoints[PatrolIndex];
 }
+
+void ABaseManaEnemy::UnloadMeOnRestart(UWorld* LoadedWorld)
+{
+	if (EnemyController)
+	{
+		if (UBlackboardComponent* BlackboardComponent = EnemyController->GetBlackboardComponent())
+		{
+			const uint8 Byte = static_cast<uint8>(PatrolType);
+			BlackboardComponent->SetValueAsEnum("EnemyPatrolType", Byte);
+
+			if (ShouldIBeInitiallyUnloaded)
+			{
+				UnloadMe();
+				BlackboardComponent->SetValueAsBool("AmILoaded", false);
+			}
+			else
+			{
+				BlackboardComponent->SetValueAsBool("AmILoaded", true);
+			}
+		}
+	}}
 
 AEquipment* ABaseManaEnemy::EnemyEquip()
 {

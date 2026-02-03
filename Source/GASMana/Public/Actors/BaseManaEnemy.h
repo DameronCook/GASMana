@@ -110,6 +110,7 @@ public:
 
 	UFUNCTION()
 	FVector GetNextPatrolPoint();
+	void UnloadMeOnRestart(UWorld* LoadedWorld);
 
 	FORCEINLINE AAIC_NPC* GetEnemyController() const { return EnemyController; }
 };
