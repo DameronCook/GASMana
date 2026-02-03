@@ -70,13 +70,13 @@ protected:
 	/////////////////////////////////////////////////////////////////////
 	///Equipment
 	/**What Equipment the character has */
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment", meta = (AllowPrivateAccess = "true"))
 	EEquipmentState EquipmentState;
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment", meta = (AllowPrivateAccess = "true"))
 	ARightHandEquipment* RightHandEquipment;
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment", meta = (AllowPrivateAccess = "true"))
 	ALeftHandEquipment* LeftHandEquipment;
 
 	/** Type of Equipment that the player is equipping*/

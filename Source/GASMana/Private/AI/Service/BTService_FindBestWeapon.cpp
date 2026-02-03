@@ -52,7 +52,6 @@ void UBTService_FindBestWeapon::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 					{
 						if (const float TempDist = OwnerActor->GetDistanceTo(Equipment); TempDist < ClosestDistance)
 						{
-							GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Red, "I HAVE FOUND A WEAPON");
 							ClosestDistance = TempDist;
 							NearestTarget = Equipment;
 						}
@@ -62,13 +61,11 @@ void UBTService_FindBestWeapon::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 			else
 			{
 				NPCController->GetSensedEquipment().Remove(Equipment);
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Called Remove on Sensed equipment");
 			}
 		}
 
 		if (NearestTarget)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Red, "I HAVE FOUND A WEAPON AND SET MY TARGET TO FOLLOW");
 			BlackboardComponent->SetValueAsObject("TargetToFollow", NearestTarget);
 			BlackboardComponent->SetValueAsFloat("DistToTarget", ClosestDistance);
 			BlackboardComponent->SetValueAsBool("IsMyItemPickedUp", false);

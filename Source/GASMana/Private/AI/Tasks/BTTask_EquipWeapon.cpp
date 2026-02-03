@@ -18,6 +18,7 @@ EBTNodeResult::Type UBTTask_EquipWeapon::ExecuteTask(UBehaviorTreeComponent& Own
 
 			if (ARightHandEquipment* RightEquipment = Cast<ARightHandEquipment>(Equipment))
 			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Setting Right hand equipment..");
 				OwnerComp.GetBlackboardComponent()->SetValueAsObject("RightHandEquipment", RightEquipment);
 				return EBTNodeResult::Succeeded;
 			}
@@ -31,5 +32,5 @@ EBTNodeResult::Type UBTTask_EquipWeapon::ExecuteTask(UBehaviorTreeComponent& Own
 		}
 	}
 	
-	return Super::ExecuteTask(OwnerComp, NodeMemory);
+	return EBTNodeResult::Failed;
 }

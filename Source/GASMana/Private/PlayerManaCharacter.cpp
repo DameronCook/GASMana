@@ -168,10 +168,10 @@ void APlayerManaCharacter::BeginPlay()
 		StaminaBarInstance = Cast<UStaminaBar>(StaminaBarWidgetComponent->GetWidget());
 		if (StaminaBarInstance)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Stamina Delegates bound?");
 			StaminaBarInstance->BindToAnimationFinished(StaminaBarInstance->GetEndAnimation(), StaminaBarInstance->GetFadeOutAnimEndedDelegate());
 			StaminaBarInstance->PlayAnimation(StaminaBarInstance->GetEndAnimation());
-			bAlreadyShowing = false;		}
+			bAlreadyShowing = false;
+		}
 	}
 }
 
