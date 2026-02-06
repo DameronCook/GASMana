@@ -64,7 +64,16 @@ bool UManaCameraModifierPlayerActions::ProcessViewRotation(AActor* ViewTarget, f
 				InterpRotationSpeed = 8.f;
 				const FVector CameraLoc = CameraOwner->GetCameraLocation();
 				const FRotator DesiredCamRot = UKismetMathLibrary::FindLookAtRotation(CameraLoc, CurrentTarget->GetActorLocation());
-				NewCameraRotation = FRotator(0.f, DesiredCamRot.Yaw, 0.f);
+				const float VerticalDist = FMath::Abs(PlayerChar->GetActorLocation().Z - CurrentTarget->GetActorLocation().Z);
+				if (VerticalDist < 500)
+				{
+					NewCameraRotation = FRotator(0.f, DesiredCamRot.Yaw, 0.f);
+					NewCameraRotation.Pitch -= 10.f;
+				}
+				else
+				{
+					NewCameraRotation = DesiredCamRot;
+				}
 			}
 		}
 

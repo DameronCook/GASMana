@@ -470,16 +470,29 @@ void APlayerManaCharacter::UpdateFocusedCamera(float DeltaTime)
 	if (GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsFocused"))))
 	{
 		if (!ManaPlayerAnimInstance) return;
-		
-		const FRotator DesiredFocusRot = GetCurrentFocusingDirection() - FRotator(15, 0, 0);
 
-		const FRotator CurrentFocusRot = FMath::RInterpTo(Controller->GetControlRotation(), DesiredFocusRot, DeltaTime, .2f);
-		
-		Controller->SetControlRotation(CurrentFocusRot);
-		
-		if (!ManaPlayerAnimInstance->Montage_IsPlaying(GetRollMontage()))
+		if (CombatCameraTarget)
 		{
-			SetActorRotation(FRotator(0, CurrentFocusRot.Yaw, 0));
+			const float VerticalDist = FMath::Abs(GetActorLocation().Z - CombatCameraTarget->GetActorLocation().Z);
+			FRotator DesiredFocusRot;
+		
+			if (VerticalDist < 500)
+			{
+				DesiredFocusRot = GetCurrentFocusingDirection();
+			}
+			else
+			{
+				DesiredFocusRot = GetCurrentFocusingDirection();
+			}
+
+			const FRotator CurrentFocusRot = FMath::RInterpTo(Controller->GetControlRotation(), DesiredFocusRot, DeltaTime, .2f);
+		
+			Controller->SetControlRotation(CurrentFocusRot);
+		
+			if (!ManaPlayerAnimInstance->Montage_IsPlaying(GetRollMontage()))
+			{
+				SetActorRotation(FRotator(0, CurrentFocusRot.Yaw, 0));
+			}
 		}
 	}
 }
