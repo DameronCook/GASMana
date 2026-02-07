@@ -21,4 +21,11 @@ class GASMANA_API UManaPlayerAnimInstance : public UManaCharacterAnimInstance
 
 	UPROPERTY()
 	APlayerManaCharacter* ManaPlayer;
+	
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Turn")
+	bool bShouldTurnInPlace;
+
+public:
+	FORCEINLINE bool SetShouldTurnInPlace(const bool TurnInPlace) { return bShouldTurnInPlace = TurnInPlace; }
 };

@@ -64,11 +64,8 @@ bool UManaCameraModifierFocusWalkDir::ProcessViewRotation(AActor* ViewTarget, fl
 		{
 			return false;
 		}
-		else
-		{
-			PreviousYawDeltaSign = YawDeltaSign;
-			DirectionChangeCooldownRemaining = DirectionChangeCooldown;
-		}
+		PreviousYawDeltaSign = YawDeltaSign;
+		DirectionChangeCooldownRemaining = DirectionChangeCooldown;
 	}
 
 	float AppliedYawDelta = YawDelta * RotationSpeed * DeltaTime;

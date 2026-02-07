@@ -474,6 +474,18 @@ void APlayerManaCharacter::UpdateFocusedCamera(float DeltaTime)
 		if (CombatCameraTarget)
 		{
 			const float VerticalDist = FMath::Abs(GetActorLocation().Z - CombatCameraTarget->GetActorLocation().Z);
+
+			const float Dist = GetDistanceTo(CombatCameraTarget);
+
+			if (Dist < 600)
+			{
+				ManaPlayerAnimInstance->SetShouldTurnInPlace(true);
+			}
+			else
+			{
+				ManaPlayerAnimInstance->SetShouldTurnInPlace(false);
+			}
+			
 			FRotator DesiredFocusRot;
 		
 			if (VerticalDist < 500)
