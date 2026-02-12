@@ -1,5 +1,6 @@
 #include "Actors/BaseManaEnemy.h"
 #include "PlayerManaCharacter.h"
+#include "Actors/SkyBeacon.h"
 #include "AI/AIC_NPC.h"
 #include "AI/ManaEnemyAnimInstance.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -213,6 +214,16 @@ void ABaseManaEnemy::Die(const FVector& HitLocation)
 	if (GetLeftHandEquipment()) DropLeftEquipment(GetLeftHandEquipment());
 
 	DeathDrops();
+
+	if (SkyBeacon)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "Found sky beacon");
+		if (SkyBeacon->GetClass()->ImplementsInterface(UEnemyList::StaticClass()))
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "Sky beacon implements interface");
+			IEnemyList::Execute_RemoveEnemyFromList(SkyBeacon, this);
+		}
+	}
 }
 
 void ABaseManaEnemy::DeathDrops()

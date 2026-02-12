@@ -6,6 +6,7 @@
 #include "../../GASManaCharacter.h"
 #include "BaseManaEnemy.generated.h"
 
+class ASkyBeacon;
 class AManaPickUp;
 class AAIC_NPC;
 class USplineComponent;
@@ -80,8 +81,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Drops)
 	TArray<FPlayerItemSlot> ItemRows;
 
-public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Beacon)
+	ASkyBeacon* SkyBeacon;
 
+public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Patrol, meta = (AllowPrivateAccess = "true"))
 	int PatrolIndex = 0;
 	

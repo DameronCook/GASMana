@@ -175,7 +175,6 @@ void APlayerManaCharacter::BeginPlay()
 	}
 }
 
-
 void APlayerManaCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
