@@ -36,4 +36,6 @@ public:
 	float GetMana() const;
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "ProgressBar")
 	float GetManaAsRatio() const;
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "ProgressBar")
+	bool GetWon() const;
 };

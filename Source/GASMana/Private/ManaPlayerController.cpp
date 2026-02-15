@@ -7,6 +7,8 @@
 #include "UI/DeathMenu.h"
 #include "UI/FadeOutScreen.h"
 #include "UI/PauseMenu.h"
+#include "UI/WinMenu.h"
+#include "UI/EnemyCounter.h"
 
 AManaPlayerController::AManaPlayerController()
 {
@@ -37,6 +39,10 @@ void AManaPlayerController::BeginPlay()
 	{
 		PauseMenu->BindToAnimationFinished(PauseMenu->GetPauseAnimation(), PauseMenu->GetPauseAnimEndedDelegate());
 	}
+
+	WinMenu = CreateWidget<UWinMenu>(this, WinMenuBP);
+
+	EnemyCounter = CreateWidget<UEnemyCounter>(this, EnemyCounterBP);
 	
 	FSlateApplication::Get().OnApplicationActivationStateChanged().AddUObject(this, &AManaPlayerController::OnWindowFocusChanged);
 

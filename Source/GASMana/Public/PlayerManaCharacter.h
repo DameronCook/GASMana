@@ -18,6 +18,7 @@
 #include "PlayerManaCharacter.generated.h"
 
 
+class ASkyBeacon;
 class UStackedProgressBar;
 class UWidgetComponent;
 class UStaminaBar;
@@ -521,6 +522,7 @@ protected:
 	float ShowStaminaTimerMax = 10.f;
 
 public:
+	
 	APlayerManaCharacter();
 
 	virtual void Blocking() override;
@@ -534,6 +536,7 @@ public:
 	void LowHealthFlashing();
 	
 	virtual void LoadMe() override;
+	
 	virtual void UnloadMe() override;
 	/** How much mana will regen to before it stops */
 	UPROPERTY(EditAnywhere)
@@ -541,7 +544,6 @@ public:
 
 	UPROPERTY()
 	FActiveGameplayEffectHandle ActiveChargeEffect;
-
 
 	UPROPERTY(EditAnywhere)
 	float DefaultWalkSpeed = 700;
@@ -559,6 +561,7 @@ public:
 	virtual float GetStaminaAsRatio_Implementation() const override;
 	virtual float GetMana_Implementation() const override;
 	virtual float GetManaAsRatio_Implementation() const override;
+	virtual bool GetWon_Implementation() const override;
 
 
 	//Attack Interface
@@ -583,7 +586,14 @@ public:
 	void EndCameraShake(UCameraShakeBase* Shake) const;
 	bool bCanCameraShake = true;
 
+	//////////////////////////////////////
+	//Other
+	//////////////////////////////////////
+	UPROPERTY(VisibleAnywhere)
+	TArray<ASkyBeacon*> Beacons;
 
+	UFUNCTION()
+	void RemoveBeaconFromList(ASkyBeacon* BeaconToRemove);
 
 	//////////////////////////////////////
 	//Convenience functions
@@ -661,8 +671,6 @@ public:
 	FORCEINLINE float GetSwingSpeedBalancer() const { return SwingSpeedBalancer; }
 	FORCEINLINE float GetOriginalGravityScale() const { return OriginalGravityScale; }
 	
-
-
 	///////////////////////////////////// -- Setters
 	FORCEINLINE UGA_ManaPlayerWallRun* SetWallRunAbility(UGA_ManaPlayerWallRun* WallRunAbility)
 	{

@@ -6,6 +6,7 @@
 #include "ManaPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/DeathMenu.h"
+#include "UI/WinMenu.h"
 
 
 void UFadeOutScreen::NativeConstruct()
@@ -48,21 +49,45 @@ void UFadeOutScreen::FadeOutEnded()
 	UGameplayStatics::SetGamePaused(GetWorld(), true);
 	if (AManaPlayerController* PlayerController = Cast<AManaPlayerController>(GetOwningPlayer()))
 	{
-		if (UDeathMenu* Menu = PlayerController->GetDeathMenu())
+		if (PlayerController->bDidIWin)
 		{
-			Menu->AddToViewport();
+			if (UWinMenu* WinMenu = PlayerController->GetWinMenu())
+			{
+				WinMenu->AddToViewport();
 
-			Menu->PlayAnimation(Menu->GetStartAnimation());
+				WinMenu->PlayAnimation(WinMenu->GetStartAnimation());
 
-			FInputModeUIOnly InputModeData;
-			InputModeData.SetWidgetToFocus(Menu->TakeWidget()); 
-			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways); 
+				FInputModeUIOnly InputModeData;
+				InputModeData.SetWidgetToFocus(WinMenu->TakeWidget()); 
+				InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways); 
 			
-			PlayerController->SetInputMode(InputModeData);
+				PlayerController->SetInputMode(InputModeData);
 
-			Menu->SetUserFocus(PlayerController);
+				WinMenu->SetUserFocus(PlayerController);
 			
-			PlayerController->bShowMouseCursor = true;
+				PlayerController->bShowMouseCursor = true;
+
+				//PlayerController->GetPawn()
+			}
+		}
+		else
+		{
+			if (UDeathMenu* Menu = PlayerController->GetDeathMenu())
+			{
+				Menu->AddToViewport();
+
+				Menu->PlayAnimation(Menu->GetStartAnimation());
+
+				FInputModeUIOnly InputModeData;
+				InputModeData.SetWidgetToFocus(Menu->TakeWidget()); 
+				InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways); 
+			
+				PlayerController->SetInputMode(InputModeData);
+
+				Menu->SetUserFocus(PlayerController);
+			
+				PlayerController->bShowMouseCursor = true;
+			}	
 		}
 	}
 }

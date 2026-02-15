@@ -394,6 +394,15 @@ float APlayerManaCharacter::GetManaAsRatio_Implementation() const
 	return GetMana_Implementation()/ GetAbilitySystemComponent()->GetNumericAttribute(UManaAttributeSet::GetMaxManaAttribute());
 }
 
+bool APlayerManaCharacter::GetWon_Implementation() const
+{
+	if (const AManaPlayerController* ManaController = Cast<AManaPlayerController>(GetController()))
+	{
+		return ManaController->bDidIWin;
+	}
+	return false;
+}
+
 void APlayerManaCharacter::SetDefaultCombos()
 {
 	Super::SetDefaultCombos();
@@ -530,6 +539,21 @@ void APlayerManaCharacter::EndCameraShake(UCameraShakeBase* Shake) const
 		if (const AManaPlayerController* ManaController = Cast<AManaPlayerController>(GetController()))
 		{
 			ManaController->PlayerCameraManager->StopCameraShake(Shake);
+		}
+	}
+}
+
+void APlayerManaCharacter::RemoveBeaconFromList(ASkyBeacon* BeaconToRemove)
+{
+	Beacons.Remove(BeaconToRemove);
+
+	if (Beacons.Num() == 0)
+	{
+		if (AManaPlayerController* ManaController = Cast<AManaPlayerController>(GetController()))
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "Win called on player");
+			ManaController->bDidIWin = true;
+			ManaController->GetFadeWidget()->StartFadeToBlack();
 		}
 	}
 }
@@ -942,6 +966,13 @@ void APlayerManaCharacter::DEBUG_ReloadLevel(const FInputActionValue& Value)
 
 void APlayerManaCharacter::DEBUG_RefillMana(const FInputActionValue& Value)
 {
+	if (AManaPlayerController* ManaController = Cast<AManaPlayerController>(GetController()))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "Win called on player");
+		ManaController->bDidIWin = true;
+		ManaController->GetFadeWidget()->StartFadeToBlack();
+	}
+	
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
 	AbilitySystem->ApplyGameplayEffectToSelf(ManaDebugRefillEffectClass->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystem->MakeEffectContext());
 }
