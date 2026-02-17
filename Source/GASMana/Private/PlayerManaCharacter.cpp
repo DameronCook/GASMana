@@ -141,9 +141,7 @@ void APlayerManaCharacter::BeginPlay()
 	}
 
 	EquipmentState = EEquipmentState::EES_Unequipped;
-
-	UpdateStaminaRegen();
-
+	
 	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0))
 	{
 		if (PlayerHUDClass)
@@ -173,6 +171,9 @@ void APlayerManaCharacter::BeginPlay()
 			bAlreadyShowing = false;
 		}
 	}
+
+	UpdateStaminaRegen();
+
 }
 
 void APlayerManaCharacter::Tick(float DeltaTime)

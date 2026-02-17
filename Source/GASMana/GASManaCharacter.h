@@ -195,8 +195,6 @@ protected:
 	/** Death Direction */
 	UPROPERTY()
 	EDeathType DeathType;
-	
-	virtual void Die(const FVector& HitLocation);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Cam, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UCameraShakeBase> HitPlayerShieldCameraShake;
@@ -236,6 +234,9 @@ public:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	FVector HitFlashColor = FVector::ZeroVector;
 
+	UFUNCTION()
+	virtual void Die(const FVector& HitLocation);
+	
 	////////////////////////////////////////////////////////////////////
 	///Gear
 	/** Instantly removes gear from hands */

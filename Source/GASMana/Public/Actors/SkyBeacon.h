@@ -7,6 +7,7 @@
 #include "Interface/EnemyList.h"
 #include "SkyBeacon.generated.h"
 
+class UBoxComponent;
 class USphereComponent;
 class UEnemyCounter;
 class ABaseManaEnemy;
@@ -20,7 +21,7 @@ class GASMANA_API ASkyBeacon : public AActor, public IEnemyList
 	ASkyBeacon();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	USphereComponent* SphereComponent;
+	UBoxComponent* BoxComponent;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UNiagaraSystem* BeaconNiagaraSystem;

@@ -7,5 +7,8 @@
 
 void UEnemyCounter::SetCounterText(FText Text)
 {
-	EnemyCounterText->SetText(Text);
+	if (EnemyCounterText)
+	{
+		EnemyCounterText->SetText(Text);
+	}
 }

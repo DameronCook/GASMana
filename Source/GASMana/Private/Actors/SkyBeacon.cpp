@@ -5,7 +5,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "PlayerManaCharacter.h"
-#include "Components/SphereComponent.h"
+#include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/EnemyCounter.h"
 
@@ -14,15 +14,13 @@ ASkyBeacon::ASkyBeacon()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-	StartBeacon();
-
 	//Create a sphere mesh that checks for enemies to load them in
-	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
-	SphereComponent->SetupAttachment(RootComponent);
-	SphereComponent->SetSphereRadius(6000.f, false);
-	SphereComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
-	SphereComponent->SetCollisionObjectType(ECC_WorldDynamic);
-	SphereComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
+	BoxComponent->SetupAttachment(RootComponent);
+	BoxComponent->SetBoxExtent(FVector(1000.f, 1000.f, 1000.f), false);
+	BoxComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+	BoxComponent->SetCollisionObjectType(ECC_WorldDynamic);
+	BoxComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 }
 
 void ASkyBeacon::StartBeacon()
@@ -31,7 +29,11 @@ void ASkyBeacon::StartBeacon()
 	{
 		BeaconNiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BeaconNiagaraSystem, GetActorLocation(), FRotator::ZeroRotator);
 	}
-	if (BeaconNiagaraComponent) BeaconNiagaraComponent->Activate();
+	if (BeaconNiagaraComponent)
+	{
+		BeaconNiagaraComponent->Activate();
+		BeaconNiagaraComponent->SetWorldLocation(GetActorLocation());
+	}
 }
 
 void ASkyBeacon::EndBeacon()
@@ -97,10 +99,10 @@ void ASkyBeacon::BeginPlay()
 		PlayerChar->Beacons.Add(this);
 	}
 
-	if (SphereComponent)
+	if (BoxComponent)
 	{
-		SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &ASkyBeacon::OnSphereOverlap);
-		SphereComponent->OnComponentEndOverlap.AddDynamic(this, &ASkyBeacon::OnSphereEndOverlap);
+		BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &ASkyBeacon::OnSphereOverlap);
+		BoxComponent->OnComponentEndOverlap.AddDynamic(this, &ASkyBeacon::OnSphereEndOverlap);
 	}
 
 	InitialCount = EnemiesToClear.Num();
@@ -113,7 +115,9 @@ void ASkyBeacon::RemoveEnemyFromList_Implementation(ABaseManaEnemy* Enemy)
 	
 	EnemiesToClear.Remove(Enemy);
 
-	EnemyCounter->SetCounterText(FText::FromString(FString::Printf(TEXT("Enemies to clear: %d / %d"), EnemiesToClear.Num(), InitialCount)));
-
+	if (EnemyCounter)
+	{
+		EnemyCounter->SetCounterText(FText::FromString(FString::Printf(TEXT("Enemies to clear: %d / %d"), EnemiesToClear.Num(), InitialCount)));
+	}
 	CheckEnemiesLeft();
 }
