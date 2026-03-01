@@ -19,7 +19,13 @@ class GASMANA_API ASkyBeacon : public AActor, public IEnemyList
 {
 	GENERATED_BODY()
 	ASkyBeacon();
-
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* Scene;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* NiagaraRoot;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* BoxComponent;
 

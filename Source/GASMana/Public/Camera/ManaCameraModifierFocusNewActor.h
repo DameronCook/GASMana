@@ -29,11 +29,9 @@ private:
 	float SnapSpeed;
 
 	/** Target actor that was selected at the time of the previous camera update. */
+	UPROPERTY()
 	AActor* LastTarget;
 
 	/** Desired rotation for focusing the target actor. */
 	FRotator DesiredRotation;
-
-	float CooldownRemaining;
-
 };

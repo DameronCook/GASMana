@@ -19,6 +19,7 @@ UGA_ManaCharHitReact::UGA_ManaCharHitReact()
 
 	//Blocked Tags
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsRolling")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsDying")));
 }
 
 void UGA_ManaCharHitReact::ActivateAbility(FGameplayAbilitySpecHandle Handle,

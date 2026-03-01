@@ -23,6 +23,7 @@ UGA_ManaPlayerBlock::UGA_ManaPlayerBlock()
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsEquipping")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsHitReacting")));
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsShieldStun")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsDying")));
 
 }
 
