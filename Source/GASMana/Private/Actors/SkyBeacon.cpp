@@ -12,8 +12,14 @@
 // Sets default values
 ASkyBeacon::ASkyBeacon()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+
+	Scene = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
+	RootComponent = Scene;
+
+	NiagaraRoot = CreateDefaultSubobject<USceneComponent>(TEXT("BoxRoot"));
+	NiagaraRoot->SetupAttachment(Scene);
+	
 	//Create a sphere mesh that checks for enemies to load them in
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
 	BoxComponent->SetupAttachment(RootComponent);
@@ -32,7 +38,7 @@ void ASkyBeacon::StartBeacon()
 	if (BeaconNiagaraComponent)
 	{
 		BeaconNiagaraComponent->Activate();
-		BeaconNiagaraComponent->SetWorldLocation(GetActorLocation());
+		BeaconNiagaraComponent->SetWorldLocation(NiagaraRoot->GetComponentLocation());
 	}
 }
 

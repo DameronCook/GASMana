@@ -372,7 +372,6 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Swing", meta = (AllowPrivateAccess = "true"))
 	float SwingSpeedBalancer = 20.f;
 
-
 	//////////////////////////////////////////
 	//Active Abilities
 
@@ -429,6 +428,9 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 
 	UPROPERTY()
 	UManaPlayerAnimInstance* ManaPlayerAnimInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	UMaterialParameterCollection* DitheringMaterialParameterCollection;
 
 	UFUNCTION()
 	void OnLoaderSphereOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -570,7 +572,8 @@ public:
 
 	//////////////////////////////////////
 	//Camera
-
+	float CamRotSpeed = 60.f;
+	
 	virtual AManaCameraModificationVolume* GetCurrentCameraModificationVolume() const override;
 	virtual void SetCurrentCameraModificationVolume(AManaCameraModificationVolume* InCurrentCameraModificationVolume) override;
 	virtual bool GotMovementInput() const override;

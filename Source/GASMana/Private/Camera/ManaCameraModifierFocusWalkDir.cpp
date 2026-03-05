@@ -2,6 +2,9 @@
 
 
 #include "Camera/ManaCameraModifierFocusWalkDir.h"
+
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Interface/PlayerCharacterInterface.h"
 
 UManaCameraModifierFocusWalkDir::UManaCameraModifierFocusWalkDir()
@@ -41,6 +44,16 @@ bool UManaCameraModifierFocusWalkDir::ProcessViewRotation(AActor* ViewTarget, fl
 		return false;
 	}
 
+	if (const ACharacter* Char = Cast<ACharacter>(ViewTarget))
+	{
+		FVector PlayerMovementDir = Char->GetCharacterMovement()->Velocity.GetSafeNormal();
+		FVector CameraFacingDir = OutViewRotation.Vector();
+		float Dot = FVector::DotProduct(PlayerMovementDir, CameraFacingDir);
+		if (Dot < -0.75f)
+		{
+			return false;
+		}
+	}
 	const float ActorYaw = ViewTarget->GetActorRotation().Yaw;
 	const float ViewYaw = OutViewRotation.Yaw;
 

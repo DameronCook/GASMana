@@ -7,6 +7,8 @@
 #include "PlayerManaCharacter.h"
 #include "Components/Button.h"
 #include "Components/CheckBox.h"
+#include "Components/Slider.h"
+#include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -21,8 +23,15 @@ void UPauseMenu::NativeConstruct()
 
 	ScreenShakeCheckBox->OnCheckStateChanged.AddUniqueDynamic(this, &UPauseMenu::ScreenShakeCheckBoxStateChanged);
 
+	CameraRotationSpeedSlider->OnValueChanged.AddUniqueDynamic(this, &UPauseMenu::CameraRotationSpeedChanged);
+	CameraRotationSpeedSlider->SetValue(60.f);
+	CameraRotationSpeedText->SetText(FText::FromString(FString::Printf(TEXT("Camera Rotation speed: %d"), 60)));
+
+
 	PauseAnimEndedDelegate.BindDynamic(this, &UPauseMenu::PauseAnimEnded);
 }
+
+
 
 void UPauseMenu::RestartClicked()
 {
@@ -59,6 +68,19 @@ void UPauseMenu::ScreenShakeCheckBoxStateChanged(bool bIsChecked)
 		if (APlayerManaCharacter* PChar = Cast<APlayerManaCharacter>(PlayerController->GetCharacter()))
 		{
 			PChar->bCanCameraShake = bIsChecked;
+		}
+	}
+}
+
+void UPauseMenu::CameraRotationSpeedChanged(float NewValue)
+{
+	if (const AManaPlayerController* PlayerController = Cast<AManaPlayerController>(GetOwningPlayer()))
+	{
+		if (APlayerManaCharacter* PChar = Cast<APlayerManaCharacter>(PlayerController->GetCharacter()))
+		{
+			int NewerValue = ceil(NewValue);
+			PChar->CamRotSpeed = NewerValue;
+			CameraRotationSpeedText->SetText(FText::FromString(FString::Printf(TEXT("Camera Rotation speed: %d"), NewerValue)));
 		}
 	}
 }

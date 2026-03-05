@@ -20,6 +20,7 @@ UGA_ManaPlayerFocus::UGA_ManaPlayerFocus()
 
 	//Blocked Tags
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.IsFocused")));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Character.IsDying")));
 }
 
 TArray<class AActor*> UGA_ManaPlayerFocus::FindAllActorsInRange(const APlayerManaCharacter* PlayerCharacter,

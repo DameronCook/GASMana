@@ -653,6 +653,7 @@ void AGASManaCharacter::Ragdoll()
 
 	MeshComp->SetCollisionProfileName(TEXT("Ragdoll"));
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	MeshComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	MeshComp->SetAllBodiesSimulatePhysics(true);
 	MeshComp->SetSimulatePhysics(true);
 	MeshComp->WakeAllRigidBodies();

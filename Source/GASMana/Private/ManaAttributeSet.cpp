@@ -62,6 +62,7 @@ void UManaAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 		//{
 		//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, FString::Printf(TEXT("New Heatlh: %f"), GetHealth()));
 		//}
+		SetHealth(FMath::Clamp(GetHealth(), -1.f, GetMaxHealth()));
 	}
 
 	if (Data.EvaluatedData.Attribute == GetStaminaAttribute())

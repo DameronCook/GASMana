@@ -26,6 +26,7 @@
 #include "Item/LeftHandEquipment.h"
 #include "Item/RightHandEquipment.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMaterialLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "UI/FadeOutScreen.h"
 #include "UI/StackedProgressBar.h"
@@ -187,6 +188,8 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 	UpdateBlockingState();
 
 	UpdateStaminaBar(DeltaTime);
+
+	UKismetMaterialLibrary::SetVectorParameterValue(this, DitheringMaterialParameterCollection, "MainCharacterLocation", FLinearColor(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -757,7 +760,6 @@ void APlayerManaCharacter::Look(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
-		constexpr float CamRotSpeed = 60.f;
 		const float DeltaSeconds = GetWorld()->GetDeltaSeconds() * CamRotSpeed;
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X * DeltaSeconds);

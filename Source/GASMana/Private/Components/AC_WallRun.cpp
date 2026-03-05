@@ -81,7 +81,7 @@ bool UAC_WallRun::WallRunCheck(ACharacter* Character, UCharacterMovementComponen
 
 	// Line parameters
 	const FVector LineStartLocation = Character->GetActorLocation();
-	const float LineTraceLength = 40.0f;
+	const float LineTraceLength = 50.0f;
 	const FVector LineEndLocation = LineStartLocation + (Character->GetActorForwardVector() * LineTraceLength);
 	FVector LineOffset = FVector(0.0f, 0.0f, 80.0f);
 
@@ -91,7 +91,7 @@ bool UAC_WallRun::WallRunCheck(ACharacter* Character, UCharacterMovementComponen
 	FCollisionQueryParams LineQueryParams;
 	LineQueryParams.AddIgnoredActor(Character);
 
-	//DrawDebugLine(GetWorld(), LineStartLocation - LineOffset, LineEndLocation - LineOffset, FColor::Red);
+	DrawDebugLine(GetWorld(), LineStartLocation - LineOffset, LineEndLocation - LineOffset, FColor::Red);
 	bool bLineHit = GetWorld()->LineTraceSingleByChannel(OutHitLine, LineStartLocation - LineOffset, LineEndLocation - LineOffset, ECollisionChannel::ECC_Visibility, LineQueryParams);
 
 	if (bLineHit)
@@ -205,9 +205,20 @@ bool UAC_WallRun::ForwardWallRunCheck(ACharacter* Character)
 {
 	FHitResult OutHit;
 
+	/*
+	FVector LeftRightOffset;
 	// Line parameters
-	const FVector LineStartLocation = Character->GetActorLocation();
-	const float LineTraceLength = 40.0f;
+	if (WallRunSide == EWallRunSide::Left)
+	{
+		LeftRightOffset = FVector(0, 10.f, 0);
+	}
+	else
+	{
+		LeftRightOffset = FVector(0, -10.f, 0);
+	}
+	*/
+	const FVector LineStartLocation = Character->GetActorLocation();// + LeftRightOffset;
+	const float LineTraceLength = 50.0f;
 	const FVector LineEndLocation = LineStartLocation + (Character->GetActorForwardVector() * LineTraceLength);
 
 	//Trace Parameters
@@ -215,12 +226,15 @@ bool UAC_WallRun::ForwardWallRunCheck(ACharacter* Character)
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(Character);
 
-	//DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
 	FVector LineOffset = FVector(0.0f, 0.0f, 80.0f);
+	DrawDebugLine(GetWorld(), LineStartLocation + LineOffset, LineEndLocation + LineOffset, FColor::Red);
+	DrawDebugLine(GetWorld(), LineStartLocation - LineOffset, LineEndLocation - LineOffset, FColor::Red);
+	DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
 	bool bHitTop = GetWorld()->LineTraceSingleByChannel(OutHit, LineStartLocation + LineOffset, LineEndLocation + LineOffset, ECollisionChannel::ECC_Visibility, QueryParams);
 	bool bHitBottom = GetWorld()->LineTraceSingleByChannel(OutHit, LineStartLocation - LineOffset, LineEndLocation - LineOffset, ECollisionChannel::ECC_Visibility, QueryParams);
+	bool bHitCenter = GetWorld()->LineTraceSingleByChannel(OutHit, LineStartLocation, LineEndLocation, ECollisionChannel::ECC_Visibility, QueryParams);
 
-	return bHitTop || bHitBottom;
+	return bHitTop || bHitBottom || bHitCenter;
 }
 
 FVector UAC_WallRun::SetWallRunDirection(FVector SideMultiplier, FVector ImpactNormal)

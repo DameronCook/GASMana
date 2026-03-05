@@ -37,6 +37,11 @@ bool UManaCameraModifierFocusNewActor::ProcessViewRotation(AActor* ViewTarget, f
 		return false;
 	}
 
+	if (PlayerHasRecentlyChangedCamera())
+	{
+		return false;
+	}
+
 	AActor* CurrentTarget = TargetingActor->GetCurrentTarget();
 
 	if (IsValid(CurrentTarget))
