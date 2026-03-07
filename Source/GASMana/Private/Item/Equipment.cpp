@@ -20,6 +20,7 @@ void AEquipment::BeginPlay()
 	Super::BeginPlay();
 	if (StimuliSource) StimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
 	DurabilityFlashThreshold = FMath::CeilToInt(CurDurability/3.33);
+	SetFresnelEmissive(1);
 
 }
 
@@ -27,6 +28,7 @@ void AEquipment::AttachMeshToSocket(USceneComponent* InParent, const FName InSoc
 {
 	const FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 	SkeletalMesh->AttachToComponent(InParent, TransformRules, InSocketName);
+	SetFresnelEmissive(0);
 }
 
 void AEquipment::DetachMeshFromSocket(const FDetachmentTransformRules Rules) const
@@ -34,6 +36,7 @@ void AEquipment::DetachMeshFromSocket(const FDetachmentTransformRules Rules) con
 	SkeletalMesh->DetachFromComponent(Rules);
 	const FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 	SkeletalMesh->AttachToComponent(RootComponent, TransformRules);
+	SetFresnelEmissive(1);
 }
 
 void AEquipment::BreakEquipment()
@@ -81,5 +84,13 @@ void AEquipment::PlayFlashEffect(const FVector& InColor, const float FlashLength
 		SkeletalMesh->SetScalarParameterValueOnMaterials("StartTime",
 			GetWorld()->GetTimeSeconds());
 		SkeletalMesh->SetScalarParameterValueOnMaterials("EffectLength", FlashLength);
+	}
+}
+
+void AEquipment::SetFresnelEmissive(const float NewValue) const
+{
+	if (SkeletalMesh)
+	{
+		SkeletalMesh->SetScalarParameterValueOnMaterials("FresnelOn", NewValue);
 	}
 }

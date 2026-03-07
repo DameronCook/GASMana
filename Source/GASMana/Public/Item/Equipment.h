@@ -60,6 +60,8 @@ protected:
 
 	void PlayFlashEffect(const FVector& InColor, float FlashLength) const;
 
+	void SetFresnelEmissive(float NewValue) const;
+
 public:
 	AEquipment();
 
