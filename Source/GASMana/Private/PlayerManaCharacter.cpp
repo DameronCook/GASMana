@@ -188,8 +188,6 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 	UpdateBlockingState();
 
 	UpdateStaminaBar(DeltaTime);
-
-	UKismetMaterialLibrary::SetVectorParameterValue(this, DitheringMaterialParameterCollection, "MainCharacterLocation", FLinearColor(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z));
 }
 
 //////////////////////////////////////////////////////////////////////////
