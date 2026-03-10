@@ -456,6 +456,15 @@ protected:
 	
 	virtual void Jump() override;
 
+	UPROPERTY()
+	float CurrentJumpTimer = 0.f;
+
+	UFUNCTION()
+	void SetJumpTimer(float Time);
+	
+	UFUNCTION()
+	void CountDownJumpTimer(float DeltaTime);
+
 	void UpdateFocusedCamera(float DeltaTime);
 	
 	UFUNCTION(BlueprintCallable)
