@@ -188,6 +188,11 @@ void APlayerManaCharacter::Tick(float DeltaTime)
 	UpdateBlockingState();
 
 	UpdateStaminaBar(DeltaTime);
+
+	if (CurrentJumpTimer > 0.f)
+	{
+		CountDownJumpTimer(DeltaTime);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -651,22 +656,35 @@ void APlayerManaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 void APlayerManaCharacter::Jump()
 {
-	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent();
+	SetJumpTimer(0.3f);
+}
 
-	if (AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning"))))
+void APlayerManaCharacter::SetJumpTimer(float Time)
+{
+	if (GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsWallRunning"))))
 	{
-		AbilitySystem->TryActivateAbilitiesByTag(WallJumpTagContainer, true);
+		GetAbilitySystemComponent()->TryActivateAbilitiesByTag(WallJumpTagContainer, true);
 		return;
 	}
 
-	if (AbilitySystem->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwinging"))))
+	if (GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.IsSwinging"))))
 	{
-		AbilitySystem->TryActivateAbilitiesByTag(SwingJumpTagContainer, true);
+		GetAbilitySystemComponent()->TryActivateAbilitiesByTag(SwingJumpTagContainer, true);
 		return;
 	}
+	
+	CurrentJumpTimer = Time;
+}
 
-	AbilitySystem->TryActivateAbilitiesByTag(JumpTagContainer, true);
+void APlayerManaCharacter::CountDownJumpTimer(float DeltaTime)
+{
+	CurrentJumpTimer -= DeltaTime;
 
+	if (CurrentJumpTimer > 0 && !GetCharacterMovement()->IsFalling())
+	{
+		GetAbilitySystemComponent()->TryActivateAbilitiesByTag(JumpTagContainer, true);
+		CurrentJumpTimer = 0.f;
+	}
 }
 
 void APlayerManaCharacter::OnMantleEnded()
