@@ -6,6 +6,7 @@
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Components/AC_HookShot.h"
 #include "Actors/ManaHookParent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 
@@ -50,12 +51,18 @@ void UGA_ManaPlayerSwing::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 	if (PlayerCharacter)
 	{
 		PlayerCharacter->InstantlyUnequipGear();
+
+		if (!PlayerCharacter->GetCharacterMovement()->IsFalling())
+		{
+			PlayerCharacter->AddActorLocalOffset(FVector(0, 0, 150.f), false, nullptr, ETeleportType::None);
+			PlayerCharacter->AddActorLocalOffset(FVector(150.f, 0, 0), false, nullptr, ETeleportType::None);
+			//PlayerCharacter->GetCharacterMovement()->Launch(PlayerCharacter->GetActorForwardVector() * 1000.f);
+		}
+		
 		if (AbilitySystemComponent)
 		{
 			PlayerCharacter->SetSwingAbility(this);
 			AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetSwingEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
-
-			//PlayerCharacter->GetCameraBoom()->bEnableCameraLag = false;
 		}
 
 		//Apply the Anim Montage

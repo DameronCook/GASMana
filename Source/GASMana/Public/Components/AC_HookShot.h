@@ -54,7 +54,7 @@ class GASMANA_API UAC_HookShot : public UActorComponent
 	UFUNCTION()
 	void SwingTarget(float DeltaTime);
 
-	void PushForceAwayFromWalls(APlayerManaCharacter* PlayerCharacter, const FVector& PushAwayDirection) const;
+	void PushForceAwayFromWalls(APlayerManaCharacter* PlayerCharacter, const FVector& PushAwayDirection, float PushStrength) const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Hooks, meta = (AllowPrivateAccess = "true"))
 	float MaxGrappleDistance;
