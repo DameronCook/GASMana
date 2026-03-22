@@ -315,10 +315,10 @@ void UAC_HookShot::SwingTarget(float DeltaTime)
 
 
 			// Okay cast a line down and whenever the player is just above the ground, offset their position so that they won't hit it at the bottom of a swing
-			PushForceAwayFromWalls(PlayerCharacter, PlayerCharacter->GetActorUpVector() * -1);
-			PushForceAwayFromWalls(PlayerCharacter, PlayerCharacter->GetActorForwardVector());
-			PushForceAwayFromWalls(PlayerCharacter, PlayerCharacter->GetActorRightVector());
-			PushForceAwayFromWalls(PlayerCharacter, PlayerCharacter->GetActorRightVector() * -1);
+			PushForceAwayFromWalls(PlayerCharacter, PlayerCharacter->GetActorUpVector() * -1, 25);
+			PushForceAwayFromWalls(PlayerCharacter, PlayerCharacter->GetActorForwardVector(), 15);
+			PushForceAwayFromWalls(PlayerCharacter, PlayerCharacter->GetActorRightVector(), 10);
+			PushForceAwayFromWalls(PlayerCharacter, PlayerCharacter->GetActorRightVector() * -1, 10);
 
 			//Also, let's rotate the player in the direction of the swing force
 			FRotator CharacterRotation = FindCharacterRotation(PlayerCharacter, DeltaTime);
@@ -341,7 +341,7 @@ void UAC_HookShot::SwingTarget(float DeltaTime)
 				if (float DirectionVelocityDot = UKismetMathLibrary::Dot_VectorVector(DirectionToSwingPoint, PlayerVelocity); DirectionVelocityDot >= 0)
 				{
 					FVector ProjectedVelocity = UKismetMathLibrary::ProjectVectorOnToPlane(PlayerCharacter->GetVelocity(), DirectionToSwingPointNormal);
-					FVector ClampedVelocity = UKismetMathLibrary::ClampVectorSize(ProjectedVelocity, -3600, 3600);
+					FVector ClampedVelocity = UKismetMathLibrary::ClampVectorSize(ProjectedVelocity, -2800, 2800);
 
 					CharMove->Velocity = ClampedVelocity;
 					//GEngine->AddOnScreenDebugMessage(4, 0.1f, FColor::Orange, CharMove->Velocity.ToString());
@@ -350,7 +350,8 @@ void UAC_HookShot::SwingTarget(float DeltaTime)
 			}
 		}
 
-		if (PlayerCharacter->GetCachedInputDirection().Size() <= 0.1f)
+		//Drops the player if they aren't pressing in a direction
+		if (PlayerCharacter->GetCachedInputDirection().Size() <= 0.2f)
 		{
 			if (SwingAngle < 18.f && SwingAngle > -18.f)
 			{
@@ -367,28 +368,28 @@ void UAC_HookShot::SwingTarget(float DeltaTime)
 	}
 }
 
-void UAC_HookShot::PushForceAwayFromWalls(APlayerManaCharacter* PlayerCharacter, const FVector& PushAwayDirection) const
+void UAC_HookShot::PushForceAwayFromWalls(APlayerManaCharacter* PlayerCharacter, const FVector& PushAwayDirection, const float PushStrength) const
 {
 	FHitResult OutLineHit;
 
 	// Line parameters
 	const FVector LineStartLocation = PlayerCharacter->GetActorLocation();
-	constexpr float LineTraceLength = 300.f;
+	constexpr float LineTraceLength = 450.f;
 	const FVector LineEndLocation = PlayerCharacter->GetActorLocation() + (PushAwayDirection * LineTraceLength);
 
 	//Trace Parameters
 	FCollisionQueryParams LineQueryParams;
 	LineQueryParams.AddIgnoredActor(PlayerCharacter);
 
-	//DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
+	DrawDebugLine(GetWorld(), LineStartLocation, LineEndLocation, FColor::Red);
 
 	if (GetWorld()->LineTraceSingleByChannel(OutLineHit, LineStartLocation, LineEndLocation,
 	                                         ECollisionChannel::ECC_Visibility, LineQueryParams))
 	{
 		//GEngine->AddOnScreenDebugMessage(8, 0.1f, FColor::Purple, "I should be OFFSETTING THE PLAYER Z AAAAAAAAAA");
-		const float AddOffset = UKismetMathLibrary::MapRangeClamped(OutLineHit.Distance, 0.f, LineTraceLength, 25.f, 1.f);
+		const float AddOffset = UKismetMathLibrary::MapRangeClamped(OutLineHit.Distance, 0.f, LineTraceLength, PushStrength, 1.f);
 
-		PlayerCharacter->AddActorWorldOffset(FVector(0.f, 0.f, AddOffset));
+		PlayerCharacter->AddActorWorldOffset(-PushAwayDirection * AddOffset);
 	}
 }
 

@@ -40,7 +40,6 @@ void UGA_ManaPlayerHook::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 	APlayerManaCharacter* PlayerCharacter = Cast<APlayerManaCharacter>(ActorInfo->AvatarActor.Get());
 	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
 
-
 	if (PlayerCharacter)
 	{
 		PlayerCharacter->GetHookShot()->AttemptGrapple();
