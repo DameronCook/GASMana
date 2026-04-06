@@ -5,6 +5,7 @@
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "../GASManaCharacter.h"
 #include "ManaPlayerAnimInstance.h"
+#include "Item/RightHandEquipment.h"
 
 UGA_ManaPlayerEquip::UGA_ManaPlayerEquip()
 {
@@ -71,7 +72,7 @@ void UGA_ManaPlayerEquip::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 			{
 				if (GASCharacter->GetRightHandEquipment())
 				{
-					if (UAbilityTask_PlayMontageAndWait* MontageRightTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, GASCharacter->GetEquipRightMontage(), 1.0f, MontageSectionName, false, 0.0f))
+					if (UAbilityTask_PlayMontageAndWait* MontageRightTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, GASCharacter->GetRightHandEquipment()->GetEquipMontage(), 1.0f, MontageSectionName, false, 0.0f))
 					{
 						MontageRightTask->ReadyForActivation();
 					}

@@ -2,6 +2,7 @@
 
 #include "GASManaCharacter.h"
 #include "AbilitySystemComponent.h"
+#include "ManaCharacterAnimInstance.h"
 #include "PlayerManaCharacter.h"
 #include "Actors/BaseManaEnemy.h"
 #include "AI/AIC_NPC.h"
@@ -216,9 +217,24 @@ bool AGASManaCharacter::Attack()
 {
 	if (RightHandEquipment)
 	{
-		GetMontageToPlay();
-		const FGameplayTagContainer AttackType = GetAttackType(); 
-		return GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackType, true);
+		if (RightHandEquipment->GetEquipmentType() == EEquipmentState::EES_EquippedOneHandedWeapon)
+		{
+			GetMontageToPlay();
+			const FGameplayTagContainer AttackType = GetAttackType(); 
+			return GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackType, true);
+		}
+		else if (RightHandEquipment->GetEquipmentType() == EEquipmentState::EES_EquippedBow)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Attacked with a bow!");
+			UManaCharacterAnimInstance* AnimInstance = Cast<UManaCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+			if (AnimInstance)
+			{
+				AnimInstance->SetShouldStrafe(true);
+				GetCharacterMovement()->MaxWalkSpeed = 300.f;
+				const FRotator CurrentFocusRot = GetActorForwardVector().Rotation();
+				Controller->SetControlRotation(CurrentFocusRot);
+			}
+		}
 	}
 	return true;
 }
