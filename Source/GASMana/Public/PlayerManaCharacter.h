@@ -498,6 +498,7 @@ protected:
 	void Hook(const FInputActionValue& Value);
 
 	/**Called for Equip input */
+	UFUNCTION(Blueprintable)
 	void Equip(const FInputActionValue& Value);
 	
 	/**Called for Pause input */
