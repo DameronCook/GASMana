@@ -7,6 +7,8 @@
 #include "Item.h"
 #include "Equipment.generated.h"
 
+class UNiagaraComponent;
+class UNiagaraSystem;
 class UAIPerceptionStimuliSourceComponent;
 class UGameplayEffect;
 
@@ -15,6 +17,18 @@ class GASMANA_API AEquipment : public AItem
 {
 	GENERATED_BODY()
 protected:
+	/** The Effect that plays when the player blows up a sword */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
+	UNiagaraSystem* BreakingEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
+	UNiagaraSystem* PickupEffect;
+
+	UPROPERTY()
+	UNiagaraComponent* BreakingNiagaraComponent;
+	
+	UPROPERTY()
+	UNiagaraComponent* PickupNiagaraComponent;
 	
 	/** Skeletal mesh of the equipment **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))

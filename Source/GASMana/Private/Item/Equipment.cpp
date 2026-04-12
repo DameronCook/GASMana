@@ -3,6 +3,8 @@
 
 #include "Item/Equipment.h"
 
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
 
@@ -22,6 +24,8 @@ void AEquipment::BeginPlay()
 	DurabilityFlashThreshold = FMath::CeilToInt(CurDurability/3.33);
 	SetFresnelEmissive(1);
 
+	PickupNiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), PickupEffect, SkeletalMesh->GetComponentLocation(), FRotator::ZeroRotator);
+	PickupNiagaraComponent->Activate();
 }
 
 void AEquipment::AttachMeshToSocket(USceneComponent* InParent, const FName InSocketName) const
@@ -29,6 +33,10 @@ void AEquipment::AttachMeshToSocket(USceneComponent* InParent, const FName InSoc
 	const FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 	SkeletalMesh->AttachToComponent(InParent, TransformRules, InSocketName);
 	SetFresnelEmissive(0);
+	if (PickupNiagaraComponent)
+	{
+		PickupNiagaraComponent->Deactivate();
+	}
 }
 
 void AEquipment::DetachMeshFromSocket(const FDetachmentTransformRules Rules) const
@@ -37,12 +45,20 @@ void AEquipment::DetachMeshFromSocket(const FDetachmentTransformRules Rules) con
 	const FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 	SkeletalMesh->AttachToComponent(RootComponent, TransformRules);
 	SetFresnelEmissive(1);
+	if (PickupNiagaraComponent)
+	{
+		PickupNiagaraComponent->Activate();
+	}
 }
 
 void AEquipment::BreakEquipment()
 {
 	GetWorld()->GetTimerManager().ClearTimer(FlashTimerHandle);
-	Destroy();
+	BreakingNiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BreakingEffect, SkeletalMesh->GetComponentLocation(), FRotator::ZeroRotator);
+	BreakingNiagaraComponent->Activate();
+	SetActorHiddenInGame(true);
+	SetActorEnableCollision(false);
+	SetLifeSpan(1.0f); 
 }
 
 void AEquipment::RegisterAsSource()
