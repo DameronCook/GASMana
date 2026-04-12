@@ -18,6 +18,7 @@
 #include "PlayerManaCharacter.generated.h"
 
 
+class UAC_Respawner;
 class ASkyBeacon;
 class UStackedProgressBar;
 class UWidgetComponent;
@@ -58,6 +59,10 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	/** Wall Run Component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hooks, meta = (AllowPrivateAccess = "true"))
 	UAC_WallRun* WallRunComponent;
+	
+	/** Respawn Component */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Respawn, meta = (AllowPrivateAccess = "true"))
+	UAC_Respawner* RespawnComponent;
 
 	/** Player HUD */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
@@ -618,6 +623,7 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE class UAC_HookShot* GetHookShot() const { return HookShotComponent; }
 	FORCEINLINE class UAC_WallRun* GetWallRun() const { return WallRunComponent; }
+	FORCEINLINE class UAC_Respawner* GetRespawnComponent() const { return RespawnComponent; }
 
 	//Effect Classes
 	FORCEINLINE TSubclassOf<UGameplayEffect> GetBlockingEffectClass() const { return BlockingEffectClass; }

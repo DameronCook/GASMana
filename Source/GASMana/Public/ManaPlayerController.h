@@ -68,6 +68,12 @@ public:
 	UPROPERTY()
 	bool bDidIWin;
 	
+	UPROPERTY()
+	bool bDidIFall;
+
+	UPROPERTY()
+	FVector RespawnLocation;
+	
 	UFUNCTION()
 	void ShowPauseMenu();
 
