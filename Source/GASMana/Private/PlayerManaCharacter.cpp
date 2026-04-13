@@ -17,6 +17,7 @@
 #include "Camera/CameraComponent.h"
 #include "Camera/ManaSpringArmComponent.h"
 #include "Components/AC_HookShot.h"
+#include "Components/AC_Respawner.h"
 #include "Components/AC_WallRun.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
@@ -26,7 +27,6 @@
 #include "Item/LeftHandEquipment.h"
 #include "Item/RightHandEquipment.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMaterialLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "UI/FadeOutScreen.h"
 #include "UI/StackedProgressBar.h"
@@ -77,9 +77,12 @@ APlayerManaCharacter::APlayerManaCharacter()
 	//Create a hook shot component
 	HookShotComponent = CreateDefaultSubobject<UAC_HookShot>(TEXT("HookShotComponent"));
 
-	//Create a hook shot component
+	//Create a Wall RUn component
 	WallRunComponent = CreateDefaultSubobject<UAC_WallRun>(TEXT("WallRunComponent"));
 
+	//Create a Respawner Component
+	RespawnComponent = CreateDefaultSubobject<UAC_Respawner>(TEXT("RespawnComponent"));
+	
 	//Create a sphere mesh that checks for enemies to load them in
 	LoaderSphere = CreateDefaultSubobject<USphereComponent>(TEXT("LoaderSphere"));
 	LoaderSphere->SetupAttachment(RootComponent);

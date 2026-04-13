@@ -49,6 +49,14 @@ void UFadeOutScreen::FadeOutEnded()
 	UGameplayStatics::SetGamePaused(GetWorld(), true);
 	if (AManaPlayerController* PlayerController = Cast<AManaPlayerController>(GetOwningPlayer()))
 	{
+		if (PlayerController->bDidIFall)
+		{
+			UGameplayStatics::SetGamePaused(GetWorld(), false);
+			FadeToNothing();
+			PlayerController->bDidIFall = false;
+			PlayerController->GetPawn()->SetActorLocation(PlayerController->RespawnLocation);
+			return;
+		}
 		if (PlayerController->bDidIWin)
 		{
 			if (UWinMenu* WinMenu = PlayerController->GetWinMenu())
