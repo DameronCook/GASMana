@@ -8,34 +8,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aff3c091-a8da-4483-922b-14a40575d81c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Content/GASMana/Animations/ABP_ManaPlayerFinal.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/GASMana/Animations/ABP_ManaPlayerFinal.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/GASMana/Animations/Attacks/EquipToAttack/AM_EquipToAttackDefault.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/GASMana/Animations/Attacks/EquipToAttack/AM_EquipToAttackDefault.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/GASMana/Animations/Attacks/EquipToAttack/AM_EquipToAttackRunning.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/GASMana/Animations/Attacks/EquipToAttack/AM_EquipToAttackRunning.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/GASMana/Animations/Attacks/EquipToAttack/AS_EquipToAttack.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/GASMana/Animations/Attacks/EquipToAttack/AS_EquipToAttack.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/GASMana/Animations/Equip/AM_EquipLeft.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/GASMana/Animations/Equip/AM_EquipLeft.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/GASMana/Animations/Equip/AM_EquipRight.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/GASMana/Animations/Equip/AM_EquipRight.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/GASMana/Blueprints/Actors/BP_PlayerManaCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/GASMana/Blueprints/Actors/BP_PlayerManaCharacter.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/GASMana/Blueprints/Effects/ManaPlayer/BPGE_ManaPlayerFree.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/GASMana/Blueprints/Effects/ManaPlayer/BPGE_ManaPlayerFree.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/GASMana/Input/IMC_ManaPlayer.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/GASMana/Input/IMC_ManaPlayer.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/1/EJ/PGUWWHRTS59S34GKBX0OUI.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/1/EJ/PGUWWHRTS59S34GKBX0OUI.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/2/66/0OP5U85W4H0R7CHG999ZDN.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/2/66/0OP5U85W4H0R7CHG999ZDN.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/6/NP/Z9EK2TXQ1TFO26WFZHWZII.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/6/NP/Z9EK2TXQ1TFO26WFZHWZII.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/8/H9/GITN2HJQNERMM41FAE68W0.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/8/H9/GITN2HJQNERMM41FAE68W0.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/B/KW/9YH18EUCJFK5CZXL6H3W3R.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/B/KW/9YH18EUCJFK5CZXL6H3W3R.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/D/WN/2DVI86UUWN54M3YX8SF68K.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/D/WN/2DVI86UUWN54M3YX8SF68K.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GASMana/GASManaCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GASMana/GASManaCharacter.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GASMana/GASManaCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GASMana/GASManaCharacter.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GASMana/Private/Ability/GA_ManaPlayerAirAttack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GASMana/Private/Ability/GA_ManaPlayerAirAttack.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GASMana/Private/Ability/GA_ManaPlayerAttack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GASMana/Private/Ability/GA_ManaPlayerAttack.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GASMana/Private/Ability/GA_ManaPlayerBlock.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GASMana/Private/Ability/GA_ManaPlayerBlock.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GASMana/Private/Ability/GA_ManaPlayerEquip.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GASMana/Private/Ability/GA_ManaPlayerEquip.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GASMana/Private/Ability/GA_ManaPlayerSwingJump.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GASMana/Private/Ability/GA_ManaPlayerSwingJump.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GASMana/Private/Ability/GA_ManaPlayerWallRun.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GASMana/Private/Ability/GA_ManaPlayerWallRun.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GASMana/Private/Ability/GA_ManaPlayerZipToPoint.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GASMana/Private/Ability/GA_ManaPlayerZipToPoint.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GASMana/Private/AbilityTasks/ApplyRootMotionDynamicForce.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GASMana/Private/AbilityTasks/ApplyRootMotionDynamicForce.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GASMana/Private/Components/AC_WallRun.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GASMana/Private/Components/AC_WallRun.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GASMana/Private/Item/Item.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GASMana/Private/Item/Item.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GASMana/Private/PlayerManaCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GASMana/Private/PlayerManaCharacter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GASMana.uproject" beforeDir="false" afterPath="$PROJECT_DIR$/GASMana.uproject" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,9 +32,9 @@
     <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/TraceLog/Public/Trace/Trace.h" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 6
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectId" id="31YXvqwYGj7HwbWvBBWEnZI5AUB" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -71,8 +45,9 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "Uproject.GASMana.executor": "Run",
-    "git-widget-placeholder": "Items",
+    "git-widget-placeholder": "UI-pop-up",
     "ignore.virus.scanning.warn.message": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -165,6 +140,7 @@
       <option name="presentableId" value="Default" />
       <updated>1755702212602</updated>
       <workItem from="1755702213753" duration="12700000" />
+      <workItem from="1776107333297" duration="25000" />
     </task>
     <servers />
   </component>
