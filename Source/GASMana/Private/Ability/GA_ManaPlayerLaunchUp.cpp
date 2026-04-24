@@ -8,6 +8,7 @@
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Actors/ManaHookParent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 UGA_ManaPlayerLaunchUp::UGA_ManaPlayerLaunchUp()
 {
@@ -51,6 +52,9 @@ void UGA_ManaPlayerLaunchUp::ActivateAbility(FGameplayAbilitySpecHandle Handle,
 		PlayerCharacter->SetLaunchUpAbility(this);
 		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetLaunchUpEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 		HookBlockEffectHandle = AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetHookBlockEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
+
+
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), PlayerCharacter->GetZipSound(), PlayerCharacter->GetActorLocation());
 
 		//Apply the root motion task
 		const UAC_HookShot* HookShot = PlayerCharacter->GetHookShot();

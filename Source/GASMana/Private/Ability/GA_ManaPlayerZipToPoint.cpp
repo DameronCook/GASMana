@@ -8,6 +8,7 @@
 #include "Components/AC_HookShot.h"
 #include "Actors/ManaHookParent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 UGA_ManaPlayerZipToPoint::UGA_ManaPlayerZipToPoint()
@@ -50,6 +51,7 @@ void UGA_ManaPlayerZipToPoint::ActivateAbility(const FGameplayAbilitySpecHandle 
 		PlayerCharacter->SetZipToPointAbility(this);
 		AbilitySystemComponent->ApplyGameplayEffectToSelf(PlayerCharacter->GetZipToPointEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), PlayerCharacter->GetZipSound(), PlayerCharacter->GetActorLocation());
 		//UAbilityTask_ApplyRootMotionConstantForce* RootMotionTask = UAbilityTask_ApplyRootMotionConstantForce::ApplyRootMotionConstantForce(this, NAME_None, Direction, Strength, Duration, false, StrengthOverTime, VelocityOnFinishMode, SetVelocityOnFinish, false, true);
 
 		//Apply the root motion task

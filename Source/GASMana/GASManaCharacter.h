@@ -65,6 +65,12 @@ class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, pub
 
 	bool AmIAlive = true;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sounds", meta = (AllowPrivateAccess = "true"))
+	USoundBase* Equip1Sound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sounds", meta = (AllowPrivateAccess = "true"))
+	USoundBase* Equip2Sound;
+
 protected:
 
 	/////////////////////////////////////////////////////////////////////
@@ -335,4 +341,8 @@ public:
 	FORCEINLINE UAnimMontage* SetAttackMontage(UAnimMontage* UAttackMontage) { return CurrentAttackMontage = UAttackMontage; }
 	FORCEINLINE UAnimMontage* SetHitReactMontage(UAnimMontage* AHitReactMontage) { return HitReactMontage = AHitReactMontage; }
 
+
+	FORCEINLINE USoundBase* GetEquip1Sound() const { return Equip1Sound; }
+	FORCEINLINE USoundBase* GetEquip2Sound() const { return Equip2Sound; }
+	
 };

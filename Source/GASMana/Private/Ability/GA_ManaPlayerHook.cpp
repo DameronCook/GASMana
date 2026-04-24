@@ -3,6 +3,7 @@
 #include "Ability/GA_ManaPlayerHook.h"
 #include "PlayerManaCharacter.h"
 #include "Ability/GA_ManaPlayerFocus.h"
+#include "Kismet/GameplayStatics.h"
 
 UGA_ManaPlayerHook::UGA_ManaPlayerHook()
 {
@@ -42,10 +43,14 @@ void UGA_ManaPlayerHook::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 
 	if (PlayerCharacter)
 	{
+
 		PlayerCharacter->GetHookShot()->AttemptGrapple();
 		PlayerCharacter->SetHookAbility(this);
 		PlayerCharacter->InstantlyUnequipGear();
 
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), PlayerCharacter->GetHookThrowSound(), PlayerCharacter->GetActorLocation());
+
+		
 		if (PlayerCharacter->GetFocusAbility())
 		{
 			PlayerCharacter->GetFocusAbility()->EndFocusAbility();

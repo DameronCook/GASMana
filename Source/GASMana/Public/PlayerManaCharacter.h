@@ -445,6 +445,19 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 	void OnLoaderEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	                        UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	/////////////////////////////////////////////////////////////////////////
+	///sounds
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sounds", meta = (AllowPrivateAccess = "true"))
+	USoundBase* ZipSound;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sounds", meta = (AllowPrivateAccess = "true"))
+	USoundBase* SwingSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sounds", meta = (AllowPrivateAccess = "true"))
+	USoundBase* HookThrowSound;
+
+	
 protected:
 	virtual void BeginPlay() override;
 	void UpdateStaminaBar(float DeltaTime);
@@ -689,6 +702,12 @@ public:
 	//Move to another component?
 	FORCEINLINE float GetSwingSpeedBalancer() const { return SwingSpeedBalancer; }
 	FORCEINLINE float GetOriginalGravityScale() const { return OriginalGravityScale; }
+
+	//Sounds
+	FORCEINLINE USoundBase* GetZipSound() const { return ZipSound; }
+	FORCEINLINE USoundBase* GetSwingSound() const { return SwingSound; }
+	FORCEINLINE USoundBase* GetHookThrowSound() const { return HookThrowSound; }
+
 	
 	///////////////////////////////////// -- Setters
 	FORCEINLINE UGA_ManaPlayerWallRun* SetWallRunAbility(UGA_ManaPlayerWallRun* WallRunAbility)

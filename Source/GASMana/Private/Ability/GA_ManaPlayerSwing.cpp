@@ -8,7 +8,7 @@
 #include "Actors/ManaHookParent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-
+#include "Kismet/GameplayStatics.h"
 
 
 UGA_ManaPlayerSwing::UGA_ManaPlayerSwing()
@@ -51,6 +51,8 @@ void UGA_ManaPlayerSwing::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 	if (PlayerCharacter)
 	{
 		PlayerCharacter->InstantlyUnequipGear();
+		
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), PlayerCharacter->GetSwingSound(), PlayerCharacter->GetActorLocation());
 
 		if (!PlayerCharacter->GetCharacterMovement()->IsFalling())
 		{
