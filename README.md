@@ -12,7 +12,7 @@ Lead Developer - Dameron Cook
 
 Environment Artist - Blake Ranabarger
 
-Audio - Layton Maienschein
+Audio - A Quillin Painter, Layton Maienschein
 
 Lore Narrative - Peter Kaufman
 
