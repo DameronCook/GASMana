@@ -16,7 +16,7 @@ Audio - Layton Maienschein
 
 Lore Narrative - Peter Kaufman
 
-VFX - Legion
+VFX - Legion Borders
 
 Narrative UI Programming - Logan Westerbeck
 
