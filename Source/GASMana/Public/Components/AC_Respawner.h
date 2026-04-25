@@ -25,6 +25,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Respawn, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AActor> RespawnPoint;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	TArray<AActor*> RespawnPoints;
 };

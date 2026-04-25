@@ -14,6 +14,8 @@ UAC_Respawner::UAC_Respawner()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
+
+	RespawnPoints.Empty();
 }
 
 void UAC_Respawner::Respawn()
