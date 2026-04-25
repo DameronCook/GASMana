@@ -60,6 +60,9 @@ class GASMANA_API AManaPickUp : public AItem
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	float FlashLength = 1.f;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	USoundBase* PickupSound;
 	
 public:
 	AManaPickUp();

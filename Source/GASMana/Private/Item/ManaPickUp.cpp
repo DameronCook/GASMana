@@ -7,6 +7,7 @@
 #include "GASMana/GASManaCharacter.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h" 
+#include "Kismet/GameplayStatics.h"
 
 AManaPickUp::AManaPickUp()
 {
@@ -94,6 +95,8 @@ void AManaPickUp::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 				ManaComponent->Deactivate();
 			}
 
+
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), PickupSound, GetActorLocation());
 			Destroy();
 		}
 	}
