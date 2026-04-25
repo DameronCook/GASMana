@@ -10,6 +10,18 @@ You CAN NOT redistribute or resell these assets (Even if modified).
 # Credits
 Lead Developer - Dameron Cook
 
+Environment Artist - Blake Ranabarger
+
+Audio - Layton Maienschein
+
+Lore Narrative - Peter Kaufman
+
+VFX - Legion
+
+Narrative UI Programming - Logan Westerbeck
+
+Treasure Data Programming - Alex Dempsey
+
 # Asset Packs
 
     Stylized Egypt by AleksandrIvanov
