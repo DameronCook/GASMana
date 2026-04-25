@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Item/LeftHandEquipment.h"
 #include "Item/RightHandEquipment.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
@@ -186,6 +187,10 @@ void AGASManaCharacter::GrabOverlappingItem()
 			SetEquipment(Equipment);
 			OverlappingItem = nullptr;
 			PlayAnimMontage(GetPickUpMontage());
+
+			
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), GetEquip1Sound(), GetActorLocation());
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), GetEquip2Sound(), GetActorLocation());
 		}
 	}
 }

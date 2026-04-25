@@ -66,9 +66,6 @@ void UGA_ManaPlayerEquip::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 			AbilitySystemComponent->ApplyGameplayEffectToSelf(GASCharacter->GetEquipEffectClass()->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComponent->MakeEffectContext());
 		}
 
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), GASCharacter->GetEquip1Sound(), GASCharacter->GetActorLocation());
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), GASCharacter->GetEquip2Sound(), GASCharacter->GetActorLocation());
-
 		// Play the montage and bind delegates
 		if (ActorInfo->AvatarActor.IsValid())
 		{

@@ -1015,6 +1015,7 @@ void APlayerManaCharacter::Die(const FVector& HitLocation)
 	
 	GetAbilitySystemComponent()->TryActivateAbilitiesByTag(DeathTagContainer, true);
 
+	UGameplayStatics::PlaySound2D(GetWorld(), YOUDIEDSound);
 }
 
 

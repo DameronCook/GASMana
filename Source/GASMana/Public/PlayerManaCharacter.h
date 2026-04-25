@@ -456,6 +456,9 @@ class GASMANA_API APlayerManaCharacter : public AGASManaCharacter, public II_Pro
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sounds", meta = (AllowPrivateAccess = "true"))
 	USoundBase* HookThrowSound;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sounds", meta = (AllowPrivateAccess = "true"))
+	USoundBase* YOUDIEDSound;
 
 	
 protected:
