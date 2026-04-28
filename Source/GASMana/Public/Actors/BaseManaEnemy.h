@@ -41,6 +41,12 @@ class GASMANA_API ABaseManaEnemy : public AGASManaCharacter
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Loading, meta = (AllowPrivateAccess = "true"))
 	bool ShouldIBeInitiallyUnloaded = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sounds, meta = (AllowPrivateAccess = "true"))
+	USoundBase* EnemyGrunts;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sounds, meta = (AllowPrivateAccess = "true"))
+	USoundBase* EnemyDies;
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, meta = (AllowPrivateAccess = "true"))

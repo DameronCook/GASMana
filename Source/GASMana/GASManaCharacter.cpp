@@ -225,6 +225,7 @@ bool AGASManaCharacter::Attack()
 		if (RightHandEquipment->GetEquipmentType() == EEquipmentState::EES_EquippedOneHandedWeapon)
 		{
 			GetMontageToPlay();
+			//UGameplayStatics::PlaySoundAtLocation(GetWorld(), SwordSwing, GetActorLocation());
 			const FGameplayTagContainer AttackType = GetAttackType(); 
 			return GetAbilitySystemComponent()->TryActivateAbilitiesByTag(AttackType, true);
 		}
@@ -425,6 +426,7 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 										}
 									}
 									//If they are, then THE ATTACKING character must activate their hit stun ability
+									UGameplayStatics::PlaySoundAtLocation(GetWorld(), ShieldImpact, GetActorLocation());
 									this->GetAbilitySystemComponent()->TryActivateAbilitiesByTag(ShieldStunTagContainer, true);
 									return;	
 								}
@@ -436,6 +438,7 @@ void AGASManaCharacter::MeleeAttackNotify(FVector AttackPosition, bool IsFinishe
 							//After applying damager, if we're alive apply knockback
 							if (HitManaCharacter->IsAlive())
 							{
+								UGameplayStatics::PlaySoundAtLocation(GetWorld(), SwordImpact, GetActorLocation());
 								HitManaCharacter->StartHitStop(0.1f, HitManaCharacter);
 								StartHitStop(0.1f, this);
 								if (ABaseManaEnemy* HitEnemyCharacter = Cast<ABaseManaEnemy>(HitManaCharacter))

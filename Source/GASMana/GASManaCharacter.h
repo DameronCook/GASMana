@@ -71,6 +71,15 @@ class AGASManaCharacter : public ACharacter, public IAbilitySystemInterface, pub
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sounds", meta = (AllowPrivateAccess = "true"))
 	USoundBase* Equip2Sound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sounds", meta = (AllowPrivateAccess = "true"))
+	USoundBase* ShieldImpact;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sounds", meta = (AllowPrivateAccess = "true"))
+	USoundBase* SwordSwing;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sounds", meta = (AllowPrivateAccess = "true"))
+	USoundBase* SwordImpact;
+
 protected:
 
 	/////////////////////////////////////////////////////////////////////

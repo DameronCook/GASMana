@@ -10,6 +10,7 @@
 #include "Item/RightHandEquipment.h"
 #include "Item/LeftHandEquipment.h"
 #include "Item/ManaPickUp.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "UI/CameraTarget.h"
 
@@ -167,7 +168,9 @@ void ABaseManaEnemy::UnloadMe()
 void ABaseManaEnemy::DirectionalHitReact(const FVector& HitterLocation, bool IsFinisher)
 {
 	Super::DirectionalHitReact(HitterLocation, IsFinisher);
-	
+
+
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), EnemyGrunts, GetActorLocation());
 }
 
 void ABaseManaEnemy::GetMontageToPlay()
@@ -214,6 +217,8 @@ void ABaseManaEnemy::Die(const FVector& HitLocation)
 	if (GetLeftHandEquipment()) DropLeftEquipment(GetLeftHandEquipment());
 
 	DeathDrops();
+
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), EnemyDies, GetActorLocation());
 
 	if (SkyBeacon)
 	{
